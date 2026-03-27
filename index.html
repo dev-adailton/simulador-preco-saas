@@ -1,1125 +1,169 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Simulador de Preço SaaS</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  <style>
-    /* =========================================
-   CSS BASE E TEMA
-   ========================================= */
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0
-    }
-
-    :root {
-      --primary: #16325c;
-      --primary2: #1f4d8f;
-      --accent: #0ea5e9;
-      --success: #10b981;
-      --danger: #ef4444;
-      --warning: #f59e0b;
-      --bg: #eef3f8;
-      --card: #fff;
-      --text: #1e293b;
-      --muted: #64748b;
-      --border: #dbe4ee;
-      --input: #f8fafc;
-      --shadow: 0 8px 30px rgba(15, 23, 42, 0.08);
-      --radius: 16px;
-    }
-
-    body {
-      font-family: "Segoe UI", Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh
-    }
-
-    /* =========================================
-   TELA DE LOGIN SAAS
-   ========================================= */
-    #auth-screen {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      background: linear-gradient(135deg, var(--primary), var(--primary2));
-      padding: 20px;
-    }
-
-    .auth-card {
-      background: #fff;
-      padding: 40px;
-      border-radius: var(--radius);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-      width: 100%;
-      max-width: 400px;
-      text-align: center;
-    }
-
-    .auth-card h1 {
-      color: var(--primary);
-      margin-bottom: 5px;
-      font-weight: 900;
-      font-size: 24px;
-    }
-
-    .auth-card p {
-      color: var(--muted);
-      margin-bottom: 25px;
-      font-size: 14px;
-    }
-
-    .auth-input {
-      width: 100%;
-      padding: 14px;
-      margin-bottom: 15px;
-      border: 1.5px solid var(--border);
-      border-radius: 10px;
-      font-size: 14px;
-      background: var(--input);
-      outline: none;
-    }
-
-    .auth-input:focus {
-      border-color: var(--accent);
-    }
-
-    .auth-btn {
-      width: 100%;
-      padding: 14px;
-      background: var(--primary);
-      color: #fff;
-      border: none;
-      border-radius: 10px;
-      font-weight: 800;
-      font-size: 15px;
-      cursor: pointer;
-      transition: 0.2s;
-      margin-bottom: 10px;
-    }
-
-    .auth-btn:hover {
-      background: var(--primary2);
-    }
-
-    .auth-btn-outline {
-      background: transparent;
-      color: var(--primary);
-      border: 1.5px solid var(--primary);
-    }
-
-    .auth-btn-outline:hover {
-      background: var(--bg);
-    }
-
-    .auth-error {
-      color: var(--danger);
-      font-size: 13px;
-      margin-bottom: 15px;
-      display: none;
-      font-weight: bold;
-    }
-
-    /* =========================================
-   APP PRINCIPAL (Oculto inicialmente)
-   ========================================= */
-    #app-screen {
-      display: none;
-      padding: 24px;
-      max-width: 1400px;
-      margin: auto;
-    }
-
-    .topbar {
-      text-align: center;
-      margin-bottom: 28px
-    }
-
-    .vtag {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: linear-gradient(135deg, #7c3aed, #4f46e5);
-      color: #fff;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 1.2px;
-      text-transform: uppercase;
-      padding: 6px 16px;
-      border-radius: 999px;
-      margin-bottom: 10px
-    }
-
-    .topbar h1 {
-      font-size: 28px;
-      color: var(--primary);
-      font-weight: 900;
-      margin-bottom: 4px
-    }
-
-    .topbar p {
-      color: var(--muted);
-      font-size: 13px
-    }
-
-    .user-info {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 10px;
-      margin-top: 12px;
-      flex-wrap: wrap
-    }
-
-    .user-name {
-      font-weight: 800;
-      color: #fff;
-      background: var(--primary);
-      padding: 6px 12px;
-      border-radius: 999px;
-      font-size: 13px
-    }
-
-    .user-logout {
-      cursor: pointer;
-      color: var(--danger);
-      font-weight: 700;
-      font-size: 13px;
-      padding: 6px 12px;
-      border-radius: 999px;
-      background: #fee2e2;
-      border: 1px solid #fecaca;
-      transition: .2s
-    }
-
-    .user-logout:hover {
-      background: #fecaca
-    }
-
-    .tabs {
-      display: flex;
-      gap: 8px;
-      justify-content: center;
-      margin-bottom: 22px;
-      flex-wrap: wrap
-    }
-
-    .tab {
-      padding: 9px 22px;
-      border-radius: 999px;
-      border: 1.5px solid var(--border);
-      background: #fff;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      color: var(--muted);
-      transition: .2s
-    }
-
-    .tab.active {
-      background: var(--primary);
-      color: #fff;
-      border-color: var(--primary)
-    }
-
-    .panel {
-      display: none
-    }
-
-    .panel.active {
-      display: block
-    }
-
-    .card {
-      background: var(--card);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      border: 1px solid var(--border);
-      overflow: hidden;
-      margin-bottom: 20px
-    }
-
-    .card-header {
-      background: linear-gradient(135deg, var(--primary), var(--primary2));
-      padding: 16px 22px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      color: white;
-    }
-
-    .card-header h2 {
-      font-size: 16px;
-      font-weight: 800;
-    }
-
-    .card-header p {
-      font-size: 12px;
-      opacity: 0.8;
-    }
-
-    .card-body {
-      padding: 22px
-    }
-
-    .sim-layout {
-      display: grid;
-      grid-template-columns: 1.1fr .9fr;
-      gap: 20px;
-      align-items: start
-    }
-
-    .stitle {
-      font-size: 11px;
-      color: var(--muted);
-      font-weight: 800;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      margin: 14px 0 12px;
-      display: flex;
-      align-items: center;
-      gap: 8px
-    }
-
-    .stitle::after {
-      content: "";
-      flex: 1;
-      height: 1px;
-      background: var(--border)
-    }
-
-    .grid2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-bottom: 4px
-    }
-
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: 5px
-    }
-
-    .field label {
-      font-size: 12px;
-      color: var(--muted);
-      font-weight: 700
-    }
-
-    .iw {
-      position: relative
-    }
-
-    .iw input,
-    .iw select {
-      width: 100%;
-      height: 42px;
-      border: 1.5px solid var(--border);
-      border-radius: 10px;
-      background: var(--input);
-      padding: 0 12px;
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--text);
-      outline: none;
-    }
-
-    .iw input:focus {
-      border-color: var(--accent);
-    }
-
-    .iw .pre {
-      position: absolute;
-      top: 50%;
-      left: 11px;
-      transform: translateY(-50%);
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--muted);
-      pointer-events: none
-    }
-
-    .iw .suf {
-      position: absolute;
-      top: 50%;
-      right: 11px;
-      transform: translateY(-50%);
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--muted);
-      pointer-events: none
-    }
-
-    .iw.wp input {
-      padding-left: 28px
-    }
-
-    .iw.ws input {
-      padding-right: 28px
-    }
-
-    .actions {
-      display: flex;
-      gap: 10px;
-      margin-top: 16px;
-      flex-wrap: wrap
-    }
-
-    .btn {
-      flex: 1;
-      min-width: 110px;
-      border: none;
-      border-radius: 10px;
-      padding: 11px 12px;
-      font-size: 13px;
-      font-weight: 800;
-      cursor: pointer;
-      transition: .2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px
-    }
-
-    .btn-primary {
-      background: var(--primary);
-      color: #fff
-    }
-
-    .btn-success {
-      background: var(--success);
-      color: #fff
-    }
-
-    .btn-secondary {
-      background: #f1f5f9;
-      color: var(--text);
-      border: 1.5px solid var(--border)
-    }
-
-    /* =========================================
-   ESTILOS DE RESULTADOS (HERO, CHARTS)
-   ========================================= */
-    .results {
-      display: flex;
-      flex-direction: column;
-      gap: 14px
-    }
-
-    .hero {
-      background: linear-gradient(135deg, var(--primary), var(--primary2));
-      border-radius: var(--radius);
-      padding: 24px 20px;
-      text-align: center;
-      box-shadow: var(--shadow);
-      color: white;
-    }
-
-    .hero small {
-      display: block;
-      text-transform: uppercase;
-      letter-spacing: 1.2px;
-      font-size: 11px;
-      font-weight: 800;
-      opacity: 0.8;
-      margin-bottom: 6px
-    }
-
-    .hero .price {
-      font-size: 38px;
-      font-weight: 900;
-      line-height: 1;
-      margin-bottom: 4px;
-    }
-
-    .hero .sub {
-      font-size: 12px;
-      opacity: 0.8;
-    }
-
-    .stats {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px
-    }
-
-    .stat {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 14px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, .03)
-    }
-
-    .stat .slabel {
-      font-size: 11px;
-      color: var(--muted);
-      font-weight: 700;
-      margin-bottom: 4px
-    }
-
-    .stat .svalue {
-      font-size: 18px;
-      font-weight: 900
-    }
-
-    .blue {
-      color: var(--accent)
-    }
-
-    .green {
-      color: var(--success)
-    }
-
-    .red {
-      color: var(--danger)
-    }
-
-    .orange {
-      color: var(--warning)
-    }
-
-    .chart-card,
-    .breakdown {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      overflow: hidden;
-    }
-
-    .ch,
-    .bk-header {
-      padding: 13px 18px;
-      border-bottom: 1px solid var(--border);
-      font-weight: 800;
-      color: var(--primary);
-      font-size: 13px;
-      background: #fbfdff;
-    }
-
-    .bk-row {
-      display: flex;
-      justify-content: space-between;
-      padding: 11px 18px;
-      border-bottom: 1px solid var(--border);
-      font-size: 13px;
-    }
-
-    .bk-total {
-      background: #eff8ff;
-      font-weight: 900;
-      color: var(--primary);
-    }
-
-    /* =========================================
-   LISTAS SIMPLES E PRODUTOS
-   ========================================= */
-    .simple-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px
-    }
-
-    .simple-item {
-      background: #fff;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 14px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px
-    }
-
-    .simple-title {
-      font-weight: 800;
-      font-size: 14px;
-    }
-
-    .simple-sub {
-      font-size: 12px;
-      color: var(--muted)
-    }
-
-    .loader-box {
-      text-align: center;
-      padding: 40px;
-      color: var(--muted);
-      font-weight: bold;
-    }
-
-    /* =========================================
-   COMPARAÇÃO DE PREÇOS (SERPAPI)
-   ========================================= */
-    .comp-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-      gap: 15px;
-      margin-top: 15px;
-    }
-
-    .comp-card {
-      background: var(--input);
-      padding: 15px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      text-align: center;
-    }
-
-    .comp-card img {
-      max-width: 100%;
-      height: 120px;
-      object-fit: contain;
-      margin-bottom: 10px;
-      mix-blend-mode: multiply;
-    }
-
-    .comp-title {
-      font-size: 13px;
-      font-weight: bold;
-      margin-bottom: 5px;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-
-    .comp-price {
-      font-size: 18px;
-      color: var(--success);
-      font-weight: 900;
-    }
-
-    .comp-store {
-      font-size: 11px;
-      color: var(--muted);
-      text-transform: uppercase;
-      margin-bottom: 10px;
-    }
-
-    .toast {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      background: var(--primary);
-      color: #fff;
-      padding: 12px 20px;
-      border-radius: 12px;
-      font-size: 13px;
-      font-weight: 700;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, .2);
-      transform: translateY(60px);
-      opacity: 0;
-      transition: .3s;
-      z-index: 9999
-    }
-
-    .toast.show {
-      transform: translateY(0);
-      opacity: 1
-    }
-
-    @media(max-width:900px) {
-      .sim-layout {
-        grid-template-columns: 1fr;
-      }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SaaS Teste Login</title>
+
+<style>
+body {
+  font-family: Arial;
+  background: #0f172a;
+  color: white;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  height:100vh;
+}
+
+.box {
+  background:#1e293b;
+  padding:30px;
+  border-radius:12px;
+  width:320px;
+}
+
+input {
+  width:100%;
+  padding:10px;
+  margin-bottom:10px;
+  border-radius:6px;
+  border:none;
+}
+
+button {
+  width:100%;
+  padding:10px;
+  margin-top:5px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+.login { background:#22c55e; color:white; }
+.register { background:#3b82f6; color:white; }
+
+.error {
+  color:#f87171;
+  font-size:13px;
+  margin-bottom:10px;
+}
+
+.ok {
+  color:#4ade80;
+  font-size:13px;
+}
+</style>
 </head>
 
 <body>
 
-  <!-- TELA DE LOGIN SAAS -->
-  <div id="auth-screen">
-    <div class="auth-card">
-      <h1>🚀 Preço SaaS</h1>
-      <p>Seu simulador de lucratividade profissional.</p>
+<div class="box">
+  <h2>Login SaaS 🔐</h2>
 
-      <div id="authError" class="auth-error">Erro ao fazer login</div>
+  
 
-      <input type="email" id="emailInput" class="auth-input" placeholder="Seu e-mail">
-      <input type="password" id="senhaInput" class="auth-input" placeholder="Sua senha">
+<div id="msg" class="error"></div>
 
-      <button class="auth-btn" id="btnLogin">Entrar no Sistema</button>
-      <button class="auth-btn auth-btn-outline" id="btnRegister">Criar nova conta grátis</button>
-    </div>
-  </div>
+  <input id="email" placeholder="Email">
+  <input id="senha" type="password" placeholder="Senha">
 
-  <!-- TELA PRINCIPAL (SaaS) -->
-  <div id="app-screen">
-    <div class="topbar">
-      <div class="vtag">💎 SaaS Premium</div>
-      <h1>Simulador de Preço Inteligente</h1>
-      <div class="user-info">
-        <span class="user-name" id="userNameDisplay">Carregando...</span>
-        <span class="user-logout" id="btnLogout">Sair da Conta</span>
-      </div>
-    </div>
+  <button class="login" id="btnLogin">Entrar</button>
+  <button class="register" id="btnRegister">Criar conta</button>
 
-    <div class="tabs">
-      <div class="tab active" onclick="window.mudarAba('simulador',this)">🧮 Simulador</div>
-      <div class="tab" onclick="window.mudarAba('comparador',this)">🔍 Mercado (Concorrentes)</div>
-      <div class="tab" onclick="window.mudarAba('produtos',this)">📦 Meus Produtos</div>
-      <div class="tab" onclick="window.mudarAba('historico',this)">📋 Meu Histórico</div>
-      <div class="tab" onclick="window.mudarAba('config',this)">⚙️ Conta & API</div>
-    </div>
+  <div id="status" class="ok"></div>
+</div>
 
-    <!-- ABA 1: SIMULADOR -->
-    <div class="panel active" id="panel-simulador">
-      <div class="sim-layout">
-        <div class="card">
-          <div class="card-header">
-            <h2>Parâmetros do Produto</h2>
-          </div>
-          <div class="card-body">
-            <div class="field" style="margin-bottom: 15px;">
-              <label>Nome do Produto (Digite para cadastrar/buscar)</label>
-              <div class="iw"><input type="text" id="simNome" placeholder="Ex: Produto X"></div>
-            </div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+import { 
+  getAuth, 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 
-            <div class="grid2">
-              <div class="field"><label>Custo Base</label>
-                <div class="iw wp"><span class="pre">R$</span><input type="number" id="simCusto"
-                    oninput="window.calc()"></div>
-              </div>
-              <div class="field"><label>Margem Alvo</label>
-                <div class="iw ws"><input type="number" id="simMargem" value="20" oninput="window.calc()"><span
-                    class="suf">%</span></div>
-              </div>
-              <div class="field"><label>Impostos</label>
-                <div class="iw ws"><input type="number" id="simImp" value="4" oninput="window.calc()"><span
-                    class="suf">%</span></div>
-              </div>
-              <div class="field"><label>Comissão Mktplace</label>
-                <div class="iw ws"><input type="number" id="simCom" value="18" oninput="window.calc()"><span
-                    class="suf">%</span></div>
-              </div>
-              <div class="field"><label>Frete de Venda</label>
-                <div class="iw wp"><span class="pre">R$</span><input type="number" id="simFrete" value="0"
-                    oninput="window.calc()"></div>
-              </div>
-              <div class="field"><label>Preço Manual (Teste)</label>
-                <div class="iw wp"><span class="pre">R$</span><input type="number" id="simManual" placeholder="Opcional"
-                    oninput="window.calc()"></div>
-              </div>
-            </div>
 
-            <div class="actions">
-              <button class="btn btn-success" onclick="window.salvarSimulacaoHistorico()">💾 Salvar no
-                Histórico</button>
-              <button class="btn btn-secondary" onclick="window.calc()">🔄 Calcular</button>
-            </div>
-          </div>
-        </div>
+// 🔥 COLE SUA CONFIG AQUI
+const firebaseConfig = {
+  apiKey: "SUA_API_KEY_AQUI",
+  authDomain: "SEU_PROJETO.firebaseapp.com",
+  projectId: "SEU_PROJETO",
+  storageBucket: "SEU_PROJETO.appspot.com",
+  messagingSenderId: "XXXX",
+  appId: "XXXX"
+};
 
-        <div class="results" id="pdf-area">
-          <div class="hero">
-            <small>Preço Ideal de Venda</small>
-            <div class="price" id="resPreco">R$ 0,00</div>
-            <div class="sub" id="resSub">Preencha os campos para calcular</div>
-          </div>
 
-          <div class="stats">
-            <div class="stat">
-              <div class="slabel">Custo Total</div>
-              <div class="svalue blue" id="resCusto">R$ 0,00</div>
-            </div>
-            <div class="stat">
-              <div class="slabel">Lucro Líquido</div>
-              <div class="svalue green" id="resLucro">R$ 0,00</div>
-            </div>
-            <div class="stat">
-              <div class="slabel">Margem Real</div>
-              <div class="svalue orange" id="resMargem">0%</div>
-            </div>
-            <div class="stat">
-              <div class="slabel">Taxas Pagas</div>
-              <div class="svalue red" id="resTaxas">R$ 0,00</div>
-            </div>
-          </div>
+// ✅ Inicialização segura
+let app, auth;
 
-          <div class="breakdown">
-            <div class="bk-header">Composição do Preço</div>
-            <div id="resDetail">
-              <div style="padding:20px; text-align:center; color:#888;">Aguardando cálculo...</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+try {
+  app = initializeApp(firebaseConfig);
+  auth = getAuth(app);
+  console.log("✅ Firebase conectado");
+} catch(e) {
+  document.getElementById("msg").innerText = "Erro ao iniciar Firebase";
+  console.error(e);
+}
 
-    <!-- ABA 2: COMPARADOR (SERPAPI) -->
-    <div class="panel" id="panel-comparador">
-      <div class="card">
-        <div class="card-header">
-          <h2>🔍 Análise de Concorrentes (Google Shopping)</h2>
-        </div>
-        <div class="card-body">
-          <div class="iw" style="display:flex; gap:10px; margin-bottom: 20px;">
-            <input type="text" id="compSearch" placeholder="Ex: iPhone 15 128gb" style="flex:1;">
-            <button class="btn btn-primary" style="flex:unset; width:150px" onclick="window.buscarMercado()">Buscar
-              Mercado</button>
-          </div>
-          <div id="compLoader" class="loader-box" style="display:none;">⏳ Pesquisando em toda a internet, aguarde...
-          </div>
-          <div id="compResults" class="comp-grid">
-            <div style="grid-column: 1/-1; text-align:center; padding: 40px; color:#888;">Digite um produto e busque.
-              (Requer API Key Configurada na aba Conta)</div>
-          </div>
-        </div>
-      </div>
-    </div>
 
-    <!-- ABA 3: PRODUTOS -->
-    <div class="panel" id="panel-produtos">
-      <div class="card">
-        <div class="card-header">
-          <h2>📦 Meus Produtos Salvos</h2>
-          <p>Banco de dados isolado privativo</p>
-        </div>
-        <div class="card-body">
-          <div class="actions" style="margin-top:0; margin-bottom: 15px;">
-            <button class="btn btn-primary" style="max-width: 250px;" onclick="window.addProdutoRapido()">+ Adicionar
-              Produto</button>
-          </div>
-          <div id="listProdutos">
-            <div class="loader-box">Carregando...</div>
-          </div>
-        </div>
-      </div>
-    </div>
+// ELEMENTOS
+const email = document.getElementById("email");
+const senha = document.getElementById("senha");
+const msg = document.getElementById("msg");
+const status = document.getElementById("status");
 
-    <!-- ABA 4: HISTÓRICO -->
-    <div class="panel" id="panel-historico">
-      <div class="card">
-        <div class="card-header">
-          <h2>📋 Histórico de Simulações</h2>
-        </div>
-        <div class="card-body">
-          <div id="listHistorico">
-            <div class="loader-box">Carregando...</div>
-          </div>
-        </div>
-      </div>
-    </div>
 
-    <!-- ABA 5: CONFIGURAÇÕES -->
-    <div class="panel" id="panel-config">
-      <div class="card">
-        <div class="card-header">
-          <h2>⚙️ Configurações da Conta e Integração</h2>
-        </div>
-        <div class="card-body">
-          <div class="stitle">🔑 Integração SerpApi (Busca do Mercado)</div>
-          <p style="font-size:13px; color:var(--muted); margin-bottom: 10px;">
-            Crie sua conta em <strong>serpapi.com</strong> e cole a chave abaixo para liberar a busca de concorrentes.
-          </p>
-          <div class="iw" style="margin-bottom: 15px;">
-            <input type="password" id="cfgSerpApi" placeholder="Sua API Key do SerpApi...">
-          </div>
-          <button class="btn btn-success" style="max-width:200px" onclick="window.salvarConfig()">💾 Salvar
-            Configurações</button>
-        </div>
-      </div>
-    </div>
+// LOGIN
+document.getElementById("btnLogin").onclick = async () => {
+  msg.innerText = "";
 
-  </div>
+  try {
+    await signInWithEmailAndPassword(auth, email.value, senha.value);
+    status.innerText = "✅ Login realizado com sucesso!";
+  } catch(e) {
+    msg.innerText = traduzErro(e.code);
+  }
+};
 
-  <div class="toast" id="toast"></div>
 
-  <!-- SCRIPT COMO MÓDULO PARA FIREBASE V10 -->
-  <script type="module">
-    // IMPORTAÇÕES DO FIREBASE (SDK V10)
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-    import { getFirestore, collection, addDoc, getDocs, query, where, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+// REGISTRO
+document.getElementById("btnRegister").onclick = async () => {
+  msg.innerText = "";
 
-    // =========================================================================
-    // ⚠️ ATENÇÃO: COLOQUE SAU CONFIGURAÇÃO DO FIREBASE AQUI
-    // =========================================================================
-    const firebaseConfig = {
-      apiKey: "const firebaseConfig = {
-  apiKey: "AIzaSyBxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-      authDomain: "simulador-preco-saas.firebaseapp.com",
-      projectId: "simulador-preco-saas",
-      storageBucket: "simulador-preco-saas.appspot.com",
-      messagingSenderId: "123456789012",
-      appId: "1:123456789012:web:abcdef1234567890"
-    };
-    ", // 🔥 Substitua isso
-    authDomain: "seu-projeto.firebaseapp.com",
-      projectId: "seu-projeto",
-        storageBucket: "seu-projeto.appspot.com",
-          messagingSenderId: "123456789",
-            appId: "1:123456789:web:abcde",
-  };
+  try {
+    await createUserWithEmailAndPassword(auth, email.value, senha.value);
+    status.innerText = "✅ Conta criada!";
+  } catch(e) {
+    msg.innerText = traduzErro(e.code);
+  }
+};
 
-    // Inicializa Firebase
-    let app, auth, db;
-    try {
-      app = initializeApp(firebaseConfig);
-      auth = getAuth(app);
-      db = getFirestore(app);
-    } catch (e) {
-      console.error("Firebase não configurado corretamente ainda.");
-    }
 
-    // Elementos UI
-    const authScreen = document.getElementById('auth-screen');
-    const appScreen = document.getElementById('app-screen');
-    const authError = document.getElementById('authError');
-    let currentUser = null;
+// OBSERVADOR LOGIN
+onAuthStateChanged(auth, (user) => {
+  if(user){
+    console.log("Logado:", user.email);
+  }
+});
 
-    // Funções Utilitárias
-    const $ = id => document.getElementById(id);
-    const v = id => parseFloat($(id).value) || 0;
-    const moeda = n => Number(n).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-    window.toast = (msg) => { const t = $('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
 
-    // NAVEGAÇÃO
-    window.mudarAba = (aba, element) => {
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-      element.classList.add('active');
-      $('panel-' + aba).classList.add('active');
+// TRADUZ ERROS
+function traduzErro(code){
+  switch(code){
+    case "auth/invalid-email": return "Email inválido";
+    case "auth/user-not-found": return "Usuário não existe";
+    case "auth/wrong-password": return "Senha incorreta";
+    case "auth/email-already-in-use": return "Email já cadastrado";
+    case "auth/weak-password": return "Senha muito fraca (mín 6)";
+    default: return code;
+  }
+}
 
-      // Carrega dados sob demanda se for a aba certa
-      if (aba === 'produtos') window.carregarProdutos();
-      if (aba === 'historico') window.carregarHistorico();
-    }
+</script>
 
-    // ====================================================
-    // 🔐 SISTEMA DE AUTENTICAÇÃO (SaaS)
-    // ====================================================
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        currentUser = user;
-        authScreen.style.display = 'none';
-        appScreen.style.display = 'block';
-        $('userNameDisplay').innerHTML = `👤 ${user.email}`;
-        carregarConfigLocal(); // Carrega config da API Key localmente ou db
-      } else {
-        currentUser = null;
-        authScreen.style.display = 'flex';
-        appScreen.style.display = 'none';
-      }
-    });
-
-    $('btnLogin').onclick = async () => {
-      try {
-        $('btnLogin').textContent = 'Aguarde...';
-        const e = $('emailInput').value; const s = $('senhaInput').value;
-        await signInWithEmailAndPassword(auth, e, s);
-      } catch (err) {
-        authError.style.display = 'block'; authError.textContent = 'Erro: Senha incorreta ou usuário não existe.';
-      } finally { $('btnLogin').textContent = 'Entrar no Sistema'; }
-    }
-
-    $('btnRegister').onclick = async () => {
-      try {
-        $('btnRegister').textContent = 'Criando...';
-        const e = $('emailInput').value; const s = $('senhaInput').value;
-        await createUserWithEmailAndPassword(auth, e, s);
-        window.toast("Conta criada com sucesso!");
-      } catch (err) {
-        authError.style.display = 'block'; authError.textContent = 'Erro: ' + err.message;
-      } finally { $('btnRegister').textContent = 'Criar nova conta grátis'; }
-    }
-
-    $('btnLogout').onclick = () => { signOut(auth); }
-
-    // ====================================================
-    // 🧮 LÓGICA DO SIMULADOR
-    // ====================================================
-    let ultimaSimulacao = null;
-
-    window.calc = () => {
-      const custo = v('simCusto');
-      const margemPct = v('simMargem');
-      const impPct = v('simImp');
-      const comPct = v('simCom');
-      const freteV = v('simFrete');
-      const pManual = v('simManual');
-
-      if (custo === 0) return;
-
-      const taxaTotal = (margemPct + impPct + comPct) / 100;
-
-      let precoVenda = 0;
-      if (pManual > 0) {
-        precoVenda = pManual;
-      } else {
-        if (taxaTotal >= 1) { window.toast("Taxas maiores que 100%!"); return; }
-        precoVenda = (custo + freteV) / (1 - taxaTotal);
-      }
-
-      const valImp = precoVenda * (impPct / 100);
-      const valCom = precoVenda * (comPct / 100);
-      const custoTotal = custo + freteV;
-      const taxasPagas = valImp + valCom;
-      const lucro = precoVenda - custoTotal - taxasPagas;
-      const margemReal = (lucro / precoVenda) * 100;
-
-      ultimaSimulacao = {
-        data: new Date().toLocaleDateString('pt-BR'),
-        nome: $('simNome').value || 'Produto não nomeado',
-        custo, precoVenda, lucro, margemReal,
-        uid: currentUser.uid // <- ISOLAMENTO SAAS
-      };
-
-      $('resPreco').textContent = moeda(precoVenda);
-      $('resCusto').textContent = moeda(custoTotal);
-      $('resLucro').textContent = moeda(lucro);
-      $('resMargem').textContent = margemReal.toFixed(2) + '%';
-      $('resTaxas').textContent = moeda(taxasPagas);
-
-      $('resDetail').innerHTML = `
-      <div class="bk-row"><span>Custo Produto</span> <span>${moeda(custo)}</span></div>
-      <div class="bk-row"><span>Frete Venda</span> <span>${moeda(freteV)}</span></div>
-      <div class="bk-row"><span>Impostos</span> <span>${moeda(valImp)}</span></div>
-      <div class="bk-row"><span>Comissão</span> <span>${moeda(valCom)}</span></div>
-      <div class="bk-row bk-total"><span>Preço Final</span> <span>${moeda(precoVenda)}</span></div>
-    `;
-    }
-
-    // ====================================================
-    // ☁️ FIREBASE FIRESTORE (SALVAR NO BANCO SAAS)
-    // ====================================================
-
-    window.salvarSimulacaoHistorico = async () => {
-      if (!ultimaSimulacao) { window.toast("Calcule algo primeiro!"); return; }
-
-      try {
-        await addDoc(collection(db, "historico"), {
-          ...ultimaSimulacao,
-          createdAt: serverTimestamp()
-        });
-        window.toast("✅ Salvo no histórico do FIrebase!");
-      } catch (e) {
-        console.error(e); window.toast("Erro ao salvar no banco.");
-      }
-    }
-
-    window.addProdutoRapido = async () => {
-      const pNome = prompt("Digite o nome do Produto:");
-      if (!pNome) return;
-      const pCusto = parseFloat(prompt("Custo Base (R$):") || 0);
-
-      await addDoc(collection(db, "produtos"), {
-        uid: currentUser.uid, // <- ISOLAMENTO SAAS
-        nome: pNome,
-        custo: pCusto,
-        createdAt: serverTimestamp()
-      });
-      window.toast("✅ Produto cadastrado!");
-      window.carregarProdutos();
-    }
-
-    window.carregarProdutos = async () => {
-      try {
-        // Buscar apenas produtos DO USUÁRIO LOGADO
-        const q = query(collection(db, "produtos"), where("uid", "==", currentUser.uid));
-        const querySnapshot = await getDocs(q);
-
-        let html = '';
-        querySnapshot.forEach((doc) => {
-          let p = doc.data();
-          html += `<div class="simple-item">
-                      <div><div class="simple-title">📦 ${p.nome}</div>
-                      <div class="simple-sub">Custo: ${moeda(p.custo)}</div></div>
-                      <button class="btn btn-secondary" style="flex:unset;" onclick="document.getElementById('simNome').value='${p.nome}'; document.getElementById('simCusto').value='${p.custo}'; window.mudarAba('simulador', document.querySelectorAll('.tab')[0]); window.calc();">Simular este</button>
-                    </div>`;
-        });
-
-        $('listProdutos').innerHTML = html || '<div class="loader-box">Nenhum produto cadastrado ainda.</div>';
-      } catch (e) { $('listProdutos').innerHTML = 'Ocorreu um erro ao ler o banco.'; }
-    }
-
-    window.carregarHistorico = async () => {
-      try {
-        const q = query(collection(db, "historico"), where("uid", "==", currentUser.uid));
-        const querySnapshot = await getDocs(q);
-
-        let html = '';
-        querySnapshot.forEach((doc) => {
-          let h = doc.data();
-          html += `<div class="simple-item">
-                      <div><div class="simple-title">📅 ${h.data} - ${h.nome}</div>
-                      <div class="simple-sub" style="color:var(--success)">Preço: ${moeda(h.precoVenda)} | Lucro: ${moeda(h.lucro)} (${h.margemReal.toFixed(1)}%)</div></div>
-                    </div>`;
-        });
-
-        $('listHistorico').innerHTML = html || '<div class="loader-box">Nenhuma simulação no histórico.</div>';
-      } catch (e) { $('listHistorico').innerHTML = 'Ocorreu um erro ao ler o histórico.'; }
-    }
-
-    // ====================================================
-    // 🔍 INTEGRAÇÃO SERPAPI (COMPARADOR)
-    // ====================================================
-    window.salvarConfig = () => {
-      const key = $('cfgSerpApi').value;
-      localStorage.setItem('saas_serp_key', key);
-      window.toast("✅ Chave da API salva no dispositivo!");
-    }
-
-    function carregarConfigLocal() {
-      const k = localStorage.getItem('saas_serp_key');
-      if (k) $('cfgSerpApi').value = k;
-    }
-
-    window.buscarMercado = async () => {
-      const q = $('compSearch').value;
-      const key = $('cfgSerpApi').value;
-
-      if (!q) { window.toast("Digite o que quer buscar"); return; }
-      if (!key) { window.toast("Configure a SerpApi Key primeiro na aba Conta"); return; }
-
-      $('compLoader').style.display = 'block';
-      $('compResults').innerHTML = '';
-
-      try {
-        // Usando um proxy robusto para evitar bloqueio de CORS no Github Pages
-        const targetUrl = `https://serpapi.com/search.json?engine=google_shopping&q=${encodeURIComponent(q)}&gl=br&hl=pt&api_key=${key}`;
-        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
-
-        const res = await fetch(proxyUrl);
-        const data = await res.json();
-
-        if (data.error) throw new Error(data.error);
-
-        const items = data.shopping_results || [];
-        if (items.length === 0) { $('compResults').innerHTML = '<div style="grid-column:1/-1;text-align:center;">Nenhum concorrente encontrado.</div>'; return; }
-
-        let html = '';
-        items.forEach(i => {
-          const priceNum = parseFloat(String(i.price).replace(/[^0-9,.]/g, '').replace('.', '').replace(',', '.')) || 0;
-          if (priceNum > 0) {
-            html += `<div class="comp-card">
-                            <img src="${i.thumbnail || ''}" onerror="this.style.display='none'">
-                            <div class="comp-store">🏪 ${i.source}</div>
-                            <div class="comp-title">${i.title}</div>
-                            <div class="comp-price">${moeda(priceNum)}</div>
-                            <a href="${i.product_link}" target="_blank" style="font-size:12px;color:var(--accent);text-decoration:none;margin-top:10px;display:block;">Ver Oferta ↗</a>
-                          </div>`;
-          }
-        });
-        $('compResults').innerHTML = html;
-      } catch (err) {
-        $('compResults').innerHTML = `<div style="grid-column:1/-1;text-align:center;color:red;"><b>Erro:</b> ${err.message}. A chave está correta?</div>`;
-      } finally {
-        $('compLoader').style.display = 'none';
-      }
-    }
-
-  </script>
 </body>
-
 </html>
