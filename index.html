@@ -3,91 +3,239 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SaaS Teste Login</title>
-
+<title>Simulador de Preços SaaS</title>
 <style>
-body {
-  font-family: Arial;
-  background: #0f172a;
-  color: white;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  height:100vh;
-}
+/* =========================================
+   CSS BASE E TEMA
+   ========================================= */
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--primary:#0f172a;--primary2:#1e293b;--accent:#3b82f6;--success:#22c55e;--danger:#ef4444;--warning:#f59e0b;--bg:#f8fafc;--card:#fff;--text:#1e293b;--muted:#64748b;--border:#e2e8f0;--radius:12px;}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
 
-.box {
-  background:#1e293b;
-  padding:30px;
-  border-radius:12px;
-  width:320px;
-}
+/* =========================================
+   TELA DE LOGIN
+   ========================================= */
+#auth-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: var(--primary); padding: 20px; }
+.auth-card { background: var(--primary2); padding: 40px; border-radius: var(--radius); box-shadow: 0 20px 40px rgba(0,0,0,0.4); width: 100%; max-width: 380px; text-align: center; color: white; }
+.auth-card h1 { margin-bottom: 25px; font-weight: 800; font-size: 24px; color: white; }
+.auth-input { width: 100%; padding: 14px; margin-bottom: 12px; border: 1px solid #334155; border-radius: 8px; font-size: 14px; background: #0f172a; color: white; outline: none; }
+.auth-input:focus { border-color: var(--accent); }
+.auth-btn { width: 100%; padding: 12px; background: var(--success); color: #fff; border: none; border-radius: 8px; font-weight: bold; font-size: 15px; cursor: pointer; transition: 0.2s; margin-top: 5px; }
+.auth-btn:hover { filter: brightness(1.1); }
+.auth-btn-outline { background: var(--accent); margin-top: 10px; }
+.auth-error { color: #f87171; font-size: 13px; margin-bottom: 15px; font-weight: bold; }
 
-input {
-  width:100%;
-  padding:10px;
-  margin-bottom:10px;
-  border-radius:6px;
-  border:none;
-}
+/* =========================================
+   APP PRINCIPAL (Oculto inicialmente)
+   ========================================= */
+#app-screen { display: none; padding: 20px; max-width: 1200px; margin: auto; }
+.topbar{display:flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; background: var(--primary); padding: 20px; border-radius: var(--radius); color: white;}
+.topbar h1{font-size:22px;font-weight:900;}
+.user-info{display:flex;align-items:center;gap:10px;font-size: 14px;}
+.user-logout{cursor:pointer;color:white;font-weight:700;font-size:12px;padding:6px 12px;border-radius:6px;background:var(--danger);border:none;}
 
-button {
-  width:100%;
-  padding:10px;
-  margin-top:5px;
-  border:none;
-  border-radius:6px;
-  cursor:pointer;
-  font-weight:bold;
-}
+.tabs{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+.tab{padding:10px 20px;border-radius:8px;border:1px solid var(--border);background:#fff;font-size:14px;font-weight:700;cursor:pointer;color:var(--muted);transition:.2s}
+.tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
 
-.login { background:#22c55e; color:white; }
-.register { background:#3b82f6; color:white; }
+.panel{display:none}.panel.active{display:block}
+.card{background:var(--card);border-radius:var(--radius);box-shadow:0 4px 6px -1px rgba(0,0,0,0.05);border:1px solid var(--border);overflow:hidden;margin-bottom:20px}
+.card-header{background:var(--bg);padding:16px 20px;border-bottom: 1px solid var(--border);}
+.card-header h2{font-size:18px;font-weight:700;color:var(--primary)} 
+.card-body{padding:20px}
 
-.error {
-  color:#f87171;
-  font-size:13px;
-  margin-bottom:10px;
-}
+/* Formulário do Simulador */
+.sim-layout{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+@media(max-width:800px){.sim-layout{grid-template-columns: 1fr;}}
+.field{display:flex;flex-direction:column;gap:6px; margin-bottom: 15px;}
+.field label{font-size:13px;color:var(--muted);font-weight:600}
+.field input{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:15px;background:#fff;outline:none;}
+.field input:focus{border-color:var(--accent);}
 
-.ok {
-  color:#4ade80;
-  font-size:13px;
-}
+.btn{border:none;border-radius:8px;padding:12px 20px;font-size:14px;font-weight:bold;cursor:pointer;transition:.2s;color:white;}
+.btn-primary{background:var(--accent);}.btn-success{background:var(--success);}
+
+/* Resultados */
+.hero{background:var(--primary);border-radius:var(--radius);padding:24px;text-align:center;color:white; margin-bottom: 20px;}
+.hero small{display:block;text-transform:uppercase;font-size:12px;font-weight:bold;color: #cbd5e1; margin-bottom:5px}
+.hero .price{font-size:42px;font-weight:900;line-height:1;margin-bottom:5px;}
+.hero .sub{font-size:14px;color: #94a3b8;}
+
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:20px;}
+.stat{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:15px;text-align:center;}
+.stat .slabel{font-size:12px;color:var(--muted);font-weight:bold;margin-bottom:5px;}
+.stat .svalue{font-size:20px;font-weight:900;}
+.green{color:var(--success)}.red{color:var(--danger)}.blue{color:var(--accent)}
+
+/* Listas (Produtos/Histórico/Pesquisa) */
+.list-item{background:#fff;border:1px solid var(--border);border-radius:8px;padding:15px;display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.list-item-title{font-weight:bold;font-size:15px;margin-bottom:4px;color:var(--primary)}
+.list-item-sub{font-size:13px;color:var(--muted)}
+
+.comp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px;}
+.comp-card { background: var(--bg); padding: 15px; border-radius: 8px; border: 1px solid var(--border); text-align: center;}
+.comp-card img { max-width: 100%; height: 100px; object-fit: contain; margin-bottom: 10px;}
+.comp-price { font-size: 18px; color: var(--success); font-weight: 900; margin: 10px 0;}
+
+.toast{position:fixed;bottom:20px;right:20px;background:var(--primary);color:#fff;padding:15px 25px;border-radius:8px;font-size:14px;font-weight:bold;transform:translateY(100px);opacity:0;transition:.3s;z-index:9999}
+.toast.show{transform:translateY(0);opacity:1}
 </style>
 </head>
-
 <body>
 
-<div class="box">
-  <h2>Login SaaS 🔐</h2>
-
-  
-
-<div id="msg" class="error"></div>
-
-  <input id="email" placeholder="Email">
-  <input id="senha" type="password" placeholder="Senha">
-
-  <button class="login" id="btnLogin">Entrar</button>
-  <button class="register" id="btnRegister">Criar conta</button>
-
-  <div id="status" class="ok"></div>
+<!-- ==========================================
+     TELA DE LOGIN
+     ========================================== -->
+<div id="auth-screen">
+  <div class="auth-card">
+    <h1>Login SaaS 🔐</h1>
+    <div id="authError" class="auth-error"></div>
+    <input type="email" id="email" class="auth-input" placeholder="seu@email.com">
+    <input type="password" id="senha" class="auth-input" placeholder="Sua senha">
+    <button class="auth-btn" id="btnLogin">Entrar</button>
+    <button class="auth-btn auth-btn-outline" id="btnRegister">Criar conta</button>
+  </div>
 </div>
 
+<!-- ==========================================
+     PAINEL PRINCIPAL (SÓ APARECE LOGADO)
+     ========================================== -->
+<div id="app-screen">
+  <div class="topbar">
+    <h1>💎 Simulador PRO</h1>
+    <div class="user-info">
+      <span id="userNameDisplay">Carregando...</span>
+      <button class="user-logout" id="btnLogout">Sair</button>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" data-target="panel-simulador">🧮 Simulador</button>
+    <button class="tab" data-target="panel-mercado">🔍 Mercado</button>
+    <button class="tab" data-target="panel-produtos">📦 Meus Produtos</button>
+    <button class="tab" data-target="panel-historico">📋 Histórico</button>
+    <button class="tab" data-target="panel-config">⚙️ API (SerpApi)</button>
+  </div>
+
+  <!-- ABA 1: SIMULADOR -->
+  <div class="panel active" id="panel-simulador">
+    <div class="sim-layout">
+      <!-- Lado Esquerdo: Formulário -->
+      <div class="card">
+        <div class="card-header"><h2>Dados do Produto</h2></div>
+        <div class="card-body">
+          <div class="field">
+            <label>Nome do Produto (Para salvar)</label>
+            <input type="text" id="simNome" placeholder="Ex: Fone Bluetooth">
+          </div>
+          <div class="field">
+            <label>Custo do Produto (R$)</label>
+            <input type="number" id="simCusto" value="0">
+          </div>
+          <div class="field">
+            <label>Margem de Lucro Desejada (%)</label>
+            <input type="number" id="simMargem" value="20">
+          </div>
+          <div class="field">
+            <label>Impostos (%)</label>
+            <input type="number" id="simImp" value="6">
+          </div>
+          <div class="field">
+            <label>Taxa/Comissão Marketplace (%)</label>
+            <input type="number" id="simCom" value="15">
+          </div>
+
+          <button class="btn btn-primary" id="btnCalcular" style="width:100%; margin-bottom:10px;">🔄 Calcular Preço Ideal</button>
+          <button class="btn btn-success" id="btnSalvarHist" style="width:100%;">💾 Salvar no Meu Histórico</button>
+        </div>
+      </div>
+
+      <!-- Lado Direito: Resultados -->
+      <div class="card">
+        <div class="card-header"><h2>Resultado Financeiro</h2></div>
+        <div class="card-body">
+          <div class="hero">
+            <small>Preço Ideal de Venda</small>
+            <div class="price" id="resPreco">R$ 0,00</div>
+            <div class="sub">Para atingir sua meta de lucro</div>
+          </div>
+          <div class="stats">
+            <div class="stat"><div class="slabel">Lucro Líquido</div><div class="svalue green" id="resLucro">R$ 0,00</div></div>
+            <div class="stat"><div class="slabel">Total de Taxas</div><div class="svalue red" id="resTaxas">R$ 0,00</div></div>
+            <div class="stat"><div class="slabel">Custo do Produto</div><div class="svalue blue" id="resCusto">R$ 0,00</div></div>
+            <div class="stat"><div class="slabel">Margem Real</div><div class="svalue" id="resMargem">0%</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ABA 2: MERCADO (SerpApi) -->
+  <div class="panel" id="panel-mercado">
+    <div class="card">
+      <div class="card-header"><h2>Pesquisar Concorrentes (Google Shopping)</h2></div>
+      <div class="card-body">
+        <div style="display:flex; gap:10px; margin-bottom: 20px;">
+          <input type="text" id="compSearch" placeholder="Nome do produto..." style="flex:1; padding:10px; border-radius:8px; border:1px solid #ccc;">
+          <button class="btn btn-primary" id="btnBuscarMercado">Buscar</button>
+        </div>
+        <div id="compResults" class="comp-grid">
+           <div style="grid-column: 1/-1; text-align:center; padding: 40px; color:#888;">Digite um produto e clique em buscar. (A API Key precisa estar configurada)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ABA 3: PRODUTOS -->
+  <div class="panel" id="panel-produtos">
+    <div class="card">
+      <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+        <h2>Meus Produtos</h2>
+        <button class="btn btn-primary" id="btnAddProduto" style="padding:6px 12px; font-size:12px;">+ Adicionar</button>
+      </div>
+      <div class="card-body" id="listProdutos">Carregando...</div>
+    </div>
+  </div>
+
+  <!-- ABA 4: HISTÓRICO -->
+  <div class="panel" id="panel-historico">
+    <div class="card">
+      <div class="card-header"><h2>Histórico de Simulações</h2></div>
+      <div class="card-body" id="listHistorico">Carregando...</div>
+    </div>
+  </div>
+
+  <!-- ABA 5: CONFIGURAÇÕES API -->
+  <div class="panel" id="panel-config">
+    <div class="card">
+      <div class="card-header"><h2>Configuração: Chave SerpApi</h2></div>
+      <div class="card-body">
+        <p style="font-size:14px; margin-bottom:15px; color:#666;">
+          Cole aqui sua API Key do site <b>serpapi.com</b> para habilitar a busca de concorrentes no Google Shopping.
+        </p>
+        <input type="password" id="cfgSerpApi" placeholder="Cole sua chave SerpApi aqui..." style="width:100%; padding:12px; margin-bottom:15px; border-radius:8px; border:1px solid #ccc;">
+        <button class="btn btn-success" id="btnSalvarConfig">Salvar Chave</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+
+<!-- ==========================================
+     SCRIPTS (A MÁGICA ACONTECE AQUI)
+     ========================================== -->
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { 
-  getAuth, 
-  signInWithEmailAndPassword, 
-  createUserWithEmailAndPassword,
-  onAuthStateChanged,
-  signOut
-} from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+  // Importando EXATAMENTE a mesma versão 10.8.1 que funcionou no seu teste!
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+  import { getFirestore, collection, addDoc, getDocs, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-
-// 🔥 COLE SUA CONFIG AQUI
-const firebaseConfig = {
+  // 👇 ==================================================================== 👇
+  // 🔥 COLE AQUI DENTRO O SEU BLOCO FIREBASE CONFIG QUE FUNCIONOU 🔥
+  const firebaseConfig = {
   apiKey: "AIzaSyALsqLomc6fbFYDlER2AIQOS8kLgxzHLY4",
   authDomain: "simulador-preco-saas.firebaseapp.com",
   projectId: "simulador-preco-saas",
@@ -95,75 +243,214 @@ const firebaseConfig = {
   messagingSenderId: "690862633206",
   appId: "1:690862633206:web:18ff1cb90f38ceb845fcd7"
 };
+  // 👆 ==================================================================== 👆
 
+  // Inicia Firebase
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
 
-// ✅ Inicialização segura
-let app, auth;
+  let currentUser = null;
+  let ultimaSim = null;
 
-try {
-  app = initializeApp(firebaseConfig);
-  auth = getAuth(app);
-  console.log("✅ Firebase conectado");
-} catch(e) {
-  document.getElementById("msg").innerText = "Erro ao iniciar Firebase";
-  console.error(e);
-}
+  // Funções Auxiliares
+  const $ = id => document.getElementById(id);
+  const v = id => parseFloat($(id).value) || 0;
+  const moeda = n => Number(n).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+  const showToast = msg => { $('toast').innerText=msg; $('toast').classList.add('show'); setTimeout(()=>$('toast').classList.remove('show'),3000); };
 
+  // ===================== LOGIN E AUTENTICAÇÃO =====================
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      currentUser = user;
+      $('auth-screen').style.display = 'none';
+      $('app-screen').style.display = 'block';
+      $('userNameDisplay').innerText = "👤 " + user.email;
 
-// ELEMENTOS
-const email = document.getElementById("email");
-const senha = document.getElementById("senha");
-const msg = document.getElementById("msg");
-const status = document.getElementById("status");
+      // Carrega configs salvas no navegador
+      if(localStorage.getItem('saas_serp_key')) {
+        $('cfgSerpApi').value = localStorage.getItem('saas_serp_key');
+      }
 
+      // Carrega as abas por padrão para já ter algo na tela
+      carregarProdutos();
+      carregarHistorico();
+    } else {
+      currentUser = null;
+      $('auth-screen').style.display = 'flex';
+      $('app-screen').style.display = 'none';
+    }
+  });
 
-// LOGIN
-document.getElementById("btnLogin").onclick = async () => {
-  msg.innerText = "";
+  $('btnLogin').onclick = async () => {
+    $('authError').innerText = "";
+    try {
+      $('btnLogin').innerText = "Aguarde...";
+      await signInWithEmailAndPassword(auth, $('email').value, $('senha').value);
+    } catch(e) { $('authError').innerText = "Erro: Email ou senha inválidos."; }
+    finally { $('btnLogin').innerText = "Entrar"; }
+  };
 
-  try {
-    await signInWithEmailAndPassword(auth, email.value, senha.value);
-    status.innerText = "✅ Login realizado com sucesso!";
-  } catch(e) {
-    msg.innerText = traduzErro(e.code);
+  $('btnRegister').onclick = async () => {
+    $('authError').innerText = "";
+    try {
+      $('btnRegister').innerText = "Aguarde...";
+      await createUserWithEmailAndPassword(auth, $('email').value, $('senha').value);
+      showToast("Conta criada com sucesso!");
+    } catch(e) { $('authError').innerText = "Erro ao criar conta: " + e.message; }
+    finally { $('btnRegister').innerText = "Criar conta"; }
+  };
+
+  $('btnLogout').onclick = () => signOut(auth);
+
+  // ===================== NAVEGAÇÃO ABAS =====================
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.onclick = () => {
+      document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+      tab.classList.add('active');
+      $(tab.dataset.target).classList.add('active');
+
+      if(tab.dataset.target === 'panel-produtos') carregarProdutos();
+      if(tab.dataset.target === 'panel-historico') carregarHistorico();
+    };
+  });
+
+  // ===================== SIMULADOR =====================
+  $('btnCalcular').onclick = () => {
+    const custo = v('simCusto');
+    const margem = v('simMargem');
+    const imp = v('simImp');
+    const com = v('simCom');
+
+    if(custo <= 0) { showToast("Digite um custo válido!"); return; }
+
+    const taxaTotal = (margem + imp + com) / 100;
+
+    if(taxaTotal >= 1) { showToast("Cuidado: Impostos e Margem somados dão 100% ou mais!"); return;}
+
+    const precoVenda = custo / (1 - taxaTotal);
+    const taxas = precoVenda * ((imp + com) / 100);
+    const lucro = precoVenda - custo - taxas;
+
+    ultimaSim = {
+      uid: currentUser.uid,
+      data: new Date().toLocaleDateString('pt-BR'),
+      nome: $('simNome').value || 'Sem Nome',
+      precoVenda, custo, lucro,
+      margemReal: (lucro/precoVenda)*100
+    };
+
+    $('resPreco').innerText = moeda(precoVenda);
+    $('resCusto').innerText = moeda(custo);
+    $('resLucro').innerText = moeda(lucro);
+    $('resTaxas').innerText = moeda(taxas);
+    $('resMargem').innerText = ultimaSim.margemReal.toFixed(2) + "%";
+  };
+
+  // ===================== BANCO DE DADOS (FIRESTORE) =====================
+  $('btnSalvarHist').onclick = async () => {
+    if(!ultimaSim) { showToast("Calcule algo primeiro!"); return; }
+    try {
+      $('btnSalvarHist').innerText = "Salvando...";
+      await addDoc(collection(db, "historico"), { ...ultimaSim, createdAt: serverTimestamp() });
+      showToast("✅ Salvo no histórico do Cloud!");
+      carregarHistorico();
+    } catch(e) { showToast("Erro ao salvar: "+e.message); }
+    finally { $('btnSalvarHist').innerText = "💾 Salvar no Meu Histórico"; }
+  };
+
+  $('btnAddProduto').onclick = async () => {
+    const nome = prompt("Nome do Produto:");
+    if(!nome) return;
+    const custo = parseFloat(prompt("Custo Base (Ex: 50.50):") || 0);
+
+    try {
+      await addDoc(collection(db, "produtos"), { uid: currentUser.uid, nome, custo, createdAt: serverTimestamp() });
+      showToast("✅ Produto adicionado!");
+      carregarProdutos();
+    } catch(e) { showToast("Erro ao adicionar."); }
+  };
+
+  async function carregarProdutos() {
+    try {
+      const q = query(collection(db, "produtos"), where("uid", "==", currentUser.uid));
+      const snapshots = await getDocs(q);
+      let html = '';
+      snapshots.forEach(doc => {
+        let p = doc.data();
+        html += `<div class="list-item">
+            <div><div class="list-item-title">${p.nome}</div><div class="list-item-sub">Custo base: ${moeda(p.custo)}</div></div>
+            <button class="btn btn-primary" style="padding:6px 12px; font-size:12px;" onclick="
+              document.getElementById('simNome').value='${p.nome}'; 
+              document.getElementById('simCusto').value='${p.custo}';
+              document.querySelectorAll('.tab')[0].click();
+            ">Simular</button>
+          </div>`;
+      });
+      $('listProdutos').innerHTML = html || "<p style='color:#888'>Nenhum produto cadastrado.</p>";
+    } catch(e) { $('listProdutos').innerHTML = "Erro ao carregar do banco."; }
   }
-};
 
-
-// REGISTRO
-document.getElementById("btnRegister").onclick = async () => {
-  msg.innerText = "";
-
-  try {
-    await createUserWithEmailAndPassword(auth, email.value, senha.value);
-    status.innerText = "✅ Conta criada!";
-  } catch(e) {
-    msg.innerText = traduzErro(e.code);
+  async function carregarHistorico() {
+    try {
+      const q = query(collection(db, "historico"), where("uid", "==", currentUser.uid));
+      const snapshots = await getDocs(q);
+      let html = '';
+      snapshots.forEach(doc => {
+        let h = doc.data();
+        html += `<div class="list-item">
+            <div><div class="list-item-title">${h.data} - ${h.nome}</div>
+            <div class="list-item-sub">Preço Venda: <b style="color:var(--success)">${moeda(h.precoVenda)}</b> | Lucro: ${moeda(h.lucro)}</div></div>
+          </div>`;
+      });
+      $('listHistorico').innerHTML = html || "<p style='color:#888'>Histórico vazio.</p>";
+    } catch(e) { $('listHistorico').innerHTML = "Erro ao carregar do banco."; }
   }
-};
 
+  // ===================== BUSCA MERCADO (SERPAPI) =====================
+  $('btnSalvarConfig').onclick = () => {
+    localStorage.setItem('saas_serp_key', $('cfgSerpApi').value);
+    showToast("✅ Chave API Salva no seu computador!");
+  };
 
-// OBSERVADOR LOGIN
-onAuthStateChanged(auth, (user) => {
-  if(user){
-    console.log("Logado:", user.email);
-  }
-});
+  $('btnBuscarMercado').onclick = async () => {
+    const q = $('compSearch').value;
+    const key = $('cfgSerpApi').value;
 
+    if(!q) return showToast("Digite o nome de um produto");
+    if(!key) return showToast("Vá na aba Configuração e insira a API Key primeiro.");
 
-// TRADUZ ERROS
-function traduzErro(code){
-  switch(code){
-    case "auth/invalid-email": return "Email inválido";
-    case "auth/user-not-found": return "Usuário não existe";
-    case "auth/wrong-password": return "Senha incorreta";
-    case "auth/email-already-in-use": return "Email já cadastrado";
-    case "auth/weak-password": return "Senha muito fraca (mín 6)";
-    default: return code;
-  }
-}
+    $('compResults').innerHTML = "<b>Pesquisando em toda a internet usando SerpApi...</b>";
+
+    try {
+      const url = `https://serpapi.com/search.json?engine=google_shopping&q=${encodeURIComponent(q)}&gl=br&hl=pt&api_key=${key}`;
+      const proxy = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+
+      const res = await fetch(proxy);
+      const data = await res.json();
+
+      const items = data.shopping_results || [];
+      if(!items.length) { $('compResults').innerHTML = "Nenhum resultado encontrado no Google Shopping."; return; }
+
+      let html = '';
+      items.forEach(i => {
+        const precoNum = parseFloat(String(i.price).replace(/[^0-9,.]/g,'').replace('.','').replace(',','.')) || 0;
+        if(precoNum > 0) {
+          html += `<div class="comp-card">
+              <img src="${i.thumbnail}">
+              <div style="font-size:12px; color:#888; font-weight:bold; margin-bottom:5px;">🏪 ${i.source}</div>
+              <div style="font-size:13px; font-weight:bold; height:35px; overflow:hidden;">${i.title}</div>
+              <div class="comp-price">${moeda(precoNum)}</div>
+              <a href="${i.product_link}" target="_blank" style="color:var(--accent); text-decoration:none; font-size:13px; font-weight:bold;">Ver Oferta →</a>
+            </div>`;
+        }
+      });
+      $('compResults').innerHTML = html;
+
+    } catch(err) { $('compResults').innerHTML = "<b style='color:red'>Erro na busca: "+err.message+"</b>"; }
+  };
 
 </script>
-
 </body>
 </html>
