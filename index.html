@@ -1397,66 +1397,72 @@
     // NOVO: ABA MERCADO (Opção B - Google Shopping Integration)
     window.buscarMercado = async function () {
 
-      const termo = $('buscaProdutoMercado').value.trim();
-      const apiKey = localStorage.getItem('serp_api_key');
+  const termo = $('buscaProdutoMercado').value.trim();
+  const apiKey = localStorage.getItem('serp_api_key');
 
-      if (!termo) return toast('Digite o produto');
-      if (!apiKey) return toast('Configure a API primeiro');
+  if (!termo) return toast('Digite o produto');
+  if (!apiKey) return toast('Configure a API primeiro');
 
-      $('resultadoMercado').innerHTML = "Buscando...";
-      $('mercadoStats').style.display = "none";
+  $('resultadoMercado').innerHTML = "Buscando...";
+  $('mercadoStats').style.display = "none";
 
-      try {
+  try {
 
-        // ✅ NOVO PROXY MAIS ESTÁVEL
-        const url = `https://serpapi.com/search.json?engine=google_shopping&q=${encodeURIComponent(termo)}&hl=pt&gl=br&api_key=${apiKey}`;
+    const url = `https://serpapi.com/search.json?engine=google_shopping&q=${encodeURIComponent(termo)}&hl=pt&gl=br&api_key=${apiKey}`;
+    const proxy = `https://corsproxy.io/?${encodeURIComponent(url)}`;
 
-        const proxy = `https://corsproxy.io/?${encodeURIComponent(url)}`;
+    const res = await fetch(proxy, {
+      method: "GET",
+      headers: {
+        "Accept": "application/json"
+      }
+    });
 
-        const res = await fetch(proxy);
+    if (!res.ok) {
+      throw new Error("Erro HTTP: " + res.status);
+    }
 
-        if (!res.ok) {
-          throw new Error("Erro HTTP: " + res.status);
-        }
+    // ✅ CORREÇÃO AQUI
+    const text = await res.text();
+    const data = JSON.parse(text);
 
-        const data = await res.json();
+    if (!data.shopping_results) {
+      $('resultadoMercado').innerHTML = "Nenhum resultado";
+      return;
+    }
 
-        if (!data.shopping_results) {
-          $('resultadoMercado').innerHTML = "Nenhum resultado";
-          return;
-        }
+    let html = "";
+    let prices = [];
 
-        let html = "";
-        let prices = [];
+    data.shopping_results.slice(0, 10).forEach(item => {
 
-        data.shopping_results.slice(0, 10).forEach(item => {
+      let preco = item.extracted_price || 0;
+      if (preco) prices.push(preco);
 
-          let preco = item.extracted_price || 0;
-          if (preco) prices.push(preco);
-
-          html += `
+      html += `
         <div class="mercado-card">
-          <img src="${item.thumbnail}">
-          <div>${item.title}</div>
-          <div><b>${item.price}</b></div>
-          <button onclick="usarPrecoConcorrente(${preco})">Usar preço</button>
+          <img class="mercado-img" src="${item.thumbnail || ''}">
+          <div class="mercado-title">${item.title}</div>
+          <div class="mercado-price">${item.price}</div>
+          <button class="btn btn-secondary" onclick="usarPrecoConcorrente(${preco})">Usar preço</button>
         </div>
       `;
-        });
+    });
 
-        $('resultadoMercado').innerHTML = html;
+    $('resultadoMercado').innerHTML = html;
 
-        // ✅ MÉDIA
-        if (prices.length) {
-          const media = prices.reduce((a, b) => a + b, 0) / prices.length;
-          $('medPreco').innerText = moeda(media);
-          $('mercadoStats').style.display = "grid";
-        }
+    if (prices.length) {
+      const media = prices.reduce((a, b) => a + b, 0) / prices.length;
 
-      } catch (e) {
-        console.error(e);
+      $('medPreco').innerText = moeda(media);
+      $('medPreco').dataset.val = media; // ✅ FIX
+      $('mercadoStats').style.display = "grid";
+    }
 
-        $('resultadoMercado').innerHTML = `
+  } catch (e) {
+    console.error(e);
+
+    $('resultadoMercado').innerHTML = `
       <div style="color:red">
         ❌ Erro ao buscar.<br><br>
         Possíveis causas:<br>
@@ -1465,8 +1471,8 @@
         - Limite da SerpApi atingido<br>
       </div>
     `;
-      }
-    };
+  }
+};
 
     window.usarPrecoConcorrente = function (valor) {
       if (valor > 0) {
