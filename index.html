@@ -369,7 +369,26 @@
                 Médio no Simulador</button></div>
           </div>
           <div class="stitle" style="margin-top:24px">🛒 Concorrentes Encontrados</div>
-          <div id="resultadoMercado" class="mercado-grid">
+
+<!-- ✅ NOVOS FILTROS E ORDENAÇÃO -->
+<div class="grid2" id="mercadoFiltros" style="display:none; margin-bottom:16px;">
+  <div class="field">
+    <label>Filtrar por Loja</label>
+    <div class="iw"><input type="text" id="filtroLojaMercado" placeholder="Digite o nome da loja..." oninput="window.renderizarMercado()"></div>
+  </div>
+  <div class="field">
+    <label>Ordenar por</label>
+    <div class="iw">
+      <select id="ordemMercado" onchange="window.renderizarMercado()">
+        <option value="asc">Menor Preço para Maior Preço</option>
+        <option value="desc">Maior Preço para Menor Preço</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<div id="resultadoMercado" class="mercado-grid">
+
             <div class="empty" style="grid-column: 1/-1;">Digite um produto e busque para ver a concorrência.</div>
           </div>
         </div>
@@ -608,7 +627,14 @@
     async function renderProdutos() { const produtos = await getProdutos(); $('listaProdutos').innerHTML = !produtos.length ? '<div class="empty">Nenhum produto cadastrado</div>' : produtos.map(p => `<div class="simple-item ${p.status === 'inativo' ? 'inativo' : ''}"><div><div class="simple-title">${p.nome}</div><div class="simple-sub">Custo: ${p.custo ? moeda(p.custo) : '—'} · Câmbio: ×${p.cambio || 1}</div></div><div class="simple-actions"><button class="btn btn-secondary" onclick="window.usarProduto('${p.id}')">Usar</button><button class="btn btn-secondary" onclick="window.editarProduto('${p.id}')">Editar</button><button class="btn btn-secondary" onclick="window.inativarProduto('${p.id}')">${p.status === 'inativo' ? 'Ativar' : 'Inativar'}</button></div></div>`).join('') }
     
     window.abrirModalProduto = (id = null) => { editProdutoId = id; $('modalProdutoWrap').style.display = 'flex'; if (id) { const p = produtosCache.find(x => x.id === id); $('produtoNomeCadastro').value = p?.nome || ''; $('produtoCustoCadastro').value = p?.custo || ''; $('produtoCambioCadastro').value = p?.cambio || 1; $('produtoStatusCadastro').value = p?.status || 'ativo' } else { $('produtoNomeCadastro').value = ''; $('produtoCustoCadastro').value = ''; $('produtoCambioCadastro').value = '1'; $('produtoStatusCadastro').value = 'ativo' } }; window.fecharModalProduto = () => $('modalProdutoWrap').style.display = 'none'; window.salvarProdutoModal = async () => { const nome = $('produtoNomeCadastro').value.trim(); if (!nome) return toast('Informe o nome do produto'); const payload = { uid: currentUser.uid, nome, custo: v('produtoCustoCadastro'), cambio: v('produtoCambioCadastro') || 1, status: $('produtoStatusCadastro').value, updatedAt: new Date().toLocaleString('pt-BR') }; if (editProdutoId) await updateDoc(doc(db, 'produtos', editProdutoId), payload); else { payload.createdAt = serverTimestamp(); await addDoc(collection(db, 'produtos'), payload) } fecharModalProduto(); await renderProdutos(); preencherDropdownProdutos(); toast('Produto salvo com sucesso') }; window.editarProduto = id => abrirModalProduto(id); window.inativarProduto = async id => { const p = produtosCache.find(x => x.id === id); await updateDoc(doc(db, 'produtos', id), { status: p.status === 'inativo' ? 'ativo' : 'inativo' }); await renderProdutos(); preencherDropdownProdutos(); toast('Status atualizado') }; window.usarProduto = id => { const p = produtosCache.find(x => x.id === id); if (!p) return; $('nomeProduto').value = p.nome; $('custo').value = p.custo || ''; $('cambio').value = p.cambio || 1; fecharDropdownProdutos(); atualizarHeaderProduto(); calcularAll(); toast('Produto carregado') };
-    window.preencherDropdownProdutos = (f = '') => { const list = produtosCache.filter(p => p.status !== 'inativo' && p.nome.toLowerCase().includes(f.toLowerCase())); $('dropdownProdutos').innerHTML = '<div class="dropdown-item" onclick="abrirModalProduto();fecharDropdownProdutos()">➕ Cadastrar novo produto</div>' + (list.length ? list.map(p => `<div class="dropdown-item" onclick="usarProduto('${p.id}')">${p.nome}</div>`).join('') : '<div class="dropdown-item">Nenhum produto encontrado</div>') }; window.abrirDropdownProdutos = () => { $('dropdownProdutos').classList.add('show'); preencherDropdownProdutos($('nomeProduto').value) }; window.fecharDropdownProdutos = () => $('dropdownProdutos').classList.remove('show'); window.filtrarDropdownProdutos = () => { preencherDropdownProdutos($('nomeProduto').value); $('dropdownProdutos').classList.add('show'); atualizarHeaderProduto(); calcularAll() }; document.addEventListener('click', e => { const w = document.querySelector('.dropdown-wrap'); if (w && !w.contains(e.target)) fecharDropdownProdutos() });
+    window.preencherDropdownProdutos = (f = '') => { 
+  const list = produtosCache
+    .filter(p => p.status !== 'inativo' && p.nome.toLowerCase().includes(f.toLowerCase()))
+    .sort((a, b) => a.nome.localeCompare(b.nome)); // ✅ Nova ordenação alfabética
+
+  $('dropdownProdutos').innerHTML = '<div class="dropdown-item" onclick="abrirModalProduto();fecharDropdownProdutos()">➕ Cadastrar novo produto</div>' + (list.length ? list.map(p => `<div class="dropdown-item" onclick="usarProduto('${p.id}')">${p.nome}</div>`).join('') : '<div class="dropdown-item">Nenhum produto encontrado</div>') 
+};
+ $('dropdownProdutos').innerHTML = '<div class="dropdown-item" onclick="abrirModalProduto();fecharDropdownProdutos()">➕ Cadastrar novo produto</div>' + (list.length ? list.map(p => `<div class="dropdown-item" onclick="usarProduto('${p.id}')">${p.nome}</div>`).join('') : '<div class="dropdown-item">Nenhum produto encontrado</div>') }; window.abrirDropdownProdutos = () => { $('dropdownProdutos').classList.add('show'); preencherDropdownProdutos($('nomeProduto').value) }; window.fecharDropdownProdutos = () => $('dropdownProdutos').classList.remove('show'); window.filtrarDropdownProdutos = () => { preencherDropdownProdutos($('nomeProduto').value); $('dropdownProdutos').classList.add('show'); atualizarHeaderProduto(); calcularAll() }; document.addEventListener('click', e => { const w = document.querySelector('.dropdown-wrap'); if (w && !w.contains(e.target)) fecharDropdownProdutos() });
 
     function syncMargensMarketplaces() { ['ml1', 'mag1', 'ml2', 'mag2'].forEach(id => { const el = $('mktMargem_' + id); if (el) el.value = v('margem') }) } function syncComissoesMarketplaces() { ['ml1', 'mag1', 'ml2', 'mag2'].forEach(id => { const el = $('mktCom_' + id); if (el) el.value = v('comissao') }) } window.calcularAll = () => { syncMargensMarketplaces(); syncComissoesMarketplaces(); calcular(); calcularMarketplaces(); atualizarHeaderProduto() };
     function calcular() { const custo = v('custo'), cambio = v('cambio') || 1, freteCPct = v('freteCompra'), outrasRS = v('outrasReais'), outrasPct = v('outrasPct'), margem = v('margem'), impostos = v('impostos'), freteV = v('freteVenda'), comissao = v('comissao'), precoManual = v('precoManual'); if (custo === 0 && freteV === 0 && outrasRS === 0 && precoManual === 0) { resetUI(); return } const custoBRL = custo * cambio, freteCompraVal = custoBRL * (freteCPct / 100), base = custoBRL + freteCompraVal + outrasRS, outrasVal = base * (outrasPct / 100), custoProduto = base + outrasVal, custoTotal = custoProduto + freteV, taxa = (margem + impostos + comissao) / 100; const precoCalc = taxa < 1 ? (custoProduto + freteV) / (1 - taxa) : 0, preco = precoManual > 0 ? precoManual : precoCalc, valImp = preco * (impostos / 100), valCom = preco * (comissao / 100), lucro = preco - custoTotal - valImp - valCom, valMargem = preco * (margem / 100), margemReal = preco > 0 ? (lucro / preco) * 100 : 0; lastCalc = { custoBRL, freteCompraVal, outrasRS, outrasVal, custoProduto, custoTotal, freteV, valImp, valCom, valMargem, preco, precoManual, lucro, margemReal }; $('precoVenda').textContent = moeda(preco); $('heroSub').textContent = 'Custo final: ' + moeda(custoTotal) + ' · Margem alvo: ' + pct(margem); $('manualBadge').style.display = precoManual > 0 ? 'inline-block' : 'none'; $('sCusto').textContent = moeda(custoTotal); $('sMargem').textContent = moeda(valMargem); $('sLucro').textContent = moeda(lucro); $('sLucro').className = 'svalue ' + (lucro >= 0 ? 'green' : 'red'); $('sMargemReal').textContent = pct(margemReal); $('bkContent').innerHTML = `<div class="bk-row"><span>Custo Produto</span><span class="rv">${moeda(custoProduto)}</span></div><div class="bk-row"><span>Frete Venda</span><span class="rv">${moeda(freteV)}</span></div><div class="bk-row"><span>Impostos</span><span class="rv">${moeda(valImp)}</span></div><div class="bk-row"><span>Comissão</span><span class="rv">${moeda(valCom)}</span></div><div class="bk-row"><span>Lucro Inicial</span><span class="rv">${moeda(lucro)}</span></div><div class="bk-row bk-total"><span>Preço de Venda</span><span class="rv">${moeda(preco)}</span></div>`; $('chartArea').innerHTML = '<canvas id="grafico" style="max-width:240px;max-height:240px"></canvas>'; if (chartInstance) chartInstance.destroy(); chartInstance = new Chart($('grafico'), { type: 'doughnut', data: { labels: ['Custo', 'Frete G.', 'Impostos', 'Comissão', 'Lucro'], datasets: [{ data: [custoProduto, freteV, valImp, valCom, Math.max(lucro, 0)], backgroundColor: ['#0ea5e9', '#6366f1', '#ef4444', '#f97316', '#10b981'], borderWidth: 2, borderColor: '#fff' }] }, options: { responsive: true, plugins: { legend: { position: 'bottom' } } } }); $('custoGrid').innerHTML = `<div class="custo-item" style="background:#eff8ff">Custo Convertido<br><b>${moeda(custoBRL)}</b></div><div class="custo-item" style="background:#eef2ff">Frete Compra<br><b>${moeda(freteCompraVal)}</b></div><div class="custo-item" style="background:#f5f3ff">Outras R$<br><b>${moeda(outrasRS)}</b></div><div class="custo-item" style="background:#fffbeb">Outras %<br><b>${moeda(outrasVal)}</b></div><div class="custo-item custo-item-total">CUSTO FINAL DO PRODUTO<br><b>${moeda(custoProduto)}</b></div>` }
@@ -616,95 +642,100 @@
     window.calcularMarketplaces = () => { if (!lastCalc) return; const ids = ['ml1', 'mag1', 'ml2', 'mag2'], nomes = { ml1: 'ML Linha 1', mag1: 'Magalu Linha 1', ml2: 'ML Linha 2', mag2: 'Magalu Linha 2' }; const res = []; ids.forEach(id => { const margem = v('mktMargem_' + id), extra = v('mktExtra_' + id), comissao = v('mktCom_' + id), fixa = v('mktFixa_' + id), desc = v('mktDesc_' + id), impostos = v('impostos'), taxa = (margem + extra + impostos + comissao) / 100; if (taxa >= 1) return; const custoBase = lastCalc.custoProduto + lastCalc.freteV + fixa, precoOriginal = custoBase / (1 - taxa), precoFinal = precoOriginal * (1 - desc / 100), valImp = precoFinal * (impostos / 100), valCom = precoFinal * (comissao / 100), lucro = precoFinal - custoBase - valImp - valCom, mReal = precoFinal > 0 ? (lucro / precoFinal) * 100 : 0, lucroOrig = precoOriginal - custoBase - precoOriginal * (impostos / 100) - precoOriginal * (comissao / 100), mRealOrig = precoOriginal > 0 ? (lucroOrig / precoOriginal) * 100 : 0, perda = mRealOrig - mReal; $('mktOriginal_' + id).textContent = moeda(precoOriginal); $('mktPreco_' + id).textContent = moeda(precoFinal); $('mktPerda_' + id).textContent = desc > 0 ? '▼ ' + pct(perda) : 'Sem desconto'; $('mktLucro_' + id).textContent = moeda(lucro); $('mktMargemReal_' + id).textContent = pct(mReal); const badge = $('mktBadge_' + id); badge.textContent = lucro >= 0 ? '✅ Lucrativo' : '❌ Prejuízo'; badge.className = 'badge-lucro ' + (lucro >= 0 ? 'badge-ok' : 'badge-bad'); badge.style.display = 'inline-block'; const al = $('mktAlerta_' + id); if (lucro < 0) { al.textContent = '🚨 PREJUÍZO'; al.className = 'mp-alerta alerta-prejuizo' } else if (mReal < 5) { al.textContent = '⚠️ Margem baixa'; al.className = 'mp-alerta alerta-atencao' } else { al.textContent = '✅ Operação saudável'; al.className = 'mp-alerta alerta-ok' } res.push({ id, nome: nomes[id], preco: precoFinal, lucro, mReal }) }); $('rankingList').innerHTML = res.length ? [...res].sort((a, b) => b.lucro - a.lucro).map((r, i) => `<div class="ranking-row"><div class="pos ${i == 0 ? 'pos-1' : i == 1 ? 'pos-2' : i == 2 ? 'pos-3' : 'pos-rest'}">${i + 1}</div><div style="flex:1"><b>${r.nome}</b></div><div>${moeda(r.preco)}</div><div style="color:${r.lucro >= 0 ? 'var(--success)' : 'var(--danger)'}"><b>${moeda(r.lucro)}</b></div><div>${pct(r.mReal)}</div></div>`).join('') : '<div class="empty">Calcule para ver o ranking</div>' }
 
     // CORREÇÃO: ABA MERCADO
-    window.buscarMercado = async function () {
-      const termo = $('buscaProdutoMercado').value.trim();
-      const apiKey = localStorage.getItem('serp_api_key');
+    // Variável global para guardar resultados em memória
+window.mercadoResultadosDB = [];
 
-      if (!termo) return toast('Digite o produto');
-      if (!apiKey) return toast('Configure a API primeiro');
+window.buscarMercado = async function () {
+  const termo = $('buscaProdutoMercado').value.trim();
+  const apiKey = localStorage.getItem('serp_api_key');
 
-      $('resultadoMercado').innerHTML = "Buscando...";
-      $('mercadoStats').style.display = "none";
+  if (!termo) return toast('Digite o produto');
+  if (!apiKey) return toast('Configure a API primeiro');
 
-      try {
-        const url = `https://serpapi.com/search.json?engine=google_shopping&q=${encodeURIComponent(termo)}&hl=pt&gl=br&api_key=${apiKey}`;
-        const proxy = `https://corsproxy.io/?${encodeURIComponent(url)}`;
+  $('resultadoMercado').innerHTML = "Buscando... (Isso pode levar alguns segundos)";
+  $('mercadoStats').style.display = "none";
+  $('mercadoFiltros').style.display = "none";
 
-        const res = await fetch(proxy, {
-          method: "GET",
-          headers: {
-            "Accept": "application/json"
-          }
-        });
+  try {
+    const url = `https://serpapi.com/search.json?engine=google_shopping&q=${encodeURIComponent(termo)}&hl=pt&gl=br&api_key=${apiKey}`;
+    const proxy = `https://corsproxy.io/?${encodeURIComponent(url)}`;
 
-        if (!res.ok) {
-          throw new Error("Erro HTTP: " + res.status);
-        }
+    const res = await fetch(proxy, { method: "GET", headers: { "Accept": "application/json" } });
 
-        const text = await res.text();
-        const data = JSON.parse(text);
+    if (!res.ok) throw new Error("Erro HTTP: " + res.status);
 
-        if (!data.shopping_results) {
-          $('resultadoMercado').innerHTML = "Nenhum resultado encontrado.";
-          return;
-        }
+    const data = JSON.parse(await res.text());
 
-        let html = "";
-        let prices = [];
+    if (!data.shopping_results || data.shopping_results.length === 0) {
+      $('resultadoMercado').innerHTML = "<div class='empty' style='grid-column:1/-1'>Nenhum resultado encontrado.</div>";
+      return;
+    }
 
-        data.shopping_results.slice(0, 10).forEach(item => {
-          let preco = item.extracted_price || 0;
-          if (preco) prices.push(preco);
+    // Salva na memória
+    window.mercadoResultadosDB = data.shopping_results.map(item => ({
+      ...item,
+      preco_num: item.extracted_price || 0,
+      loja_nome: item.source || item.seller || item.store || 'Loja'
+    })).filter(item => item.preco_num > 0);
 
-          const loja = item.source || item.seller || item.store || 'Loja';
+    // ✅ Atualizar Stats (Média, Mínimo e Máximo)
+    const prices = window.mercadoResultadosDB.map(i => i.preco_num);
+    const media = prices.reduce((a, b) => a + b, 0) / prices.length;
+    $('medPreco').innerText = moeda(media);
+    $('medPreco').dataset.val = media; 
+    $('minPreco').innerText = moeda(Math.min(...prices));
+    $('maxPreco').innerText = moeda(Math.max(...prices));
+    $('mercadoStats').style.display = "grid";
 
-html += `
-  <div class="mercado-card">
-    <img class="mercado-img" src="${item.thumbnail || ''}">
-    <div class="mercado-title">${item.title}</div>
-    
-    <div class="mercado-store">🏪 ${loja}</div>
-    
-    <div class="mercado-price">${item.price}</div>
+    // Mostra painel de filtros e reseta
+    $('mercadoFiltros').style.display = "grid";
+    $('filtroLojaMercado').value = '';
+    $('ordemMercado').value = 'asc'; // Padrão menor pro maior
 
-              <button class="btn btn-secondary" onclick="usarPrecoConcorrente(${preco})">Usar preço</button>
-            </div>
-          `;
-        });
+    window.renderizarMercado();
 
-        $('resultadoMercado').innerHTML = html;
-
-        if (prices.length) {
-          const media = prices.reduce((a, b) => a + b, 0) / prices.length;
-          $('medPreco').innerText = moeda(media);
-          $('medPreco').dataset.val = media; 
-          $('mercadoStats').style.display = "grid";
-        }
-
-      } catch (e) {
-        console.error(e);
-        $('resultadoMercado').innerHTML = `
-          <div style="color:red; grid-column:1/-1;">
-            ❌ Erro ao buscar.<br><br>
-            Possíveis causas:<br>
-            - Proxy bloqueado (Tente outra internet ou desabilite antivírus/adblock)<br>
-            - API Key inválida<br>
-            - Limite da SerpApi atingido<br>
-          </div>
-        `;
-      }
-    };
-
-    window.usarPrecoConcorrente = function (valor) {
-  if (valor > 0) {
-    valor = Number(parseFloat(valor).toFixed(2)); // ✅ força 2 casas
-
-    $('precoManual').value = valor;
-    calcularAll();
-    window.mudarAba('simulador');
-    toast('✅ Preço aplicado como "Preço Manual" no Simulador!');
+  } catch (e) {
+    console.error(e);
+    $('resultadoMercado').innerHTML = `
+      <div style="color:var(--danger); grid-column:1/-1;">
+        ❌ Erro ao buscar.<br><br>Possíveis causas:<br>- Proxy bloqueado<br>- API Key inválida<br>- Limite da SerpApi atingido
+      </div>`;
   }
-}
+};
+
+window.renderizarMercado = function() {
+  let html = "";
+  const filtroNome = $('filtroLojaMercado').value.toLowerCase();
+  const ordem = $('ordemMercado').value;
+
+  // 1. Filtra por Loja
+  let listaFiltrada = window.mercadoResultadosDB;
+  if (filtroNome) {
+    listaFiltrada = listaFiltrada.filter(item => item.loja_nome.toLowerCase().includes(filtroNome));
+  }
+
+  // 2. Ordena
+  listaFiltrada.sort((a, b) => ordem === 'asc' ? a.preco_num - b.preco_num : b.preco_num - a.preco_num);
+
+  if(!listaFiltrada.length) {
+    $('resultadoMercado').innerHTML = "<div class='empty' style='grid-column:1/-1'>Nenhum concorrente com esse nome.</div>";
+    return;
+  }
+
+  // 3. Monta o HTML
+  listaFiltrada.forEach(item => {
+    html += `
+      <div class="mercado-card">
+        <img class="mercado-img" src="${item.thumbnail || ''}">
+        <div class="mercado-title">${item.title}</div>
+        <div class="mercado-store">🏪 ${item.loja_nome}</div>
+        <div class="mercado-price">${item.price}</div>
+        <button class="btn btn-secondary" onclick="usarPrecoConcorrente(${item.preco_num})">Usar preço</button>
+      </div>`;
+  });
+
+  $('resultadoMercado').innerHTML = html;
+};
 
 
     window.usarPrecoMedio = function () {
