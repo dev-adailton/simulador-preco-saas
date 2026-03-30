@@ -656,11 +656,17 @@
           let preco = item.extracted_price || 0;
           if (preco) prices.push(preco);
 
-          html += `
-            <div class="mercado-card">
-              <img class="mercado-img" src="${item.thumbnail || ''}">
-              <div class="mercado-title">${item.title}</div>
-              <div class="mercado-price">${item.price}</div>
+          const loja = item.source || item.seller || item.store || 'Loja';
+
+html += `
+  <div class="mercado-card">
+    <img class="mercado-img" src="${item.thumbnail || ''}">
+    <div class="mercado-title">${item.title}</div>
+    
+    <div class="mercado-store">🏪 ${loja}</div>
+    
+    <div class="mercado-price">${item.price}</div>
+
               <button class="btn btn-secondary" onclick="usarPrecoConcorrente(${preco})">Usar preço</button>
             </div>
           `;
@@ -690,18 +696,26 @@
     };
 
     window.usarPrecoConcorrente = function (valor) {
-      if (valor > 0) {
-        $('precoManual').value = valor;
-        calcularAll();
-        window.mudarAba('simulador');
-        toast('✅ Preço aplicado como "Preço Manual" no Simulador!');
-      }
-    }
+  if (valor > 0) {
+    valor = Number(parseFloat(valor).toFixed(2)); // ✅ força 2 casas
+
+    $('precoManual').value = valor;
+    calcularAll();
+    window.mudarAba('simulador');
+    toast('✅ Preço aplicado como "Preço Manual" no Simulador!');
+  }
+}
+
 
     window.usarPrecoMedio = function () {
-      const val = parseFloat($('medPreco').dataset.val);
-      if (!isNaN(val)) usarPrecoConcorrente(val);
-    }
+  let val = parseFloat($('medPreco').dataset.val);
+
+  if (!isNaN(val)) {
+    val = Number(val.toFixed(2)); // ✅ limita para 2 casas
+    usarPrecoConcorrente(val);
+  }
+}
+
 
     // NOVOS CAMPOS NO HISTÓRICO
     window.salvarHistorico = async () => { 
