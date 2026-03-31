@@ -188,6 +188,19 @@
         .mercado-actions { display: flex; gap: 8px; margin-top: 8px; }
         .mercado-actions button { flex: 1; padding: 8px; font-size: 12px; text-align: center; }
 
+        /* DROPDOWN CHECKBOX (PRO) DA ABA DE MERCADO */
+        .dropdown-check { position: relative; width: 100%; }
+        .dropdown-check-btn { height: 42px; border: 1.5px solid var(--border); border-radius: 10px; background: var(--input); display: flex; align-items: center; justify-content: space-between; padding: 0 12px; font-weight: 700; cursor: pointer; color: var(--text); font-size: 14px; }
+        .dropdown-check-menu { position: absolute; top: 48px; left: 0; right: 0; background: #fff; border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); max-height: 260px; overflow: auto; display: none; z-index: 100; }
+        .dropdown-check-menu.show { display: block; }
+        .dropdown-check-item { display: flex; align-items: center; gap: 8px; padding: 10px 14px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f1f5f9; font-weight: 600; color: var(--text); margin: 0; }
+        .dropdown-check-item:hover { background: #f8fafc; }
+        .dropdown-check-item input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; }
+        .dropdown-check-actions { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid var(--border); background: #f8fafc; position: sticky; top: 0; z-index: 2; }
+        .dropdown-check-actions button { font-size: 11px; font-weight: 800; border: none; background: var(--primary); color: #fff; padding: 6px 10px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s;}
+        .dropdown-check-actions button.btn-clear { background: #e2e8f0; color: var(--text); }
+        .dropdown-check-actions button:hover { opacity: 0.8; }
+
         @media(max-width:1100px) { .sim-layout { grid-template-columns: 1fr } }
         @media(max-width:700px) { .mp-grid, .grid2, .grid4, .stats, .modal-grid, .product-picker, .mercado-grid { grid-template-columns: 1fr } }
     </style>
@@ -218,13 +231,13 @@
         
         <!-- TABS -->
         <div class="tabs">
-            <div class="tab active" onclick="mudarAba('simulador',this)">🧮 Simulador</div>
-            <div class="tab" onclick="mudarAba('marketplaces',this)">🛒 Marketplaces</div>
-            <div class="tab" onclick="mudarAba('mercado',this)">🔎 Mercado</div>
-            <div class="tab" onclick="mudarAba('historico',this)">📋 Histórico</div>
-            <div class="tab" onclick="mudarAba('produtos',this)">📦 Produtos</div>
-            <div class="tab" onclick="mudarAba('api',this)">⚙️ Configurar API Key</div>
-            <div class="tab" id="tabAdmin" onclick="mudarAba('admin',this)" style="display:none; background: #1e293b; color: #fff; border-color: #0f172a;">👑 Admin</div>
+            <div class="tab active" onclick="window.mudarAba('simulador',this)">🧮 Simulador</div>
+            <div class="tab" onclick="window.mudarAba('marketplaces',this)">🛒 Marketplaces</div>
+            <div class="tab" onclick="window.mudarAba('mercado',this)">🔎 Mercado</div>
+            <div class="tab" onclick="window.mudarAba('historico',this)">📋 Histórico</div>
+            <div class="tab" onclick="window.mudarAba('produtos',this)">📦 Produtos</div>
+            <div class="tab" onclick="window.mudarAba('api',this)">⚙️ Configurar API Key</div>
+            <div class="tab" id="tabAdmin" onclick="window.mudarAba('admin',this)" style="display:none; background: #1e293b; color: #fff; border-color: #0f172a;">👑 Admin</div>
         </div>
 
         <!-- SIMULADOR -->
@@ -244,58 +257,58 @@
                             <div class="product-picker">
                                 <div class="dropdown-wrap">
                                     <div class="iw">
-                                        <input type="text" id="nomeProduto" placeholder="Pesquisar e selecionar produto..." autocomplete="off" oninput="filtrarDropdownProdutos()" onfocus="abrirDropdownProdutos()">
+                                        <input type="text" id="nomeProduto" placeholder="Pesquisar e selecionar produto..." autocomplete="off" oninput="window.filtrarDropdownProdutos()" onfocus="window.abrirDropdownProdutos()">
                                     </div>
                                     <div class="dropdown-box" id="dropdownProdutos"></div>
                                 </div>
-                                <button class="btn btn-secondary" style="min-width:140px" onclick="abrirModalProduto()">➕ Cadastrar</button>
+                                <button class="btn btn-secondary" style="min-width:140px" onclick="window.abrirModalProduto()">➕ Cadastrar</button>
                             </div>
                         </div>
                         <div class="stitle">🛒 Custos de Compra</div>
                         <div class="grid2">
                             <div class="field"><label>Custo de Compra</label>
-                                <div class="iw wp"><span class="pre">$</span><input type="number" id="custo" min="0" step="0.01" oninput="calcularAll()"></div>
+                                <div class="iw wp"><span class="pre">$</span><input type="number" id="custo" min="0" step="0.01" oninput="window.calcularAll()"></div>
                             </div>
                             <div class="field"><label>Taxa de Câmbio</label>
-                                <div class="iw wp"><span class="pre">×</span><input type="number" id="cambio" value="1" min="0" step="0.0001" oninput="calcularAll()"></div>
+                                <div class="iw wp"><span class="pre">×</span><input type="number" id="cambio" value="1" min="0" step="0.0001" oninput="window.calcularAll()"></div>
                             </div>
                             <div class="field"><label>Frete de Compra (%)</label>
-                                <div class="iw ws"><input type="number" id="freteCompra" value="28" min="0" step="0.01" oninput="calcularAll()"><span class="suf">%</span></div>
+                                <div class="iw ws"><input type="number" id="freteCompra" value="28" min="0" step="0.01" oninput="window.calcularAll()"><span class="suf">%</span></div>
                             </div>
                             <div class="field"><label>Outras Despesas (R$)</label>
-                                <div class="iw wp"><span class="pre">R$</span><input type="number" id="outrasReais" min="0" step="0.01" oninput="calcularAll()"></div>
+                                <div class="iw wp"><span class="pre">R$</span><input type="number" id="outrasReais" min="0" step="0.01" oninput="window.calcularAll()"></div>
                             </div>
                             <div class="field"><label>Outras Despesas (%)</label>
-                                <div class="iw ws"><input type="number" id="outrasPct" min="0" step="0.01" oninput="calcularAll()"><span class="suf">%</span></div>
+                                <div class="iw ws"><input type="number" id="outrasPct" min="0" step="0.01" oninput="window.calcularAll()"><span class="suf">%</span></div>
                             </div>
                         </div>
                         <div class="stitle">💰 Venda & Tributação</div>
                         <div class="grid2">
                             <div class="field"><label>Margem de Venda (%)</label>
-                                <div class="iw ws"><input type="number" id="margem" value="20" min="0" max="99" step="0.01" oninput="calcularAll()"><span class="suf">%</span></div>
+                                <div class="iw ws"><input type="number" id="margem" value="20" min="0" max="99" step="0.01" oninput="window.calcularAll()"><span class="suf">%</span></div>
                             </div>
                             <div class="field"><label>Impostos (%)</label>
-                                <div class="iw ws"><input type="number" id="impostos" value="2" min="0" step="0.01" oninput="calcularAll()"><span class="suf">%</span></div>
+                                <div class="iw ws"><input type="number" id="impostos" value="2" min="0" step="0.01" oninput="window.calcularAll()"><span class="suf">%</span></div>
                             </div>
                             <div class="field"><label>Frete de Venda (R$)</label>
-                                <div class="iw wp"><span class="pre">R$</span><input type="number" id="freteVenda" min="0" step="0.01" oninput="calcularAll()"></div>
+                                <div class="iw wp"><span class="pre">R$</span><input type="number" id="freteVenda" min="0" step="0.01" oninput="window.calcularAll()"></div>
                             </div>
                             <div class="field"><label>Comissão Plataforma (%)</label>
-                                <div class="iw ws"><input type="number" id="comissao" value="18" min="0" step="0.01" oninput="calcularAll()"><span class="suf">%</span></div>
+                                <div class="iw ws"><input type="number" id="comissao" value="18" min="0" step="0.01" oninput="window.calcularAll()"><span class="suf">%</span></div>
                             </div>
                             <div class="field"><label>Preço de Venda (Manual)</label>
-                                <div class="iw wp"><span class="pre">R$</span><input type="number" id="precoManual" min="0" step="0.01" oninput="calcularAll()"></div>
+                                <div class="iw wp"><span class="pre">R$</span><input type="number" id="precoManual" min="0" step="0.01" oninput="window.calcularAll()"></div>
                             </div>
                             <div class="field"><label>Observação Interna</label>
                                 <div class="iw"><input type="text" id="observacao" placeholder="Ex: promocional, fornecedor X..."></div>
                             </div>
                         </div>
                         <div class="actions">
-                            <button class="btn btn-primary" onclick="calcularAll()">⚡ Calcular Tudo</button>
-                            <button class="btn btn-success" onclick="salvarHistorico()">💾 Salvar</button>
-                            <button class="btn btn-accent" onclick="copiarResultado()">📋 Copiar</button>
-                            <button class="btn btn-secondary" onclick="exportarPDF()">📄 PDF</button>
-                            <button class="btn btn-secondary" onclick="limpar()">🗑️ Limpar</button>
+                            <button class="btn btn-primary" onclick="window.calcularAll()">⚡ Calcular Tudo</button>
+                            <button class="btn btn-success" onclick="window.salvarHistorico()">💾 Salvar</button>
+                            <button class="btn btn-accent" onclick="window.copiarResultado()">📋 Copiar</button>
+                            <button class="btn btn-secondary" onclick="window.exportarPDF()">📄 PDF</button>
+                            <button class="btn btn-secondary" onclick="window.limpar()">🗑️ Limpar</button>
                         </div>
                     </div>
                 </div>
@@ -321,7 +334,7 @@
                     <div class="chart-card">
                         <div class="ch">🥧 Composição do Preço</div>
                         <div class="cb" id="chartArea">
-                            <div class="empty">Preencha os campos para ver o gráfico</div>
+                            <canvas id="grafico"></canvas>
                         </div>
                     </div>
                     <div class="breakdown">
@@ -405,17 +418,30 @@
                             <div class="cb"><canvas id="graficoMercado" style="max-height:200px; width:100%"></canvas></div>
                         </div>
                         
-                        <!-- CONTROLES ADICIONAIS DE LISTA -->
+                        <!-- CONTROLES ADICIONAIS DE LISTA (FILTRO NOVO SUPERIOR E ORDENAÇÃO) -->
                         <div class="stitle">Filtros da Lista de Concorrentes</div>
                         <div class="grid2">
+                            <!-- NOVO MULTISELECT DROPDOWN PRO -->
                             <div class="field">
-                                <label>Filtrar por nome de Loja</label>
-                                <div class="iw"><input type="text" id="filtroConcorrente" oninput="renderListaMercado()" placeholder="Ex: Amazon ou Mercado Livre"></div>
+                                <label>Filtrar por lojas concorrentes</label>
+                                <div class="dropdown-check" id="boxDropdownLojas">
+                                    <div class="dropdown-check-btn" onclick="window.toggleDropdownLojas()">
+                                        <span id="labelFiltroLojas">Exibindo todas</span>
+                                        <span style="font-size:10px">▼</span>
+                                    </div>
+                                    <div id="dropdownLojas" class="dropdown-check-menu">
+                                        <div class="dropdown-check-actions">
+                                            <button onclick="window.selecionarTodasLojas()">Selecionar todas</button>
+                                            <button class="btn-clear" onclick="window.limparSelecaoLojas()">Limpar</button>
+                                        </div>
+                                        <div id="listaLojasCheckbox" style="display:flex; flex-direction:column;"></div>
+                                    </div>
+                                </div>
                             </div>
                             <div class="field">
                                 <label>Ordenar Resultados</label>
                                 <div class="iw">
-                                    <select id="ordenacaoMercado" onchange="renderListaMercado()">
+                                    <select id="ordenacaoMercado" onchange="window.renderListaMercado()">
                                         <option value="asc">Menor Preço primeiro</option>
                                         <option value="desc">Maior Preço primeiro</option>
                                     </select>
@@ -449,7 +475,7 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <div class="toolbar"><button class="btn btn-secondary" style="max-width:220px" onclick="limparHistoricoUsuario()">🗑️ Limpar Meu Histórico</button></div>
+                    <div class="toolbar"><button class="btn btn-secondary" style="max-width:220px" onclick="window.limparHistoricoUsuario()">🗑️ Limpar Meu Histórico</button></div>
                     <div id="histContent">
                         <div class="empty">Nenhuma simulação salva ainda.</div>
                     </div>
@@ -468,7 +494,7 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <div class="toolbar"><button class="btn btn-secondary" style="max-width:220px" onclick="abrirModalProduto()">➕ Novo Produto</button></div>
+                    <div class="toolbar"><button class="btn btn-secondary" style="max-width:220px" onclick="window.abrirModalProduto()">➕ Novo Produto</button></div>
                     <div id="listaProdutos" class="simple-list"></div>
                 </div>
             </div>
@@ -489,7 +515,7 @@
                         </select>
                     </div>
                 </div>
-                <div class="actions"><button class="btn btn-accent" style="max-width:240px" onclick="salvarConfigApi()">💾 Salvar configurações</button></div>
+                <div class="actions"><button class="btn btn-accent" style="max-width:240px" onclick="window.salvarConfigApi()">💾 Salvar configurações</button></div>
             </div>
         </div>
 
@@ -529,7 +555,7 @@
     <!-- MODAL DE PRODUTO -->
     <div class="modal-wrap" id="modalProdutoWrap">
         <div class="modal">
-            <div class="modal-head">📦 Produto <button class="modal-close" onclick="fecharModalProduto()">×</button></div>
+            <div class="modal-head">📦 Produto <button class="modal-close" onclick="window.fecharModalProduto()">×</button></div>
             <div class="modal-body">
                 <div class="modal-grid">
                     <div class="field"><label>Nome do Produto</label>
@@ -551,8 +577,8 @@
                     </div>
                 </div>
                 <div class="actions">
-                    <button class="btn btn-success" onclick="salvarProdutoModal()">💾 Salvar</button>
-                    <button class="btn btn-secondary" onclick="fecharModalProduto()">Cancelar</button>
+                    <button class="btn btn-success" onclick="window.salvarProdutoModal()">💾 Salvar</button>
+                    <button class="btn btn-secondary" onclick="window.fecharModalProduto()">Cancelar</button>
                 </div>
             </div>
         </div>
@@ -581,6 +607,7 @@
         let chartInstance = null, chartMercadoInstance = null;
         let lastCalc = null, currentUser = null, editProdutoId = null, produtosCache = [];
         let mercadoCache = [], mercadoMediaAtual = 0, mercadoIdealAtual = 0;
+        let lojasSelecionadas = []; // NOVO ESTADO DE LOJAS PARA O FILTRO PRO
 
         const ADMIN_EMAIL = 'dev.adailton@gmail.com'.toLowerCase();
 
@@ -653,7 +680,7 @@
                     $('tabAdmin').style.display = 'none';
                 }
                 carregarConfigApi(); montarMarketplaces(); await renderProdutos(); await renderHistorico();
-                preencherDropdownProdutos(); syncMargensMarketplaces(); syncComissoesMarketplaces(); atualizarHeaderProduto();
+                window.preencherDropdownProdutos(); syncMargensMarketplaces(); syncComissoesMarketplaces(); atualizarHeaderProduto();
             } else {
                 $('auth-screen').style.display = 'flex'; $('app-screen').style.display = 'none'; currentUser = null;
             }
@@ -661,7 +688,7 @@
 
         window.logoutUser = async () => await signOut(auth);
 
-        function montarCard(id, titulo, bg, color, fixa) { return `<div class="mp-col"><div class="mp-head" style="background:${bg};color:${color}">${titulo}</div><div class="mp-body"><div class="mp-input-group"><label>Margem de Venda (%)</label><input type="number" id="mktMargem_${id}" value="20" oninput="calcularMarketplaces()"></div><div class="mp-input-group"><label>Margem Extra (%)</label><input type="number" id="mktExtra_${id}" value="3" oninput="calcularMarketplaces()"></div><div class="mp-input-group"><label>Comissão (%)</label><input type="number" id="mktCom_${id}" value="18" oninput="calcularMarketplaces()"></div><div class="mp-input-group"><label>Taxa Fixa (R$)</label><input type="number" id="mktFixa_${id}" value="${fixa}" oninput="calcularMarketplaces()"></div><div class="mp-input-group"><label>Desconto Promoção (%)</label><input type="number" id="mktDesc_${id}" value="0" oninput="calcularMarketplaces()"></div><div class="mp-compare-box"><div>Preço Original: <b id="mktOriginal_${id}">—</b></div><div>Com Desconto: <b id="mktPreco_${id}">—</b></div><div>Perda de Margem: <b id="mktPerda_${id}">—</b></div></div><div class="mp-result-box">Lucro Liquido<br><b id="mktLucro_${id}">—</b><div id="mktBadge_${id}" class="badge-lucro" style="display:none"></div></div><div class="mp-result-box">Margem Real<br><b id="mktMargemReal_${id}">—</b></div><div class="mp-alerta" id="mktAlerta_${id}"></div></div></div>` }
+        function montarCard(id, titulo, bg, color, fixa) { return `<div class="mp-col"><div class="mp-head" style="background:${bg};color:${color}">${titulo}</div><div class="mp-body"><div class="mp-input-group"><label>Margem de Venda (%)</label><input type="number" id="mktMargem_${id}" value="20" oninput="window.calcularMarketplaces()"></div><div class="mp-input-group"><label>Margem Extra (%)</label><input type="number" id="mktExtra_${id}" value="3" oninput="window.calcularMarketplaces()"></div><div class="mp-input-group"><label>Comissão (%)</label><input type="number" id="mktCom_${id}" value="18" oninput="window.calcularMarketplaces()"></div><div class="mp-input-group"><label>Taxa Fixa (R$)</label><input type="number" id="mktFixa_${id}" value="${fixa}" oninput="window.calcularMarketplaces()"></div><div class="mp-input-group"><label>Desconto Promoção (%)</label><input type="number" id="mktDesc_${id}" value="0" oninput="window.calcularMarketplaces()"></div><div class="mp-compare-box"><div>Preço Original: <b id="mktOriginal_${id}">—</b></div><div>Com Desconto: <b id="mktPreco_${id}">—</b></div><div>Perda de Margem: <b id="mktPerda_${id}">—</b></div></div><div class="mp-result-box">Lucro Liquido<br><b id="mktLucro_${id}">—</b><div id="mktBadge_${id}" class="badge-lucro" style="display:none"></div></div><div class="mp-result-box">Margem Real<br><b id="mktMargemReal_${id}">—</b></div><div class="mp-alerta" id="mktAlerta_${id}"></div></div></div>` }
         function montarMarketplaces() { $('mpGrid1').innerHTML = montarCard('ml1', '🛒 Mercado Livre', '#ffe600', '#333', '0') + montarCard('mag1', '🛍️ Magalu', '#0086ff', '#fff', '5'); $('mpGrid2').innerHTML = montarCard('ml2', '🛒 Mercado Livre', '#ffe600', '#333', '0') + montarCard('mag2', '🛍️ Magalu', '#0086ff', '#fff', '5') }
 
         async function getProdutos() { if (!currentUser) return []; const snap = await getDocs(query(collection(db, 'produtos'), where('uid', '==', currentUser.uid))); const arr = []; snap.forEach(d => arr.push({ id: d.id, ...d.data() })); produtosCache = arr; return arr }
@@ -682,18 +709,18 @@
             const payload = { uid: currentUser.uid, nome, custo: v('produtoCustoCadastro'), cambio: v('produtoCambioCadastro') || 1, status: $('produtoStatusCadastro').value, updatedAt: new Date().toLocaleString('pt-BR') }; 
             if (editProdutoId) await updateDoc(doc(db, 'produtos', editProdutoId), payload); 
             else { payload.createdAt = serverTimestamp(); await addDoc(collection(db, 'produtos'), payload) } 
-            fecharModalProduto(); await renderProdutos(); preencherDropdownProdutos(); toast('Produto salvo com sucesso') 
+            window.fecharModalProduto(); await renderProdutos(); window.preencherDropdownProdutos(); toast('Produto salvo com sucesso') 
         }; 
         
-        window.editarProduto = id => abrirModalProduto(id); 
-        window.inativarProduto = async id => { const p = produtosCache.find(x => x.id === id); await updateDoc(doc(db, 'produtos', id), { status: p.status === 'inativo' ? 'ativo' : 'inativo' }); await renderProdutos(); preencherDropdownProdutos(); toast('Status atualizado') }; 
+        window.editarProduto = id => window.abrirModalProduto(id); 
+        window.inativarProduto = async id => { const p = produtosCache.find(x => x.id === id); await updateDoc(doc(db, 'produtos', id), { status: p.status === 'inativo' ? 'ativo' : 'inativo' }); await renderProdutos(); window.preencherDropdownProdutos(); toast('Status atualizado') }; 
         
         window.usarProduto = id => { 
             const p = produtosCache.find(x => x.id === id); 
             if (!p) return; 
             $('nomeProduto').value = p.nome; $('custo').value = p.custo || ''; $('cambio').value = p.cambio || 1; 
             mercadoMediaAtual = 0; mercadoIdealAtual = 0; // reseta inteligencia de mkt ao mudar produto
-            fecharDropdownProdutos(); atualizarHeaderProduto(); calcularAll(); mudarAba('simulador'); toast('Produto carregado para simulação');
+            window.fecharDropdownProdutos(); atualizarHeaderProduto(); window.calcularAll(); window.mudarAba('simulador'); toast('Produto carregado para simulação');
         };
 
         // DROPDOWN DE PRODUTOS ORDEM A-Z
@@ -702,16 +729,27 @@
                 .filter(p => p.status !== 'inativo' && p.nome.toLowerCase().includes(f.toLowerCase()))
                 .sort((a,b) => a.nome.localeCompare(b.nome));
 
-            $('dropdownProdutos').innerHTML = '<div class="dropdown-item" onclick="abrirModalProduto();fecharDropdownProdutos()">➕ Cadastrar novo produto aqui</div>' + (list.length ? list.map(p => `<div class="dropdown-item" onclick="usarProduto('${p.id}')">${p.nome}</div>`).join('') : '<div class="dropdown-item">Nenhum produto encontrado. Digite para buscar ou cadastre.</div>') 
+            $('dropdownProdutos').innerHTML = '<div class="dropdown-item" onclick="window.abrirModalProduto();window.fecharDropdownProdutos()">➕ Cadastrar novo produto aqui</div>' + (list.length ? list.map(p => `<div class="dropdown-item" onclick="window.usarProduto('${p.id}')">${p.nome}</div>`).join('') : '<div class="dropdown-item">Nenhum produto encontrado. Digite para buscar ou cadastre.</div>') 
         }; 
-        window.abrirDropdownProdutos = () => { $('dropdownProdutos').classList.add('show'); preencherDropdownProdutos($('nomeProduto').value) }; 
+        window.abrirDropdownProdutos = () => { $('dropdownProdutos').classList.add('show'); window.preencherDropdownProdutos($('nomeProduto').value) }; 
         window.fecharDropdownProdutos = () => $('dropdownProdutos').classList.remove('show'); 
-        window.filtrarDropdownProdutos = () => { preencherDropdownProdutos($('nomeProduto').value); $('dropdownProdutos').classList.add('show'); atualizarHeaderProduto(); calcularAll() }; 
-        document.addEventListener('click', e => { const w = document.querySelector('.dropdown-wrap'); if (w && !w.contains(e.target)) fecharDropdownProdutos() });
+        window.filtrarDropdownProdutos = () => { window.preencherDropdownProdutos($('nomeProduto').value); $('dropdownProdutos').classList.add('show'); atualizarHeaderProduto(); window.calcularAll() }; 
+        
+        // GESTÃO DE CLIQUE FORA DA TELA PARA OS 2 DROPDOWNS
+        document.addEventListener('click', e => { 
+            const w = document.querySelector('.dropdown-wrap'); 
+            if (w && !w.contains(e.target)) window.fecharDropdownProdutos(); 
+            
+            const boxLojas = document.getElementById('boxDropdownLojas');
+            if (boxLojas && !boxLojas.contains(e.target)) {
+                const elMenu = $('dropdownLojas');
+                if (elMenu) elMenu.classList.remove('show');
+            }
+        });
 
         function syncMargensMarketplaces() { ['ml1', 'mag1', 'ml2', 'mag2'].forEach(id => { const el = $('mktMargem_' + id); if (el) el.value = v('margem') }) } 
         function syncComissoesMarketplaces() { ['ml1', 'mag1', 'ml2', 'mag2'].forEach(id => { const el = $('mktCom_' + id); if (el) el.value = v('comissao') }) } 
-        window.calcularAll = () => { syncMargensMarketplaces(); syncComissoesMarketplaces(); calcular(); calcularMarketplaces(); atualizarHeaderProduto() };
+        window.calcularAll = () => { syncMargensMarketplaces(); syncComissoesMarketplaces(); calcular(); window.calcularMarketplaces(); atualizarHeaderProduto() };
         
         // CALCULO DO SIMULADOR PRINCIPAL + ALERTA COMPETITIVIDADE
         function calcular() { 
@@ -775,7 +813,7 @@
         }
 
         // ==========================================
-        //  NOVA ABA DE MERCADO INTELIGENTE
+        //  NOVA ABA DE MERCADO INTELIGENTE (PRO)
         // ==========================================
         window.buscarMercado = async function () {
             const termo = $('buscaProdutoMercado').value.trim();
@@ -811,7 +849,8 @@
                 })).filter(i => i.preco > 0);
 
                 calcularStatsMercado();
-                renderListaMercado();
+                window.popularFiltroLojas();
+                window.renderListaMercado();
                 toast('📊 Concorrência Mapeada!');
 
             } catch (e) {
@@ -864,20 +903,77 @@
             });
 
             // Se o simulador estiver ativo, refaz para mostrar os alertas
-            calcularAll();
+            window.calcularAll();
         }
 
-        function renderListaMercado() {
+        // ==========================================
+        //  LÓGICA DO NOVO DROPDOWN PRO DE LOJAS
+        // ==========================================
+        window.toggleDropdownLojas = function () {
+            $('dropdownLojas').classList.toggle('show');
+        };
+
+        window.popularFiltroLojas = function () {
+            lojasSelecionadas = []; // default vazio
+            const container = $('listaLojasCheckbox');
+            const lojas = [...new Set(mercadoCache.map(i => i.loja))].sort();
+            
+            container.innerHTML = '';
+            lojas.forEach(loja => {
+                container.innerHTML += `
+                    <label class="dropdown-check-item">
+                        <input type="checkbox" value="${loja}" onchange="window.toggleLoja(this)">
+                        ${loja}
+                    </label>
+                `;
+            });
+            window.atualizarLabelFiltro();
+        };
+
+        window.toggleLoja = function (el) {
+            if (el.checked) {
+                lojasSelecionadas.push(el.value);
+            } else {
+                lojasSelecionadas = lojasSelecionadas.filter(l => l !== el.value);
+            }
+            window.atualizarLabelFiltro();
+            window.renderListaMercado();
+        };
+
+        window.selecionarTodasLojas = function () {
+            lojasSelecionadas = [...new Set(mercadoCache.map(i => i.loja))];
+            document.querySelectorAll('#listaLojasCheckbox input').forEach(i => i.checked = true);
+            window.atualizarLabelFiltro();
+            window.renderListaMercado();
+        };
+
+        window.limparSelecaoLojas = function () {
+            lojasSelecionadas = [];
+            document.querySelectorAll('#listaLojasCheckbox input').forEach(i => i.checked = false);
+            window.atualizarLabelFiltro();
+            window.renderListaMercado();
+        };
+
+        window.atualizarLabelFiltro = function () {
+            const total = lojasSelecionadas.length;
+            if (total === 0) {
+                $('labelFiltroLojas').innerText = 'Exibindo todas';
+            } else {
+                $('labelFiltroLojas').innerText = `${total} loja(s) filtrada(s)`;
+            }
+        };
+
+        // RENDER LISTA REVISADO E COM ORDENAÇÃO PRO
+        window.renderListaMercado = function () {
             let lista = [...mercadoCache];
-            const filtro = $('filtroConcorrente').value.toLowerCase();
             const ordem = $('ordenacaoMercado').value;
 
-            // Filtra por nome da loja
-            if (filtro) {
-                lista = lista.filter(i => i.loja.toLowerCase().includes(filtro) || i.titulo.toLowerCase().includes(filtro));
+            // Filtro dinâmico pelo Checkbox Lojas
+            if (lojasSelecionadas.length > 0) {
+                lista = lista.filter(i => lojasSelecionadas.includes(i.loja));
             }
 
-            // Ordena (menor ou maior)
+            // Ordena Results (menor ou maior)
             lista.sort((a, b) => ordem === 'asc' ? a.preco - b.preco : b.preco - a.preco);
 
             let html = "";
@@ -893,20 +989,21 @@
                     </div>
                 </div>`;
             });
-            $('resultadoMercado').innerHTML = html || "<div class='empty' style='grid-column:1/-1'>Nenhum concorrente passou no seu filtro.</div>";
-        }
+            $('resultadoMercado').innerHTML = html || "<div class='empty' style='grid-column: 1/-1;'>Nenhum concorrente passou nos seus filtros.</div>";
+        };
 
         window.usarPrecoConcorrente = function (valor) {
             if (valor > 0) {
                 $('precoManual').value = Number(parseFloat(valor).toFixed(2));
-                calcularAll();
+                window.calcularAll();
                 window.mudarAba('simulador');
                 toast('✅ Preço fixado no Painel do Simulador!');
             }
         }
+        
         window.usarPrecoNoSimulador = function(tipo) {
             let val = tipo === 'ideal' ? mercadoIdealAtual : mercadoMediaAtual;
-            if(val > 0) usarPrecoConcorrente(val);
+            if(val > 0) window.usarPrecoConcorrente(val);
         }
 
         // ==========================================
@@ -959,8 +1056,8 @@
                     <td>Preço: <b>${moeda(h.preco)}</b><br><small style="color:var(--muted)">` + (h.infoMercadoSalva ? `Média de mercado na época: ${moeda(h.mercadoMediaHist)}` : `(Pesquisa n/ realizada)`) + `</small></td>
                     <td style="color:${h.lucro >= 0 ? 'var(--success)' : 'var(--danger)'}"><b>Lucro: ${moeda(h.lucro)}</b><br><small>M. Real: ${pct(h.margemReal)}</small></td>
                     <td style="white-space:nowrap">
-                        <button onclick="editarHistorico('${h.id}')" class="btn btn-secondary" style="padding:6px 12px; font-size:12px" title="Traz p/ tela">♻️ Re-simular</button>
-                        <button onclick="excluirHistorico('${h.id}')" class="btn btn-secondary" style="padding:6px 12px; font-size:12px; color:var(--danger)" title="Apagar">❌</button>
+                        <button onclick="window.editarHistorico('${h.id}')" class="btn btn-secondary" style="padding:6px 12px; font-size:12px" title="Traz p/ tela">♻️ Re-simular</button>
+                        <button onclick="window.excluirHistorico('${h.id}')" class="btn btn-secondary" style="padding:6px 12px; font-size:12px; color:var(--danger)" title="Apagar">❌</button>
                     </td>
                 </tr>`).join('') + '</tbody></table></div>';
         }
@@ -978,7 +1075,7 @@
             $('observacao').value = item.observacao;
             $('precoManual').value = item.preco;
 
-            calcularAll(); mudarAba('simulador'); toast('♻️ Histórico restaurado no simulador.');
+            window.calcularAll(); window.mudarAba('simulador'); toast('♻️ Histórico restaurado no simulador.');
         };
 
         window.excluirHistorico = async (id) => {
@@ -1000,7 +1097,7 @@
 
         function resetUI() { $('precoVenda').textContent = 'R$ —'; $('heroSub').textContent = 'Preencha os campos ao lado'; $('manualBadge').style.display = 'none'; $('badgeMercado').style.display = 'none'; $('sCusto').textContent = 'R$ —'; $('sMargem').textContent = 'R$ —'; $('sLucro').textContent = 'R$ —'; $('sMargemReal').textContent = '— %'; $('bkContent').innerHTML = '<div class="empty">Aguardando dados</div>'; $('chartArea').innerHTML = '<div class="empty">O gráfico surgirá após simular</div>'; $('custoGrid').innerHTML = '<div class="empty" style="grid-column:1/-1">Nenhum custo listado</div>'; $('rankingList').innerHTML = '<div class="empty">Aguardando cálculo</div>'; if (chartInstance) { chartInstance.destroy(); chartInstance = null } lastCalc = null }
 
-        window.limpar = () => { ['custo', 'freteVenda', 'outrasReais', 'outrasPct', 'precoManual', 'observacao'].forEach(id => $(id).value = ''); $('nomeProduto').value = ''; $('cambio').value = '1'; $('freteCompra').value = '28'; $('margem').value = '20'; $('impostos').value = '2'; $('comissao').value = '18'; syncMargensMarketplaces(); syncComissoesMarketplaces(); resetUI(); mercadoMediaAtual = 0; atualizarHeaderProduto(); toast('Tudo Limpo 👌') };
+        window.limpar = () => { ['custo', 'freteVenda', 'outrasReais', 'outrasPct', 'precoManual', 'observacao'].forEach(id => $(id).value = ''); $('nomeProduto').value = ''; $('cambio').value = '1'; $('freteCompra').value = '28'; $('margem').value = '20'; $('impostos').value = '2'; $('comissao').value = '18'; syncMargensMarketplaces(); syncComissoesMarketplaces(); resetUI(); mercadoMediaAtual = 0; atualizarHeaderProduto(); lojasSelecionadas = []; window.atualizarLabelFiltro(); toast('Tudo Limpo 👌') };
 
         window.salvarConfigApi = () => { localStorage.setItem('serp_api_key', $('serpApiKey').value); localStorage.setItem('modo_busca', $('modoBusca').value); toast('✅ Sistema Sincronizado com SerpApi') };
         function carregarConfigApi() { $('serpApiKey').value = localStorage.getItem('serp_api_key') || ''; $('modoBusca').value = localStorage.getItem('modo_busca') || 'proxy' }
