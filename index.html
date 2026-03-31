@@ -753,34 +753,82 @@
         
                 // CALCULO DO SIMULADOR PRINCIPAL + ALERTA COMPETITIVIDADE
         function calcular() { 
-            const custo = v('custo'), cambio = v('cambio') || 1, freteCPct = v('freteCompra'), outrasRS = v('outrasReais'), outrasPct = v('outrasPct'), margem = v('margem'), impostos = v('impostos'), freteV = v('freteVenda'), comissao = v('comissao'), precoManual = v('precoManual'); 
-            if (custo === 0 && freteV === 0 && outrasRS === 0 && precoManual === 0) { resetUI(); return } 
-            
-            const custoBRL = custo * cambio, freteCompraVal = custoBRL * (freteCPct / 100), base = custoBRL + freteCompraVal + outrasRS, outrasVal = base * (outrasPct / 100), custoProduto = base + outrasVal, custoTotal = custoProduto + freteV, taxa = (margem + impostos + comissao) / 100; 
-            const precoCalc = taxa < 1 ? (custoProduto + freteV) / (1 - taxa) : 0, preco = precoManual > 0 ? precoManual : precoCalc, valImp = preco * (impostos / 100), valCom = preco * (comissao / 100), lucro = preco - custoTotal - valImp - valCom, valMargem = preco * (margem / 100), margemReal = preco > 0 ? (lucro / preco) * 100 : 0; 
-            lastCalc = { custoBRL, freteCompraVal, outrasRS, outrasVal, custoProduto, custoTotal, freteV, valImp, valCom, valMargem, preco, precoManual, lucro, margemReal }; 
-            
-            $('precoVenda').textContent = moeda(preco); 
-            $('heroSub').textContent = 'Custo final: ' + moeda(custoTotal) + ' · Margem alvo: ' + pct(margem); 
-            $('manualBadge').style.display = precoManual > 0 ? 'inline-block' : 'none'; 
-            
-            // INTELIGÊNCIA COMERCIAL - ALERTA NO PREÇO
-            const aBadge = $('badgeMercado');
-            if (mercadoMediaAtual > 0) {
-                if (preco <= mercadoIdealAtual) {
-                    aBadge.innerText = `🔥 PREÇO IMBATÍVEL (Abaixo do Ideal de ${moeda(mercadoIdealAtual)})`;
-                    aBadge.className = 'market-alert-badge good';
-                    aBadge.style.display = 'block';
-                } else if (preco <= mercadoMediaAtual) {
-                    aBadge.innerText = `✅ COMPETITIVO (Abaixo da média de ${moeda(mercadoMediaAtual)})`;
-                    aBadge.className = 'market-alert-badge good';
-                    aBadge.style.display = 'block';
-                } else {
-                    aBadge.innerText = `🚨 CUIDADO: Preço ${pct(((preco/mercadoMediaAtual)-1)*100)} ACIMA da Média do Mercado!`;
-                    aBadge.className = 'market-alert-badge bad';
-                    aBadge.style.display = 'block';
-                }
-            } else
+    const custo = v('custo'),
+        cambio = v('cambio') || 1,
+        freteCPct = v('freteCompra'),
+        outrasRS = v('outrasReais'),
+        outrasPct = v('outrasPct'),
+        margem = v('margem'),
+        impostos = v('impostos'),
+        freteV = v('freteVenda'),
+        comissao = v('comissao'),
+        precoManual = v('precoManual'); 
+
+    if (custo === 0 && freteV === 0 && outrasRS === 0 && precoManual === 0) { 
+        resetUI(); 
+        return; 
+    } 
+
+    const custoBRL = custo * cambio,
+        freteCompraVal = custoBRL * (freteCPct / 100),
+        base = custoBRL + freteCompraVal + outrasRS,
+        outrasVal = base * (outrasPct / 100),
+        custoProduto = base + outrasVal,
+        custoTotal = custoProduto + freteV,
+        taxa = (margem + impostos + comissao) / 100; 
+
+    const precoCalc = taxa < 1 ? (custoProduto + freteV) / (1 - taxa) : 0,
+        preco = precoManual > 0 ? precoManual : precoCalc,
+        valImp = preco * (impostos / 100),
+        valCom = preco * (comissao / 100),
+        lucro = preco - custoTotal - valImp - valCom,
+        valMargem = preco * (margem / 100),
+        margemReal = preco > 0 ? (lucro / preco) * 100 : 0; 
+
+    lastCalc = { custoBRL, freteCompraVal, outrasRS, outrasVal, custoProduto, custoTotal, freteV, valImp, valCom, valMargem, preco, precoManual, lucro, margemReal }; 
+
+    $('precoVenda').textContent = moeda(preco); 
+    $('heroSub').textContent = 'Custo final: ' + moeda(custoTotal); 
+    $('manualBadge').style.display = precoManual > 0 ? 'inline-block' : 'none'; 
+
+    $('sCusto').textContent = moeda(custoTotal); 
+    $('sMargem').textContent = moeda(valMargem); 
+    $('sLucro').textContent = moeda(lucro); 
+    $('sLucro').className = 'svalue ' + (lucro >= 0 ? 'green' : 'red'); 
+    $('sMargemReal').textContent = pct(margemReal); 
+
+    $('bkContent').innerHTML = `
+        <div class="bk-row"><span>Custo Produto</span><span class="rv">${moeda(custoProduto)}</span></div>
+        <div class="bk-row"><span>Frete</span><span class="rv">${moeda(freteV)}</span></div>
+        <div class="bk-row"><span>Impostos</span><span class="rv">${moeda(valImp)}</span></div>
+        <div class="bk-row"><span>Comissão</span><span class="rv">${moeda(valCom)}</span></div>
+        <div class="bk-row"><span>Lucro</span><span class="rv">${moeda(lucro)}</span></div>
+        <div class="bk-row bk-total"><span>Preço Final</span><span class="rv">${moeda(preco)}</span></div>
+    `;
+
+    // 🔥 GARANTE QUE O CANVAS EXISTE
+    $('chartArea').innerHTML = '<canvas id="grafico"></canvas>';
+
+    if (chartInstance) chartInstance.destroy();
+
+    chartInstance = new Chart($('grafico'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Custo', 'Frete', 'Impostos', 'Comissão', 'Lucro'],
+            datasets: [{
+                data: [custoProduto, freteV, valImp, valCom, Math.max(lucro, 0)],
+                backgroundColor: ['#0ea5e9', '#6366f1', '#ef4444', '#f97316', '#10b981']
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        }
+    });
+}
+ else
         function atualizarHeaderProduto() { const n = $('nomeProduto').value.trim(); $('mpProductHeader').textContent = n ? '📦 ' + n.toUpperCase() : '📦 Digite o nome do produto no Simulador'; $('mpProductHeader').className = n ? 'mp-product-header' : 'mp-product-header empty-header' }
         
         window.calcularMarketplaces = () => { 
