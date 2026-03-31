@@ -1093,26 +1093,30 @@
             if (!lastCalc) return toast('Precisa calcular a operação antes de salvar.');
 
             await addDoc(collection(db, 'historico'), {
-                uid: currentUser.uid,
-                usuarioEmail: currentUser.email,
-                produtoNome: $('nomeProduto').value.trim() || 'Desconhecido',
-                data: new Date().toLocaleString('pt-BR'),
-                observacao: $('observacao').value || '',
-                
-                custoCompra: v('custo'),
-                cambio: v('cambio'),
-                freteCompra: v('freteCompra'),
+    uid: currentUser.uid,
+    usuarioEmail: currentUser.email,
+    produtoNome: $('nomeProduto').value.trim() || 'Desconhecido',
+    data: new Date().toLocaleString('pt-BR'),
+    observacao: $('observacao').value || '',
 
-                custoTotal: lastCalc.custoTotal,
-                preco: lastCalc.preco,
-                lucro: lastCalc.lucro,
-                margemReal: lastCalc.margemReal,
-                
-                infoMercadoSalva: mercadoMediaAtual > 0 ? true : false,
-                mercadoMediaHist: mercadoMediaAtual,
+    custoCompra: v('custo'),
+    cambio: v('cambio'),
+    freteCompra: v('freteCompra'),
 
-                createdAt: serverTimestamp()
-            });
+    // ✅ NOVOS CAMPOS
+    custoProduto: lastCalc.custoProduto,
+    freteCompraPct: v('freteCompra'),
+
+    custoTotal: lastCalc.custoTotal,
+    preco: lastCalc.preco,
+    lucro: lastCalc.lucro,
+    margemReal: lastCalc.margemReal,
+
+    precoManualUsado: lastCalc.precoManual > 0, // ✅ IMPORTANTE
+
+    createdAt: serverTimestamp()
+});
+
 
             await renderHistorico();
             toast('💾 Simulação consolidada direto no Banco de Dados!');
@@ -1132,7 +1136,14 @@
                     <td>${i + 1}</td>
                     <td><b>${h.produtoNome}</b><br><small style="color:var(--muted)">Obs: ${h.observacao || 'Nenhuma'}</small></td>
                     <td>${h.data}</td>
-                    <td>$ ${h.custoCompra} (Câmbio ${h.cambio})</td>
+                    <td>
+    $ ${h.custoCompra} (Câmbio ${h.cambio})<br>
+    <small style="color:var(--muted)">
+        Frete Compra: ${h.freteCompraPct || 0}%<br>
+        Custo Final Produto: ${moeda(h.custoProduto || 0)}
+    </small>
+</td>
+
                     <td>Preço: <b>${moeda(h.preco)}</b><br><small style="color:var(--muted)">` + (h.infoMercadoSalva ? `Média de mercado na época: ${moeda(h.mercadoMediaHist)}` : `(Pesquisa n/ realizada)`) + `</small></td>
                     <td style="color:${h.lucro >= 0 ? 'var(--success)' : 'var(--danger)'}"><b>Lucro: ${moeda(h.lucro)}</b><br><small>M. Real: ${pct(h.margemReal)}</small></td>
                     <td style="white-space:nowrap">
