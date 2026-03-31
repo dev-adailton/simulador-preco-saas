@@ -751,7 +751,7 @@
         function syncComissoesMarketplaces() { ['ml1', 'mag1', 'ml2', 'mag2'].forEach(id => { const el = $('mktCom_' + id); if (el) el.value = v('comissao') }) } 
         window.calcularAll = () => { syncMargensMarketplaces(); syncComissoesMarketplaces(); calcular(); window.calcularMarketplaces(); atualizarHeaderProduto() };
         
-        // CALCULO DO SIMULADOR PRINCIPAL + ALERTA COMPETITIVIDADE
+                // CALCULO DO SIMULADOR PRINCIPAL + ALERTA COMPETITIVIDADE
         function calcular() { 
             const custo = v('custo'), cambio = v('cambio') || 1, freteCPct = v('freteCompra'), outrasRS = v('outrasReais'), outrasPct = v('outrasPct'), margem = v('margem'), impostos = v('impostos'), freteV = v('freteVenda'), comissao = v('comissao'), precoManual = v('precoManual'); 
             if (custo === 0 && freteV === 0 && outrasRS === 0 && precoManual === 0) { resetUI(); return } 
@@ -780,20 +780,7 @@
                     aBadge.className = 'market-alert-badge bad';
                     aBadge.style.display = 'block';
                 }
-            } else {
-                aBadge.style.display = 'none';
-            }
-
-            $('sCusto').textContent = moeda(custoTotal); $('sMargem').textContent = moeda(valMargem); $('sLucro').textContent = moeda(lucro); $('sLucro').className = 'svalue ' + (lucro >= 0 ? 'green' : 'red'); $('sMargemReal').textContent = pct(margemReal); 
-            
-            $('bkContent').innerHTML = `<div class="bk-row"><span>Custo Produto (Cheio)</span><span class="rv">${moeda(custoProduto)}</span></div><div class="bk-row"><span>Frete Expedição</span><span class="rv">${moeda(freteV)}</span></div><div class="bk-row"><span>Impostos Totais</span><span class="rv">${moeda(valImp)}</span></div><div class="bk-row"><span>Comissão Plataforma</span><span class="rv">${moeda(valCom)}</span></div><div class="bk-row"><span>Lucro Liquido Projetado</span><span class="rv">${moeda(lucro)}</span></div><div class="bk-row bk-total"><span>Preço Final para Venda</span><span class="rv">${moeda(preco)}</span></div>`; 
-            
-            if (chartInstance) chartInstance.destroy(); 
-            chartInstance = new Chart($('grafico'), { type: 'doughnut', data: { labels: ['Custo', 'Frete', 'Impostos', 'Comissão', 'Lucro'], datasets: [{ data: [custoProduto, freteV, valImp, valCom, Math.max(lucro, 0)], backgroundColor: ['#0ea5e9', '#6366f1', '#ef4444', '#f97316', '#10b981'], borderWidth: 2, borderColor: '#fff' }] }, options: { responsive: true, plugins: { legend: { position: 'bottom' } } } }); 
-            
-            $('custoGrid').innerHTML = `<div class="custo-item" style="background:#eff8ff">Custo Convertido<br><b>${moeda(custoBRL)}</b></div><div class="custo-item" style="background:#eef2ff">Imposto/Frete Compra<br><b>${moeda(freteCompraVal)}</b></div><div class="custo-item" style="background:#f5f3ff">Despesas Extras R$<br><b>${moeda(outrasRS)}</b></div><div class="custo-item" style="background:#fffbeb">Despesas Extras %<br><b>${moeda(outrasVal)}</b></div><div class="custo-item custo-item-total">CUSTO FINAL DO PRODUTO<br><b>${moeda(custoProduto)}</b></div>` 
-        }
-
+            } else
         function atualizarHeaderProduto() { const n = $('nomeProduto').value.trim(); $('mpProductHeader').textContent = n ? '📦 ' + n.toUpperCase() : '📦 Digite o nome do produto no Simulador'; $('mpProductHeader').className = n ? 'mp-product-header' : 'mp-product-header empty-header' }
         
         window.calcularMarketplaces = () => { 
