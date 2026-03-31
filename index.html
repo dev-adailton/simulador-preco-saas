@@ -752,64 +752,99 @@
         window.calcularAll = () => { syncMargensMarketplaces(); syncComissoesMarketplaces(); calcular(); window.calcularMarketplaces(); atualizarHeaderProduto() };
         
                 // CALCULO DO SIMULADOR PRINCIPAL + ALERTA COMPETITIVIDADE
-        function calcular() { 
-    const custo = v('custo'),
-        cambio = v('cambio') || 1,
-        freteCPct = v('freteCompra'),
-        outrasRS = v('outrasReais'),
-        outrasPct = v('outrasPct'),
-        margem = v('margem'),
-        impostos = v('impostos'),
-        freteV = v('freteVenda'),
-        comissao = v('comissao'),
-        precoManual = v('precoManual'); 
+        function calcular() {
+    const custo = v('custo');
+    const cambio = v('cambio') || 1;
+    const freteCPct = v('freteCompra');
+    const outrasRS = v('outrasReais');
+    const outrasPct = v('outrasPct');
+    const margem = v('margem');
+    const impostos = v('impostos');
+    const freteV = v('freteVenda');
+    const comissao = v('comissao');
+    const precoManual = v('precoManual');
 
-    if (custo === 0 && freteV === 0 && outrasRS === 0 && precoManual === 0) { 
-        resetUI(); 
-        return; 
-    } 
+    if (custo === 0 && freteV === 0 && outrasRS === 0 && precoManual === 0) {
+        resetUI();
+        return;
+    }
 
-    const custoBRL = custo * cambio,
-        freteCompraVal = custoBRL * (freteCPct / 100),
-        base = custoBRL + freteCompraVal + outrasRS,
-        outrasVal = base * (outrasPct / 100),
-        custoProduto = base + outrasVal,
-        custoTotal = custoProduto + freteV,
-        taxa = (margem + impostos + comissao) / 100; 
+    const custoBRL = custo * cambio;
+    const freteCompraVal = custoBRL * (freteCPct / 100);
+    const base = custoBRL + freteCompraVal + outrasRS;
+    const outrasVal = base * (outrasPct / 100);
+    const custoProduto = base + outrasVal;
+    const custoTotal = custoProduto + freteV;
+    const taxa = (margem + impostos + comissao) / 100;
 
-    const precoCalc = taxa < 1 ? (custoProduto + freteV) / (1 - taxa) : 0,
-        preco = precoManual > 0 ? precoManual : precoCalc,
-        valImp = preco * (impostos / 100),
-        valCom = preco * (comissao / 100),
-        lucro = preco - custoTotal - valImp - valCom,
-        valMargem = preco * (margem / 100),
-        margemReal = preco > 0 ? (lucro / preco) * 100 : 0; 
+    const precoCalc = taxa < 1 ? (custoProduto + freteV) / (1 - taxa) : 0;
+    const preco = precoManual > 0 ? precoManual : precoCalc;
+    const valImp = preco * (impostos / 100);
+    const valCom = preco * (comissao / 100);
+    const lucro = preco - custoTotal - valImp - valCom;
+    const valMargem = preco * (margem / 100);
+    const margemReal = preco > 0 ? (lucro / preco) * 100 : 0;
 
-    lastCalc = { custoBRL, freteCompraVal, outrasRS, outrasVal, custoProduto, custoTotal, freteV, valImp, valCom, valMargem, preco, precoManual, lucro, margemReal }; 
+    lastCalc = {
+        custoBRL,
+        freteCompraVal,
+        outrasRS,
+        outrasVal,
+        custoProduto,
+        custoTotal,
+        freteV,
+        valImp,
+        valCom,
+        valMargem,
+        preco,
+        precoManual,
+        lucro,
+        margemReal
+    };
 
-    $('precoVenda').textContent = moeda(preco); 
-    $('heroSub').textContent = 'Custo final: ' + moeda(custoTotal); 
-    $('manualBadge').style.display = precoManual > 0 ? 'inline-block' : 'none'; 
+    $('precoVenda').textContent = moeda(preco);
+    $('heroSub').textContent = 'Custo final: ' + moeda(custoTotal) + ' · Margem alvo: ' + pct(margem);
+    $('manualBadge').style.display = precoManual > 0 ? 'inline-block' : 'none';
 
-    $('sCusto').textContent = moeda(custoTotal); 
-    $('sMargem').textContent = moeda(valMargem); 
-    $('sLucro').textContent = moeda(lucro); 
-    $('sLucro').className = 'svalue ' + (lucro >= 0 ? 'green' : 'red'); 
-    $('sMargemReal').textContent = pct(margemReal); 
+    const aBadge = $('badgeMercado');
+    if (mercadoMediaAtual > 0) {
+        if (preco <= mercadoIdealAtual) {
+            aBadge.innerText = `🔥 PREÇO IMBATÍVEL (Abaixo do Ideal de ${moeda(mercadoIdealAtual)})`;
+            aBadge.className = 'market-alert-badge good';
+            aBadge.style.display = 'block';
+        } else if (preco <= mercadoMediaAtual) {
+            aBadge.innerText = `✅ COMPETITIVO (Abaixo da média de ${moeda(mercadoMediaAtual)})`;
+            aBadge.className = 'market-alert-badge good';
+            aBadge.style.display = 'block';
+        } else {
+            aBadge.innerText = `🚨 CUIDADO: preço acima da média de mercado`;
+            aBadge.className = 'market-alert-badge bad';
+            aBadge.style.display = 'block';
+        }
+    } else {
+        aBadge.style.display = 'none';
+    }
+
+    $('sCusto').textContent = moeda(custoTotal);
+    $('sMargem').textContent = moeda(valMargem);
+    $('sLucro').textContent = moeda(lucro);
+    $('sLucro').className = 'svalue ' + (lucro >= 0 ? 'green' : 'red');
+    $('sMargemReal').textContent = pct(margemReal);
 
     $('bkContent').innerHTML = `
-        <div class="bk-row"><span>Custo Produto</span><span class="rv">${moeda(custoProduto)}</span></div>
-        <div class="bk-row"><span>Frete</span><span class="rv">${moeda(freteV)}</span></div>
-        <div class="bk-row"><span>Impostos</span><span class="rv">${moeda(valImp)}</span></div>
-        <div class="bk-row"><span>Comissão</span><span class="rv">${moeda(valCom)}</span></div>
-        <div class="bk-row"><span>Lucro</span><span class="rv">${moeda(lucro)}</span></div>
-        <div class="bk-row bk-total"><span>Preço Final</span><span class="rv">${moeda(preco)}</span></div>
+        <div class="bk-row"><span>Custo Produto (Cheio)</span><span class="rv">${moeda(custoProduto)}</span></div>
+        <div class="bk-row"><span>Frete Expedição</span><span class="rv">${moeda(freteV)}</span></div>
+        <div class="bk-row"><span>Impostos Totais</span><span class="rv">${moeda(valImp)}</span></div>
+        <div class="bk-row"><span>Comissão Plataforma</span><span class="rv">${moeda(valCom)}</span></div>
+        <div class="bk-row"><span>Lucro Líquido Projetado</span><span class="rv">${moeda(lucro)}</span></div>
+        <div class="bk-row bk-total"><span>Preço Final para Venda</span><span class="rv">${moeda(preco)}</span></div>
     `;
 
-    // 🔥 GARANTE QUE O CANVAS EXISTE
     $('chartArea').innerHTML = '<canvas id="grafico"></canvas>';
 
-    if (chartInstance) chartInstance.destroy();
+    if (chartInstance) {
+        chartInstance.destroy();
+    }
 
     chartInstance = new Chart($('grafico'), {
         type: 'doughnut',
@@ -817,7 +852,9 @@
             labels: ['Custo', 'Frete', 'Impostos', 'Comissão', 'Lucro'],
             datasets: [{
                 data: [custoProduto, freteV, valImp, valCom, Math.max(lucro, 0)],
-                backgroundColor: ['#0ea5e9', '#6366f1', '#ef4444', '#f97316', '#10b981']
+                backgroundColor: ['#0ea5e9', '#6366f1', '#ef4444', '#f97316', '#10b981'],
+                borderWidth: 2,
+                borderColor: '#fff'
             }]
         },
         options: {
@@ -827,8 +864,16 @@
             }
         }
     });
+
+    $('custoGrid').innerHTML = `
+        <div class="custo-item" style="background:#eff8ff">Custo Convertido<br><b>${moeda(custoBRL)}</b></div>
+        <div class="custo-item" style="background:#eef2ff">Imposto/Frete Compra<br><b>${moeda(freteCompraVal)}</b></div>
+        <div class="custo-item" style="background:#f5f3ff">Despesas Extras R$<br><b>${moeda(outrasRS)}</b></div>
+        <div class="custo-item" style="background:#fffbeb">Despesas Extras %<br><b>${moeda(outrasVal)}</b></div>
+        <div class="custo-item custo-item-total">CUSTO FINAL DO PRODUTO<br><b>${moeda(custoProduto)}</b></div>
+    `;
 }
- else
+
         function atualizarHeaderProduto() { const n = $('nomeProduto').value.trim(); $('mpProductHeader').textContent = n ? '📦 ' + n.toUpperCase() : '📦 Digite o nome do produto no Simulador'; $('mpProductHeader').className = n ? 'mp-product-header' : 'mp-product-header empty-header' }
         
         window.calcularMarketplaces = () => { 
@@ -1130,7 +1175,28 @@
         window.copiarResultado = () => { if (!lastCalc) return toast('Sem cálculos para extrair'); const txt = `Resumo da Precificação | ${$('nomeProduto').value || 'Projeto'}\nPreço de Venda: ${moeda(lastCalc.preco)}\nCusto Embutido: ${moeda(lastCalc.custoTotal)}\nLucro Limpo: ${moeda(lastCalc.lucro)}\nMargem: ${pct(lastCalc.margemReal)}`; navigator.clipboard.writeText(txt).then(() => toast('✨ Copiado pro Clipboard!')) };
         window.exportarPDF = () => { if (!lastCalc) return toast('Precisa simular antes do PDF'); html2pdf().set({ margin: 10, filename: 'relatorio_precificacao_pro.pdf', image: { type: 'jpeg', quality: .98 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } }).from($('pdf-area')).save(); toast('📑 Emitindo seu documento Oficial...') };
 
-        function resetUI() { $('precoVenda').textContent = 'R$ —'; $('heroSub').textContent = 'Preencha os campos ao lado'; $('manualBadge').style.display = 'none'; $('badgeMercado').style.display = 'none'; $('sCusto').textContent = 'R$ —'; $('sMargem').textContent = 'R$ —'; $('sLucro').textContent = 'R$ —'; $('sMargemReal').textContent = '— %'; $('bkContent').innerHTML = '<div class="empty">Aguardando dados</div>'; $('chartArea').innerHTML = '<div class="empty">O gráfico surgirá após simular</div>'; $('custoGrid').innerHTML = '<div class="empty" style="grid-column:1/-1">Nenhum custo listado</div>'; $('rankingList').innerHTML = '<div class="empty">Aguardando cálculo</div>'; if (chartInstance) { chartInstance.destroy(); chartInstance = null } lastCalc = null }
+        function resetUI() {
+    $('precoVenda').textContent = 'R$ —';
+    $('heroSub').textContent = 'Preencha os campos ao lado';
+    $('manualBadge').style.display = 'none';
+    $('badgeMercado').style.display = 'none';
+    $('sCusto').textContent = 'R$ —';
+    $('sMargem').textContent = 'R$ —';
+    $('sLucro').textContent = 'R$ —';
+    $('sMargemReal').textContent = '— %';
+    $('bkContent').innerHTML = '<div class="empty">Aguardando dados</div>';
+    $('chartArea').innerHTML = '<div class="empty">O gráfico surgirá após simular</div>';
+    $('custoGrid').innerHTML = '<div class="empty" style="grid-column:1/-1">Nenhum custo listado</div>';
+    $('rankingList').innerHTML = '<div class="empty">Aguardando cálculo</div>';
+
+    if (chartInstance) {
+        chartInstance.destroy();
+        chartInstance = null;
+    }
+
+    lastCalc = null;
+}
+
 
         window.limpar = () => { ['custo', 'freteVenda', 'outrasReais', 'outrasPct', 'precoManual', 'observacao'].forEach(id => $(id).value = ''); $('nomeProduto').value = ''; $('cambio').value = '1'; $('freteCompra').value = '28'; $('margem').value = '20'; $('impostos').value = '2'; $('comissao').value = '18'; syncMargensMarketplaces(); syncComissoesMarketplaces(); resetUI(); mercadoMediaAtual = 0; atualizarHeaderProduto(); lojasSelecionadas = []; window.atualizarLabelFiltro(); toast('Tudo Limpo 👌') };
 
