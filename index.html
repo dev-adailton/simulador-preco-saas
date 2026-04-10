@@ -8,201 +8,1188 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0 }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
         :root {
-            --primary: #16325c; --primary2: #1f4d8f; --accent: #0ea5e9;
-            --success: #10b981; --danger: #ef4444; --warning: #f59e0b;
-            --purple: #8b5cf6; --bg: #eef3f8; --card: #fff;
-            --text: #1e293b; --muted: #64748b; --border: #dbe4ee;
-            --input: #f8fafc; --shadow: 0 8px 30px rgba(15, 23, 42, .08);
+            --primary: #16325c;
+            --primary2: #1f4d8f;
+            --accent: #0ea5e9;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --purple: #8b5cf6;
+            --bg: #eef3f8;
+            --card: #fff;
+            --text: #1e293b;
+            --muted: #64748b;
+            --border: #dbe4ee;
+            --input: #f8fafc;
+            --shadow: 0 8px 30px rgba(15, 23, 42, .08);
             --radius: 16px
         }
 
-        body { font-family: Segoe UI, Arial, sans-serif; background: var(--bg); padding: 24px; color: var(--text); min-height: 100vh }
-        .container { max-width: 1400px; margin: auto }
-        .topbar { text-align: center; margin-bottom: 28px }
-        .vtag { display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #7c3aed, #4f46e5); color: #fff; font-size: 11px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; padding: 6px 16px; border-radius: 999px; margin-bottom: 10px }
-        .topbar h1 { font-size: 28px; color: var(--primary); font-weight: 900; margin-bottom: 4px }
-        .topbar p { color: var(--muted); font-size: 13px }
-        .user-info { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 12px; flex-wrap: wrap }
-        .user-name { font-weight: 800; color: #fff; background: var(--primary); padding: 6px 12px; border-radius: 999px; font-size: 13px }
-        .user-logout { cursor: pointer; color: var(--danger); font-weight: 700; font-size: 13px; padding: 6px 12px; border-radius: 999px; background: #fee2e2; border: 1px solid #fecaca }
-        
-        .tabs { display: flex; gap: 8px; justify-content: center; margin-bottom: 22px; flex-wrap: wrap }
-        .tab { padding: 9px 22px; border-radius: 999px; border: 1.5px solid var(--border); background: #fff; font-size: 13px; font-weight: 700; cursor: pointer; color: var(--muted); transition: .2s; }
-        .tab.active { background: var(--primary); color: #fff; border-color: var(--primary) }
-        .tab:hover:not(.active) { background: var(--bg) }
-        .panel { display: none }
-        .panel.active { display: block }
+        body {
+            font-family: Segoe UI, Arial, sans-serif;
+            background: var(--bg);
+            padding: 24px;
+            color: var(--text);
+            min-height: 100vh
+        }
 
-        .card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border); overflow: hidden; margin-bottom: 20px }
-        .card-header { background: linear-gradient(135deg, var(--primary), var(--primary2)); padding: 16px 22px; display: flex; align-items: center; gap: 12px }
-        .card-header .icon { width: 36px; height: 36px; background: rgba(255, 255, 255, .15); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0 }
-        .card-header h2 { color: #fff; font-size: 15px; font-weight: 800 }
-        .card-header p { color: rgba(255, 255, 255, .65); font-size: 12px; margin-top: 2px }
-        .card-body { padding: 22px }
+        .container {
+            max-width: 1400px;
+            margin: auto
+        }
 
-        .sim-layout { display: grid; grid-template-columns: 1.1fr .9fr; gap: 20px; align-items: start }
-        .stitle { font-size: 11px; color: var(--muted); font-weight: 800; letter-spacing: 1px; text-transform: uppercase; margin: 14px 0 12px; display: flex; align-items: center; gap: 8px }
-        .stitle:after { content: ''; flex: 1; height: 1px; background: var(--border) }
-        .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 4px }
-        .grid4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 12px }
-        
-        .field { display: flex; flex-direction: column; gap: 5px }
-        .field label { font-size: 12px; color: var(--muted); font-weight: 700 }
-        .iw { position: relative }
-        .iw input, .iw select { width: 100%; height: 42px; border: 1.5px solid var(--border); border-radius: 10px; background: var(--input); padding: 0 12px; font-size: 14px; font-weight: 700; color: var(--text); outline: none }
-        .iw .pre { position: absolute; top: 50%; left: 11px; transform: translateY(-50%); font-size: 12px; font-weight: 700; color: var(--muted) }
-        .iw .suf { position: absolute; top: 50%; right: 11px; transform: translateY(-50%); font-size: 12px; font-weight: 700; color: var(--muted) }
-        .iw.wp input { padding-left: 28px }
-        .iw.ws input { padding-right: 28px }
+        .topbar {
+            text-align: center;
+            margin-bottom: 28px
+        }
 
-        .actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap }
-        .btn { flex: 1; min-width: 110px; border: none; border-radius: 10px; padding: 11px 12px; font-size: 13px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: .2s; }
-        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
-        .btn-primary { background: var(--primary); color: #fff }
-        .btn-secondary { background: #f1f5f9; color: var(--text); border: 1.5px solid var(--border) }
-        .btn-success { background: var(--success); color: #fff }
-        .btn-accent { background: var(--accent); color: #fff }
+        .vtag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, #7c3aed, #4f46e5);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            padding: 6px 16px;
+            border-radius: 999px;
+            margin-bottom: 10px
+        }
 
-        .results { display: flex; flex-direction: column; gap: 14px }
-        .hero { background: linear-gradient(135deg, var(--primary), var(--primary2)); border-radius: var(--radius); padding: 24px 20px; text-align: center; color: #fff; position: relative; }
-        .hero small { display: block; text-transform: uppercase; letter-spacing: 1.2px; font-size: 11px; font-weight: 800; color: rgba(255, 255, 255, .65); margin-bottom: 6px }
-        .hero .price { font-size: 38px; font-weight: 900; line-height: 1; margin-bottom: 4px }
-        .hero .sub { font-size: 12px; color: rgba(255, 255, 255, .6) }
-        
-        .manual-badge { background: #f59e0b; color: #fff; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 999px; margin-top: 8px; display: inline-block }
-        .market-alert-badge { font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 999px; margin-top: 12px; display: inline-block; background: rgba(0,0,0,0.2); }
-        .market-alert-badge.good { background: #10b981; color: #fff; }
-        .market-alert-badge.bad { background: #ef4444; color: #fff; }
+        .topbar h1 {
+            font-size: 28px;
+            color: var(--primary);
+            font-weight: 900;
+            margin-bottom: 4px
+        }
 
-        .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px }
-        .stat { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px; position:relative; overflow:hidden;}
-        .stat .slabel { font-size: 11px; color: var(--muted); font-weight: 700; margin-bottom: 4px }
-        .stat .svalue { font-size: 18px; font-weight: 900 }
-        
-        .blue { color: var(--accent) }
-        .green { color: var(--success) }
-        .red { color: var(--danger) }
-        .orange { color: var(--warning) }
-        .purple { color: var(--purple) }
+        .topbar p {
+            color: var(--muted);
+            font-size: 13px
+        }
 
-        .breakdown, .chart-card, .custo-bloco, .ranking-bloco { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden }
-        .bk-header, .chart-card .ch { padding: 13px 18px; border-bottom: 1px solid var(--border); font-weight: 800; color: var(--primary); font-size: 13px; background: #fbfdff }
-        .bk-row { display: flex; justify-content: space-between; align-items: center; padding: 11px 18px; border-bottom: 1px solid var(--border); font-size: 13px }
-        .bk-row:last-child { border: none }
-        .bk-total { background: #eff8ff }
-        .bk-row .rv { font-weight: 800 }
-        .chart-card .cb { padding: 18px; display: flex; justify-content: center }
-        .empty { padding: 28px 20px; text-align: center; color: var(--muted); font-size: 14px }
-        
-        .custo-bloco { padding: 18px; margin-bottom: 20px }
-        .custo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px }
-        .custo-item { border-radius: 10px; padding: 12px 10px; text-align: center }
-        .custo-item-total { background: linear-gradient(135deg, var(--primary), var(--primary2)); color: #fff; grid-column: 1/-1 }
+        .user-info {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 12px;
+            flex-wrap: wrap
+        }
 
-        .ranking-list { display: flex; flex-direction: column; gap: 8px }
-        .ranking-row { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border) }
-        .pos { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 13px; flex-shrink: 0 }
-        .pos-1 { background: #f59e0b; color: #fff }
-        .pos-2 { background: #94a3b8; color: #fff }
-        .pos-3 { background: #b45309; color: #fff }
-        .pos-rest { background: #f1f5f9; color: var(--muted) }
+        .user-name {
+            font-weight: 800;
+            color: #fff;
+            background: var(--primary);
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 13px
+        }
 
-        .mp-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px }
-        .mp-col { background: var(--card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden }
-        .mp-head { padding: 13px; text-align: center; font-weight: 800; font-size: 14px }
-        .mp-body { padding: 14px; display: flex; flex-direction: column; gap: 10px }
-        .mp-input-group { display: flex; flex-direction: column; gap: 5px }
-        .mp-input-group label { font-size: 11px; color: var(--muted); font-weight: 700; text-align: center }
-        .mp-input-group input { width: 100%; height: 36px; border: 1px solid var(--border); border-radius: 8px; text-align: center; font-weight: 700; background: var(--input) }
-        .mp-result-box, .mp-compare-box { background: #f8fafc; border-radius: 8px; padding: 10px; text-align: center; border: 1px solid #f1f5f9 }
-        .mp-alerta { border-radius: 10px; padding: 10px 14px; font-size: 12px; font-weight: 700; text-align: center; display: none }
-        .alerta-prejuizo { background: #fee2e2; color: #991b1b; border: 1.5px solid #fca5a5; display: block }
-        .alerta-atencao { background: #fef9c3; color: #854d0e; border: 1.5px solid #fde047; display: block }
-        .alerta-ok { background: #d1fae5; color: #065f46; border: 1.5px solid #6ee7b7; display: block }
-        
-        .badge-lucro { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 999px; margin-top: 4px }
-        .badge-ok { background: #d1fae5; color: #065f46 }
-        .badge-bad { background: #fee2e2; color: #991b1b }
+        .user-logout {
+            cursor: pointer;
+            color: var(--danger);
+            font-weight: 700;
+            font-size: 13px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: #fee2e2;
+            border: 1px solid #fecaca
+        }
 
-        .mp-product-header { background: linear-gradient(135deg, var(--success), #059669); color: #fff; font-weight: 900; font-size: 17px; text-align: center; padding: 14px; border-radius: 12px; margin-bottom: 16px }
-        .mp-product-header.empty-header { background: #f1f5f9; color: var(--muted); font-size: 13px; font-weight: 600 }
+        .tabs {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 22px;
+            flex-wrap: wrap
+        }
 
-        .hist-table { width: 100%; border-collapse: collapse; font-size: 13px }
-        .hist-table th { background: var(--primary); color: #fff; padding: 10px 14px; text-align: left; font-weight: 700; font-size: 12px }
-        .hist-table td { padding: 10px 14px; border-bottom: 1px solid var(--border) }
+        .tab {
+            padding: 9px 22px;
+            border-radius: 999px;
+            border: 1.5px solid var(--border);
+            background: #fff;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            color: var(--muted);
+            transition: .2s;
+        }
 
-        .toast { position: fixed; bottom: 24px; right: 24px; background: var(--primary); color: #fff; padding: 12px 20px; border-radius: 12px; font-size: 13px; font-weight: 700; transform: translateY(60px); opacity: 0; transition: .35s; z-index: 9999 }
-        .toast.show { transform: translateY(0); opacity: 1 }
+        .tab.active {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary)
+        }
 
-        .modal-wrap { position: fixed; inset: 0; background: rgba(0, 0, 0, .5); display: none; align-items: center; justify-content: center; padding: 20px; z-index: 9998 }
-        .modal { background: #fff; border-radius: 16px; box-shadow: var(--shadow); max-width: 560px; width: 100%; overflow: hidden; border: 1px solid var(--border) }
-        .modal-head { background: linear-gradient(135deg, var(--primary), var(--primary2)); padding: 16px 22px; color: #fff; font-weight: 800; display: flex; justify-content: space-between; align-items: center }
-        .modal-close { background: none; border: none; color: #fff; font-size: 24px; cursor: pointer }
-        .modal-body { padding: 20px }
-        .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px }
+        .tab:hover:not(.active) {
+            background: var(--bg)
+        }
 
-        .toolbar { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; margin-bottom: 12px }
-        
-        .simple-list { display: flex; flex-direction: column; gap: 10px }
-        .simple-item { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 14px; display: flex; justify-content: space-between; align-items: center; gap: 10px }
-        .simple-item.inativo { opacity: .65; background: #fff7ed }
-        .simple-title { font-weight: 800 }
-        .simple-sub { font-size: 12px; color: var(--muted) }
-        .simple-actions { display: flex; gap: 8px; flex-wrap: wrap }
+        .panel {
+            display: none
+        }
 
-        .product-picker { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: end }
-        .dropdown-wrap { position: relative }
-        .dropdown-box { position: absolute; left: 0; right: 0; top: 46px; background: #fff; border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); display: none; max-height: 240px; overflow: auto; z-index: 50 }
-        .dropdown-box.show { display: block }
-        .dropdown-item { padding: 10px 12px; border-bottom: 1px solid #f1f5f9; cursor: pointer; font-size: 13px; font-weight: 700 }
-        .dropdown-item:last-child { border-bottom: none }
-        .dropdown-item:hover { background: #f1f5f9; }
+        .panel.active {
+            display: block
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            overflow: hidden;
+            margin-bottom: 20px
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--primary), var(--primary2));
+            padding: 16px 22px;
+            display: flex;
+            align-items: center;
+            gap: 12px
+        }
+
+        .card-header .icon {
+            width: 36px;
+            height: 36px;
+            background: rgba(255, 255, 255, .15);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0
+        }
+
+        .card-header h2 {
+            color: #fff;
+            font-size: 15px;
+            font-weight: 800
+        }
+
+        .card-header p {
+            color: rgba(255, 255, 255, .65);
+            font-size: 12px;
+            margin-top: 2px
+        }
+
+        .card-body {
+            padding: 22px
+        }
+
+        .sim-layout {
+            display: grid;
+            grid-template-columns: 1.1fr .9fr;
+            gap: 20px;
+            align-items: start
+        }
+
+        .stitle {
+            font-size: 11px;
+            color: var(--muted);
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin: 14px 0 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px
+        }
+
+        .stitle:after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border)
+        }
+
+        .grid2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 4px
+        }
+
+        .grid4 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin-bottom: 12px
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 5px
+        }
+
+        .field label {
+            font-size: 12px;
+            color: var(--muted);
+            font-weight: 700
+        }
+
+        .iw {
+            position: relative
+        }
+
+        .iw input,
+        .iw select {
+            width: 100%;
+            height: 42px;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            background: var(--input);
+            padding: 0 12px;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text);
+            outline: none
+        }
+
+        .iw .pre {
+            position: absolute;
+            top: 50%;
+            left: 11px;
+            transform: translateY(-50%);
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--muted)
+        }
+
+        .iw .suf {
+            position: absolute;
+            top: 50%;
+            right: 11px;
+            transform: translateY(-50%);
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--muted)
+        }
+
+        .iw.wp input {
+            padding-left: 28px
+        }
+
+        .iw.ws input {
+            padding-right: 28px
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+            flex-wrap: wrap
+        }
+
+        .btn {
+            flex: 1;
+            min-width: 110px;
+            border: none;
+            border-radius: 10px;
+            padding: 11px 12px;
+            font-size: 13px;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: .2s;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #fff
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: var(--text);
+            border: 1.5px solid var(--border)
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: #fff
+        }
+
+        .btn-accent {
+            background: var(--accent);
+            color: #fff
+        }
+
+        .results {
+            display: flex;
+            flex-direction: column;
+            gap: 14px
+        }
+
+        .hero {
+            background: linear-gradient(135deg, var(--primary), var(--primary2));
+            border-radius: var(--radius);
+            padding: 24px 20px;
+            text-align: center;
+            color: #fff;
+            position: relative;
+        }
+
+        .hero small {
+            display: block;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            font-size: 11px;
+            font-weight: 800;
+            color: rgba(255, 255, 255, .65);
+            margin-bottom: 6px
+        }
+
+        .hero .price {
+            font-size: 38px;
+            font-weight: 900;
+            line-height: 1;
+            margin-bottom: 4px
+        }
+
+        .hero .sub {
+            font-size: 12px;
+            color: rgba(255, 255, 255, .6)
+        }
+
+        .manual-badge {
+            background: #f59e0b;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 999px;
+            margin-top: 8px;
+            display: inline-block
+        }
+
+        .market-alert-badge {
+            font-size: 11px;
+            font-weight: 800;
+            padding: 6px 12px;
+            border-radius: 999px;
+            margin-top: 12px;
+            display: inline-block;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .market-alert-badge.good {
+            background: #10b981;
+            color: #fff;
+        }
+
+        .market-alert-badge.bad {
+            background: #ef4444;
+            color: #fff;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px
+        }
+
+        .stat {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat .slabel {
+            font-size: 11px;
+            color: var(--muted);
+            font-weight: 700;
+            margin-bottom: 4px
+        }
+
+        .stat .svalue {
+            font-size: 18px;
+            font-weight: 900
+        }
+
+        .blue {
+            color: var(--accent)
+        }
+
+        .green {
+            color: var(--success)
+        }
+
+        .red {
+            color: var(--danger)
+        }
+
+        .orange {
+            color: var(--warning)
+        }
+
+        .purple {
+            color: var(--purple)
+        }
+
+        .breakdown,
+        .chart-card,
+        .custo-bloco,
+        .ranking-bloco {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden
+        }
+
+        .bk-header,
+        .chart-card .ch {
+            padding: 13px 18px;
+            border-bottom: 1px solid var(--border);
+            font-weight: 800;
+            color: var(--primary);
+            font-size: 13px;
+            background: #fbfdff
+        }
+
+        .bk-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 11px 18px;
+            border-bottom: 1px solid var(--border);
+            font-size: 13px
+        }
+
+        .bk-row:last-child {
+            border: none
+        }
+
+        .bk-total {
+            background: #eff8ff
+        }
+
+        .bk-row .rv {
+            font-weight: 800
+        }
+
+        .chart-card .cb {
+            padding: 18px;
+            display: flex;
+            justify-content: center
+        }
+
+        .empty {
+            padding: 28px 20px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 14px
+        }
+
+        .custo-bloco {
+            padding: 18px;
+            margin-bottom: 20px
+        }
+
+        .custo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px
+        }
+
+        .custo-item {
+            border-radius: 10px;
+            padding: 12px 10px;
+            text-align: center
+        }
+
+        .custo-item-total {
+            background: linear-gradient(135deg, var(--primary), var(--primary2));
+            color: #fff;
+            grid-column: 1/-1
+        }
+
+        .ranking-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px
+        }
+
+        .ranking-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            border-radius: 10px;
+            border: 1px solid var(--border)
+        }
+
+        .pos {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 13px;
+            flex-shrink: 0
+        }
+
+        .pos-1 {
+            background: #f59e0b;
+            color: #fff
+        }
+
+        .pos-2 {
+            background: #94a3b8;
+            color: #fff
+        }
+
+        .pos-3 {
+            background: #b45309;
+            color: #fff
+        }
+
+        .pos-rest {
+            background: #f1f5f9;
+            color: var(--muted)
+        }
+
+        .mp-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px
+        }
+
+        .mp-col {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden
+        }
+
+        .mp-head {
+            padding: 13px;
+            text-align: center;
+            font-weight: 800;
+            font-size: 14px
+        }
+
+        .mp-body {
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px
+        }
+
+        .mp-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px
+        }
+
+        .mp-input-group label {
+            font-size: 11px;
+            color: var(--muted);
+            font-weight: 700;
+            text-align: center
+        }
+
+        .mp-input-group input {
+            width: 100%;
+            height: 36px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 700;
+            background: var(--input)
+        }
+
+        .mp-result-box,
+        .mp-compare-box {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #f1f5f9
+        }
+
+        .mp-alerta {
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 12px;
+            font-weight: 700;
+            text-align: center;
+            display: none
+        }
+
+        .alerta-prejuizo {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1.5px solid #fca5a5;
+            display: block
+        }
+
+        .alerta-atencao {
+            background: #fef9c3;
+            color: #854d0e;
+            border: 1.5px solid #fde047;
+            display: block
+        }
+
+        .alerta-ok {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1.5px solid #6ee7b7;
+            display: block
+        }
+
+        .badge-lucro {
+            display: inline-block;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 999px;
+            margin-top: 4px
+        }
+
+        .badge-ok {
+            background: #d1fae5;
+            color: #065f46
+        }
+
+        .badge-bad {
+            background: #fee2e2;
+            color: #991b1b
+        }
+
+        .mp-product-header {
+            background: linear-gradient(135deg, var(--success), #059669);
+            color: #fff;
+            font-weight: 900;
+            font-size: 17px;
+            text-align: center;
+            padding: 14px;
+            border-radius: 12px;
+            margin-bottom: 16px
+        }
+
+        .mp-product-header.empty-header {
+            background: #f1f5f9;
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 600
+        }
+
+        .hist-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px
+        }
+
+        .hist-table th {
+            background: var(--primary);
+            color: #fff;
+            padding: 10px 14px;
+            text-align: left;
+            font-weight: 700;
+            font-size: 12px
+        }
+
+        .hist-table td {
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border)
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--primary);
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 700;
+            transform: translateY(60px);
+            opacity: 0;
+            transition: .35s;
+            z-index: 9999
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1
+        }
+
+        .modal-wrap {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 9998
+        }
+
+        .modal {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            max-width: 560px;
+            width: 100%;
+            overflow: hidden;
+            border: 1px solid var(--border)
+        }
+
+        .modal-head {
+            background: linear-gradient(135deg, var(--primary), var(--primary2));
+            padding: 16px 22px;
+            color: #fff;
+            font-weight: 800;
+            display: flex;
+            justify-content: space-between;
+            align-items: center
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 24px;
+            cursor: pointer
+        }
+
+        .modal-body {
+            padding: 20px
+        }
+
+        .modal-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+            margin-bottom: 12px
+        }
+
+        .simple-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px
+        }
+
+        .simple-item {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px
+        }
+
+        .simple-item.inativo {
+            opacity: .65;
+            background: #fff7ed
+        }
+
+        .simple-title {
+            font-weight: 800
+        }
+
+        .simple-sub {
+            font-size: 12px;
+            color: var(--muted)
+        }
+
+        .simple-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap
+        }
+
+        .product-picker {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 10px;
+            align-items: end
+        }
+
+        .dropdown-wrap {
+            position: relative
+        }
+
+        .dropdown-box {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 46px;
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            display: none;
+            max-height: 240px;
+            overflow: auto;
+            z-index: 50
+        }
+
+        .dropdown-box.show {
+            display: block
+        }
+
+        .dropdown-item {
+            padding: 10px 12px;
+            border-bottom: 1px solid #f1f5f9;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 700
+        }
+
+        .dropdown-item:last-child {
+            border-bottom: none
+        }
+
+        .dropdown-item:hover {
+            background: #f1f5f9;
+        }
 
         /* AUTH SCREEN */
-        #auth-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: #0f172a; padding: 20px }
-        .auth-card { background: #1e293b; padding: 40px; border-radius: 16px; box-shadow: 0 20px 40px rgba(0, 0, 0, .35); width: 100%; max-width: 380px; text-align: center; color: #fff }
-        .auth-card h1 { margin-bottom: 25px; font-weight: 800; font-size: 24px }
-        .auth-input { width: 100%; padding: 14px; margin-bottom: 12px; border: 1px solid #334155; border-radius: 8px; font-size: 14px; background: #0f172a; color: #fff; outline: none }
-        .auth-btn { width: 100%; padding: 12px; background: var(--success); color: #fff; border: none; border-radius: 8px; font-weight: bold; font-size: 15px; cursor: pointer; margin-top: 5px }
-        .auth-btn-outline { background: #3b82f6; margin-top: 10px }
-        .auth-error, .auth-ok { font-size: 13px; min-height: 18px }
-        .auth-error { color: #f87171; margin-bottom: 15px; font-weight: bold }
-        .auth-ok { color: #4ade80; margin-top: 12px; font-weight: bold }
+        #auth-screen {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: #0f172a;
+            padding: 20px
+        }
+
+        .auth-card {
+            background: #1e293b;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, .35);
+            width: 100%;
+            max-width: 380px;
+            text-align: center;
+            color: #fff
+        }
+
+        .auth-card h1 {
+            margin-bottom: 25px;
+            font-weight: 800;
+            font-size: 24px
+        }
+
+        .auth-input {
+            width: 100%;
+            padding: 14px;
+            margin-bottom: 12px;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            font-size: 14px;
+            background: #0f172a;
+            color: #fff;
+            outline: none
+        }
+
+        .auth-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--success);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 15px;
+            cursor: pointer;
+            margin-top: 5px
+        }
+
+        .auth-btn-outline {
+            background: #3b82f6;
+            margin-top: 10px
+        }
+
+        .auth-error,
+        .auth-ok {
+            font-size: 13px;
+            min-height: 18px
+        }
+
+        .auth-error {
+            color: #f87171;
+            margin-bottom: 15px;
+            font-weight: bold
+        }
+
+        .auth-ok {
+            color: #4ade80;
+            margin-top: 12px;
+            font-weight: bold
+        }
 
         /* API BOX */
-        .api-box { background: #151d34; border: 1px solid #30456f; border-radius: 16px; padding: 18px; color: #dce7ff }
-        .api-box input, .api-box select { background: #0f172a; border-color: #27446d; color: #fff }
-        .help { background: #1d2d4a; border: 1px solid #145b86; border-radius: 12px; padding: 16px; margin-bottom: 16px; color: #dbeafe }
-        .section-chip { display: inline-flex; background: #10182d; color: #fff; padding: 7px 14px; border-radius: 999px; font-size: 12px; font-weight: 700; border: 1px solid #22365d; margin-bottom: 16px }
+        .api-box {
+            background: #151d34;
+            border: 1px solid #30456f;
+            border-radius: 16px;
+            padding: 18px;
+            color: #dce7ff
+        }
+
+        .api-box input,
+        .api-box select {
+            background: #0f172a;
+            border-color: #27446d;
+            color: #fff
+        }
+
+        .help {
+            background: #1d2d4a;
+            border: 1px solid #145b86;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            color: #dbeafe
+        }
+
+        .section-chip {
+            display: inline-flex;
+            background: #10182d;
+            color: #fff;
+            padding: 7px 14px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            border: 1px solid #22365d;
+            margin-bottom: 16px
+        }
 
         /* MERCADO TAB */
-        .mercado-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin-top: 16px;}
-        .mercado-card { border: 1px solid var(--border); border-radius: 12px; padding: 16px; background: #fff; display: flex; flex-direction: column; gap: 10px; transition: 0.2s; position: relative; overflow: hidden; }
-        .mercado-card:hover { box-shadow: var(--shadow); transform: translateY(-3px); border-color: var(--accent); }
-        .mercado-img { width: 100%; height: 160px; object-fit: contain; border-radius: 8px; margin-bottom: 4px; background: #fff; }
-        .mercado-title { font-size: 13px; font-weight: 700; color: var(--text); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4; }
-        .mercado-store { font-size: 11px; color: var(--muted); font-weight: 800; background: var(--bg); padding: 4px 8px; border-radius: 6px; display: inline-block; align-self: flex-start; border: 1px solid var(--border); }
-        .mercado-price { font-size: 20px; font-weight: 900; color: var(--primary); margin-top: auto; }
-        .mercado-actions { display: flex; gap: 8px; margin-top: 8px; }
-        .mercado-actions button { flex: 1; padding: 8px; font-size: 12px; text-align: center; }
+        .mercado-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .mercado-card {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transition: 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mercado-card:hover {
+            box-shadow: var(--shadow);
+            transform: translateY(-3px);
+            border-color: var(--accent);
+        }
+
+        .mercado-img {
+            width: 100%;
+            height: 160px;
+            object-fit: contain;
+            border-radius: 8px;
+            margin-bottom: 4px;
+            background: #fff;
+        }
+
+        .mercado-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.4;
+        }
+
+        .mercado-store {
+            font-size: 11px;
+            color: var(--muted);
+            font-weight: 800;
+            background: var(--bg);
+            padding: 4px 8px;
+            border-radius: 6px;
+            display: inline-block;
+            align-self: flex-start;
+            border: 1px solid var(--border);
+        }
+
+        .mercado-price {
+            font-size: 20px;
+            font-weight: 900;
+            color: var(--primary);
+            margin-top: auto;
+        }
+
+        .mercado-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .mercado-actions button {
+            flex: 1;
+            padding: 8px;
+            font-size: 12px;
+            text-align: center;
+        }
 
         /* DROPDOWN CHECKBOX (PRO) DA ABA DE MERCADO */
-        .dropdown-check { position: relative; width: 100%; }
-        .dropdown-check-btn { height: 42px; border: 1.5px solid var(--border); border-radius: 10px; background: var(--input); display: flex; align-items: center; justify-content: space-between; padding: 0 12px; font-weight: 700; cursor: pointer; color: var(--text); font-size: 14px; }
-        .dropdown-check-menu { position: absolute; top: 48px; left: 0; right: 0; background: #fff; border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); max-height: 260px; overflow: auto; display: none; z-index: 100; }
-        .dropdown-check-menu.show { display: block; }
-        .dropdown-check-item { display: flex; align-items: center; gap: 8px; padding: 10px 14px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f1f5f9; font-weight: 600; color: var(--text); margin: 0; }
-        .dropdown-check-item:hover { background: #f8fafc; }
-        .dropdown-check-item input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; }
-        .dropdown-check-actions { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid var(--border); background: #f8fafc; position: sticky; top: 0; z-index: 2; }
-        .dropdown-check-actions button { font-size: 11px; font-weight: 800; border: none; background: var(--primary); color: #fff; padding: 6px 10px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s;}
-        .dropdown-check-actions button.btn-clear { background: #e2e8f0; color: var(--text); }
-        .dropdown-check-actions button:hover { opacity: 0.8; }
+        .dropdown-check {
+            position: relative;
+            width: 100%;
+        }
 
-        @media(max-width:1100px) { .sim-layout { grid-template-columns: 1fr } }
-        @media(max-width:700px) { .mp-grid, .grid2, .grid4, .stats, .modal-grid, .product-picker, .mercado-grid { grid-template-columns: 1fr } }
+        .dropdown-check-btn {
+            height: 42px;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            background: var(--input);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 12px;
+            font-weight: 700;
+            cursor: pointer;
+            color: var(--text);
+            font-size: 14px;
+        }
+
+        .dropdown-check-menu {
+            position: absolute;
+            top: 48px;
+            left: 0;
+            right: 0;
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            max-height: 260px;
+            overflow: auto;
+            display: none;
+            z-index: 100;
+        }
+
+        .dropdown-check-menu.show {
+            display: block;
+        }
+
+        .dropdown-check-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            font-size: 13px;
+            cursor: pointer;
+            border-bottom: 1px solid #f1f5f9;
+            font-weight: 600;
+            color: var(--text);
+            margin: 0;
+        }
+
+        .dropdown-check-item:hover {
+            background: #f8fafc;
+        }
+
+        .dropdown-check-item input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        .dropdown-check-actions {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid var(--border);
+            background: #f8fafc;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+        }
+
+        .dropdown-check-actions button {
+            font-size: 11px;
+            font-weight: 800;
+            border: none;
+            background: var(--primary);
+            color: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+
+        .dropdown-check-actions button.btn-clear {
+            background: #e2e8f0;
+            color: var(--text);
+        }
+
+        .dropdown-check-actions button:hover {
+            opacity: 0.8;
+        }
+
+        @media(max-width:1100px) {
+            .sim-layout {
+                grid-template-columns: 1fr
+            }
+        }
+
+        @media(max-width:700px) {
+
+            .mp-grid,
+            .grid2,
+            .grid4,
+            .stats,
+            .modal-grid,
+            .product-picker,
+            .mercado-grid {
+                grid-template-columns: 1fr
+            }
+        }
     </style>
 </head>
 
@@ -228,7 +1215,7 @@
             <p>✅ Simulador · Marketplaces · Inteligência de Mercado</p>
             <div class="user-info" id="userInfo"></div>
         </div>
-        
+
         <!-- TABS -->
         <div class="tabs">
             <div class="tab active" onclick="window.mudarAba('simulador',this)">🧮 Simulador</div>
@@ -237,7 +1224,8 @@
             <div class="tab" onclick="window.mudarAba('historico',this)">📋 Histórico</div>
             <div class="tab" onclick="window.mudarAba('produtos',this)">📦 Produtos</div>
             <div class="tab" onclick="window.mudarAba('api',this)">⚙️ Configurar API Key</div>
-            <div class="tab" id="tabAdmin" onclick="window.mudarAba('admin',this)" style="display:none; background: #1e293b; color: #fff; border-color: #0f172a;">👑 Admin</div>
+            <div class="tab" id="tabAdmin" onclick="window.mudarAba('admin',this)"
+                style="display:none; background: #1e293b; color: #fff; border-color: #0f172a;">👑 Admin</div>
         </div>
 
         <!-- SIMULADOR -->
@@ -257,50 +1245,65 @@
                             <div class="product-picker">
                                 <div class="dropdown-wrap">
                                     <div class="iw">
-                                        <input type="text" id="nomeProduto" placeholder="Pesquisar e selecionar produto..." autocomplete="off" oninput="window.filtrarDropdownProdutos()" onfocus="window.abrirDropdownProdutos()">
+                                        <input type="text" id="nomeProduto"
+                                            placeholder="Pesquisar e selecionar produto..." autocomplete="off"
+                                            oninput="window.filtrarDropdownProdutos()"
+                                            onfocus="window.abrirDropdownProdutos()">
                                     </div>
                                     <div class="dropdown-box" id="dropdownProdutos"></div>
                                 </div>
-                                <button class="btn btn-secondary" style="min-width:140px" onclick="window.abrirModalProduto()">➕ Cadastrar</button>
+                                <button class="btn btn-secondary" style="min-width:140px"
+                                    onclick="window.abrirModalProduto()">➕ Cadastrar</button>
                             </div>
                         </div>
                         <div class="stitle">🛒 Custos de Compra</div>
                         <div class="grid2">
                             <div class="field"><label>Custo de Compra</label>
-                                <div class="iw wp"><span class="pre">$</span><input type="number" id="custo" min="0" step="0.01" oninput="window.calcularAll()"></div>
+                                <div class="iw wp"><span class="pre">$</span><input type="number" id="custo" min="0"
+                                        step="0.01" oninput="window.calcularAll()"></div>
                             </div>
                             <div class="field"><label>Taxa de Câmbio</label>
-                                <div class="iw wp"><span class="pre">×</span><input type="number" id="cambio" value="1" min="0" step="0.0001" oninput="window.calcularAll()"></div>
+                                <div class="iw wp"><span class="pre">×</span><input type="number" id="cambio" value="1"
+                                        min="0" step="0.0001" oninput="window.calcularAll()"></div>
                             </div>
                             <div class="field"><label>Frete de Compra (%)</label>
-                                <div class="iw ws"><input type="number" id="freteCompra" value="28" min="0" step="0.01" oninput="window.calcularAll()"><span class="suf">%</span></div>
+                                <div class="iw ws"><input type="number" id="freteCompra" value="28" min="0" step="0.01"
+                                        oninput="window.calcularAll()"><span class="suf">%</span></div>
                             </div>
                             <div class="field"><label>Outras Despesas (R$)</label>
-                                <div class="iw wp"><span class="pre">R$</span><input type="number" id="outrasReais" min="0" step="0.01" oninput="window.calcularAll()"></div>
+                                <div class="iw wp"><span class="pre">R$</span><input type="number" id="outrasReais"
+                                        min="0" step="0.01" oninput="window.calcularAll()"></div>
                             </div>
                             <div class="field"><label>Outras Despesas (%)</label>
-                                <div class="iw ws"><input type="number" id="outrasPct" min="0" step="0.01" oninput="window.calcularAll()"><span class="suf">%</span></div>
+                                <div class="iw ws"><input type="number" id="outrasPct" min="0" step="0.01"
+                                        oninput="window.calcularAll()"><span class="suf">%</span></div>
                             </div>
                         </div>
                         <div class="stitle">💰 Venda & Tributação</div>
                         <div class="grid2">
                             <div class="field"><label>Margem de Venda (%)</label>
-                                <div class="iw ws"><input type="number" id="margem" value="20" min="0" max="99" step="0.01" oninput="window.calcularAll()"><span class="suf">%</span></div>
+                                <div class="iw ws"><input type="number" id="margem" value="20" min="0" max="99"
+                                        step="0.01" oninput="window.calcularAll()"><span class="suf">%</span></div>
                             </div>
                             <div class="field"><label>Impostos (%)</label>
-                                <div class="iw ws"><input type="number" id="impostos" value="2" min="0" step="0.01" oninput="window.calcularAll()"><span class="suf">%</span></div>
+                                <div class="iw ws"><input type="number" id="impostos" value="2" min="0" step="0.01"
+                                        oninput="window.calcularAll()"><span class="suf">%</span></div>
                             </div>
                             <div class="field"><label>Frete de Venda (R$)</label>
-                                <div class="iw wp"><span class="pre">R$</span><input type="number" id="freteVenda" min="0" step="0.01" oninput="window.calcularAll()"></div>
+                                <div class="iw wp"><span class="pre">R$</span><input type="number" id="freteVenda"
+                                        min="0" step="0.01" oninput="window.calcularAll()"></div>
                             </div>
                             <div class="field"><label>Comissão Plataforma (%)</label>
-                                <div class="iw ws"><input type="number" id="comissao" value="18" min="0" step="0.01" oninput="window.calcularAll()"><span class="suf">%</span></div>
+                                <div class="iw ws"><input type="number" id="comissao" value="18" min="0" step="0.01"
+                                        oninput="window.calcularAll()"><span class="suf">%</span></div>
                             </div>
                             <div class="field"><label>Preço de Venda (Manual)</label>
-                                <div class="iw wp"><span class="pre">R$</span><input type="number" id="precoManual" min="0" step="0.01" oninput="window.calcularAll()"></div>
+                                <div class="iw wp"><span class="pre">R$</span><input type="number" id="precoManual"
+                                        min="0" step="0.01" oninput="window.calcularAll()"></div>
                             </div>
                             <div class="field"><label>Observação Interna</label>
-                                <div class="iw"><input type="text" id="observacao" placeholder="Ex: promocional, fornecedor X..."></div>
+                                <div class="iw"><input type="text" id="observacao"
+                                        placeholder="Ex: promocional, fornecedor X..."></div>
                             </div>
                         </div>
                         <div class="actions">
@@ -312,7 +1315,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- ÁREA DE COMPOSIÇÃO / RESULTADOS -->
                 <div class="results" id="pdf-area">
                     <div class="hero">
@@ -323,14 +1326,26 @@
                         <!-- ALERTA DE COMPETITIVIDADE DE MERCADO -->
                         <div id="badgeMercado" class="market-alert-badge" style="display:none"></div>
                     </div>
-                    
+
                     <div class="stats">
-                        <div class="stat"><div class="slabel">Custo Final (Produto)</div><div class="svalue blue" id="sCusto">R$ —</div></div>
-                        <div class="stat"><div class="slabel">Lucro Líquido</div><div class="svalue green" id="sLucro">R$ —</div></div>
-                        <div class="stat"><div class="slabel">Valor da Margem</div><div class="svalue purple" id="sMargem">R$ —</div></div>
-                        <div class="stat"><div class="slabel">Margem Real (%)</div><div class="svalue orange" id="sMargemReal">— %</div></div>
+                        <div class="stat">
+                            <div class="slabel">Custo Final (Produto)</div>
+                            <div class="svalue blue" id="sCusto">R$ —</div>
+                        </div>
+                        <div class="stat">
+                            <div class="slabel">Lucro Líquido</div>
+                            <div class="svalue green" id="sLucro">R$ —</div>
+                        </div>
+                        <div class="stat">
+                            <div class="slabel">Valor da Margem</div>
+                            <div class="svalue purple" id="sMargem">R$ —</div>
+                        </div>
+                        <div class="stat">
+                            <div class="slabel">Margem Real (%)</div>
+                            <div class="svalue orange" id="sMargemReal">— %</div>
+                        </div>
                     </div>
-                    
+
                     <div class="chart-card">
                         <div class="ch">🥧 Composição do Preço</div>
                         <div class="cb" id="chartArea">
@@ -358,7 +1373,8 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <div id="mpProductHeader" class="mp-product-header empty-header">📦 Digite o nome do produto no Simulador</div>
+                    <div id="mpProductHeader" class="mp-product-header empty-header">📦 Digite o nome do produto no
+                        Simulador</div>
                     <div class="custo-bloco">
                         <div class="stitle" style="margin-top:0">📊 Composição do Custo Final do Produto</div>
                         <div id="custoGrid" class="custo-grid">
@@ -393,31 +1409,43 @@
                     <div class="grid2">
                         <div class="field">
                             <label>Produto para pesquisa</label>
-                            <div class="iw"><input type="text" id="buscaProdutoMercado" placeholder="Ex: iPhone 13 Pro Max"></div>
+                            <div class="iw"><input type="text" id="buscaProdutoMercado"
+                                    placeholder="Ex: iPhone 13 Pro Max"></div>
                         </div>
                         <div class="field" style="justify-content:flex-end;">
-                            <button class="btn btn-primary" style="height:42px" onclick="window.buscarMercado()">🔎 Extrair Dados de Mercado</button>
+                            <button class="btn btn-primary" style="height:42px" onclick="window.buscarMercado()">🔎
+                                Extrair Dados de Mercado</button>
                         </div>
                     </div>
 
                     <!-- ESTATISTICAS DE MERCADO -->
                     <div id="mercadoStats" style="display:none; margin-top:24px;">
                         <div class="grid4" style="margin-bottom:20px">
-                            <div class="stat"><div class="slabel">🔻 Menor Preço</div><div class="svalue green" id="minPreco">R$ 0,00</div></div>
-                            <div class="stat"><div class="slabel">🎯 Preço Médio</div><div class="svalue blue" id="medPreco">R$ 0,00</div></div>
-                            <div class="stat"><div class="slabel">🔺 Maior Preço</div><div class="svalue red" id="maxPreco">R$ 0,00</div></div>
+                            <div class="stat">
+                                <div class="slabel">🔻 Menor Preço</div>
+                                <div class="svalue green" id="minPreco">R$ 0,00</div>
+                            </div>
+                            <div class="stat">
+                                <div class="slabel">🎯 Preço Médio</div>
+                                <div class="svalue blue" id="medPreco">R$ 0,00</div>
+                            </div>
+                            <div class="stat">
+                                <div class="slabel">🔺 Maior Preço</div>
+                                <div class="svalue red" id="maxPreco">R$ 0,00</div>
+                            </div>
                             <div class="stat" style="border-color:var(--success); background:#f0fdf4;">
                                 <div class="slabel" style="color:var(--success)">✨ PREÇO IDEAL SUGERIDO</div>
                                 <div class="svalue green" id="idealPreco">R$ 0,00</div>
                             </div>
                         </div>
-                        
+
                         <!-- GRAFICO DE BARRAS DO MERCADO -->
                         <div class="chart-card" style="margin-bottom:20px">
                             <div class="ch">📈 Distribuição de Preços (Concorrentes Base)</div>
-                            <div class="cb"><canvas id="graficoMercado" style="max-height:200px; width:100%"></canvas></div>
+                            <div class="cb"><canvas id="graficoMercado" style="max-height:200px; width:100%"></canvas>
+                            </div>
                         </div>
-                        
+
                         <!-- CONTROLES ADICIONAIS DE LISTA (FILTRO NOVO SUPERIOR E ORDENAÇÃO) -->
                         <div class="stitle">Filtros da Lista de Concorrentes</div>
                         <div class="grid2">
@@ -432,7 +1460,8 @@
                                     <div id="dropdownLojas" class="dropdown-check-menu">
                                         <div class="dropdown-check-actions">
                                             <button onclick="window.selecionarTodasLojas()">Selecionar todas</button>
-                                            <button class="btn-clear" onclick="window.limparSelecaoLojas()">Limpar</button>
+                                            <button class="btn-clear"
+                                                onclick="window.limparSelecaoLojas()">Limpar</button>
                                         </div>
                                         <div id="listaLojasCheckbox" style="display:flex; flex-direction:column;"></div>
                                     </div>
@@ -448,17 +1477,20 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <!-- BOTOES RAPIDOS -->
                         <div class="grid2" style="margin-top:10px">
-                            <button class="btn btn-secondary" onclick="window.usarPrecoNoSimulador('medio')">✅ Usar Preço Médio no Simulador</button>
-                            <button class="btn btn-success" onclick="window.usarPrecoNoSimulador('ideal')">✨ Usar Preço Ideal Sugerido no Simulador</button>
+                            <button class="btn btn-secondary" onclick="window.usarPrecoNoSimulador('medio')">✅ Usar
+                                Preço Médio no Simulador</button>
+                            <button class="btn btn-success" onclick="window.usarPrecoNoSimulador('ideal')">✨ Usar Preço
+                                Ideal Sugerido no Simulador</button>
                         </div>
                     </div>
-                    
+
                     <div class="stitle" style="margin-top:24px">🛒 Concorrentes Encontrados na Extração</div>
                     <div id="resultadoMercado" class="mercado-grid">
-                        <div class="empty" style="grid-column: 1/-1;">Digite um produto e busque para extrair a inteligência comercial.</div>
+                        <div class="empty" style="grid-column: 1/-1;">Digite um produto e busque para extrair a
+                            inteligência comercial.</div>
                     </div>
                 </div>
             </div>
@@ -475,7 +1507,15 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <div class="toolbar"><button class="btn btn-secondary" style="max-width:220px" onclick="window.limparHistoricoUsuario()">🗑️ Limpar Meu Histórico</button></div>
+                    <div class="toolbar">
+                        <input type="text" id="buscaHistorico" placeholder="🔎 Buscar produto..."
+                            style="height:42px; padding:0 12px; border-radius:10px; border:1.5px solid var(--border); font-weight:700;"
+                            oninput="window.filtrarHistorico()">
+
+                        <button class="btn btn-secondary" style="max-width:220px"
+                            onclick="window.limparHistoricoUsuario()">🗑️ Limpar Meu Histórico</button>
+                    </div>
+
                     <div id="histContent">
                         <div class="empty">Nenhuma simulação salva ainda.</div>
                     </div>
@@ -494,7 +1534,8 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <div class="toolbar"><button class="btn btn-secondary" style="max-width:220px" onclick="window.abrirModalProduto()">➕ Novo Produto</button></div>
+                    <div class="toolbar"><button class="btn btn-secondary" style="max-width:220px"
+                            onclick="window.abrirModalProduto()">➕ Novo Produto</button></div>
                     <div id="listaProdutos" class="simple-list"></div>
                 </div>
             </div>
@@ -504,9 +1545,11 @@
         <div class="panel" id="panel-api">
             <div class="section-chip">⚙️ Configurar API Key</div>
             <div class="api-box">
-                <div class="help">Esta aplicação usa a SerpApi para buscar dados reais do Google Shopping.<br>1. Crie conta grátis em serpapi.com<br>2. Cole sua API Key abaixo.</div>
+                <div class="help">Esta aplicação usa a SerpApi para buscar dados reais do Google Shopping.<br>1. Crie
+                    conta grátis em serpapi.com<br>2. Cole sua API Key abaixo.</div>
                 <div class="field"><label>🔑 SerpApi Key</label>
-                    <div class="iw"><input type="password" id="serpApiKey" placeholder="Cole sua chave aqui (Ex: a1b2c3...)"></div>
+                    <div class="iw"><input type="password" id="serpApiKey"
+                            placeholder="Cole sua chave aqui (Ex: a1b2c3...)"></div>
                 </div>
                 <div class="field" style="margin-top:14px"><label>🌐 Modo de busca proxy</label>
                     <div class="iw">
@@ -515,7 +1558,8 @@
                         </select>
                     </div>
                 </div>
-                <div class="actions"><button class="btn btn-accent" style="max-width:240px" onclick="window.salvarConfigApi()">💾 Salvar configurações</button></div>
+                <div class="actions"><button class="btn btn-accent" style="max-width:240px"
+                        onclick="window.salvarConfigApi()">💾 Salvar configurações</button></div>
             </div>
         </div>
 
@@ -538,7 +1582,8 @@
                             </div>
                         </div>
                         <div class="field" style="justify-content:flex-end;">
-                            <button class="btn btn-success" style="height:42px" onclick="window.addEmailAutorizado()">✅ Autorizar E-mail</button>
+                            <button class="btn btn-success" style="height:42px" onclick="window.addEmailAutorizado()">✅
+                                Autorizar E-mail</button>
                         </div>
                     </div>
                     <div class="stitle" style="margin-top:24px">📋 E-mails com acesso liberado</div>
@@ -555,17 +1600,20 @@
     <!-- MODAL DE PRODUTO -->
     <div class="modal-wrap" id="modalProdutoWrap">
         <div class="modal">
-            <div class="modal-head">📦 Produto <button class="modal-close" onclick="window.fecharModalProduto()">×</button></div>
+            <div class="modal-head">📦 Produto <button class="modal-close"
+                    onclick="window.fecharModalProduto()">×</button></div>
             <div class="modal-body">
                 <div class="modal-grid">
                     <div class="field"><label>Nome do Produto</label>
                         <div class="iw"><input type="text" id="produtoNomeCadastro"></div>
                     </div>
                     <div class="field"><label>Custo Base de Compra ($)</label>
-                        <div class="iw wp"><span class="pre">$</span><input type="number" id="produtoCustoCadastro" step="0.01"></div>
+                        <div class="iw wp"><span class="pre">$</span><input type="number" id="produtoCustoCadastro"
+                                step="0.01"></div>
                     </div>
                     <div class="field"><label>Câmbio Padrão</label>
-                        <div class="iw wp"><span class="pre">×</span><input type="number" id="produtoCambioCadastro" step="0.0001" value="1"></div>
+                        <div class="iw wp"><span class="pre">×</span><input type="number" id="produtoCambioCadastro"
+                                step="0.0001" value="1"></div>
                     </div>
                     <div class="field"><label>Status</label>
                         <div class="iw">
@@ -599,11 +1647,11 @@
             appId: "1:690862633206:web:18ff1cb90f38ceb845fcd7"
         };
 
-        const app = initializeApp(firebaseConfig), auth = getAuth(app), db = getFirestore(app); 
+        const app = initializeApp(firebaseConfig), auth = getAuth(app), db = getFirestore(app);
         window.auth = auth; window.db = db;
-        
-        const $ = id => document.getElementById(id), v = id => { const x = parseFloat($(id)?.value); return isNaN(x) ? 0 : x }, moeda = n => Number(n || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), pct = n => Number(n || 0).toFixed(2).replace('.', ',') + '%'; 
-        
+
+        const $ = id => document.getElementById(id), v = id => { const x = parseFloat($(id)?.value); return isNaN(x) ? 0 : x }, moeda = n => Number(n || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), pct = n => Number(n || 0).toFixed(2).replace('.', ',') + '%';
+
         let chartInstance = null, chartMercadoInstance = null;
         let lastCalc = null, currentUser = null, editProdutoId = null, produtosCache = [];
         let mercadoCache = [], mercadoMediaAtual = 0, mercadoIdealAtual = 0;
@@ -627,17 +1675,17 @@
         function traduzErro(c) { return ({ 'auth/invalid-email': 'Email inválido', 'auth/user-not-found': 'Usuário não encontrado', 'auth/wrong-password': 'Senha incorreta', 'auth/invalid-credential': 'Email ou senha inválidos', 'auth/email-already-in-use': 'Email já cadastrado', 'auth/weak-password': 'Senha muito fraca!' })[c] || c || 'Erro desconhecido' }
 
         // LOGIN
-        $('btnLogin').onclick = async () => { 
-            $('authError').innerText = ''; $('authOk').innerText = ''; 
-            try { 
-                $('btnLogin').innerText = 'Aguarde...'; 
-                await signInWithEmailAndPassword(auth, $('email').value.trim(), $('senha').value); 
-                $('authOk').innerText = '✅ Login realizado com sucesso!' 
-            } catch (e) { 
-                $('authError').innerText = traduzErro(e.code) 
-            } finally { 
-                $('btnLogin').innerText = 'Entrar' 
-            } 
+        $('btnLogin').onclick = async () => {
+            $('authError').innerText = ''; $('authOk').innerText = '';
+            try {
+                $('btnLogin').innerText = 'Aguarde...';
+                await signInWithEmailAndPassword(auth, $('email').value.trim(), $('senha').value);
+                $('authOk').innerText = '✅ Login realizado com sucesso!'
+            } catch (e) {
+                $('authError').innerText = traduzErro(e.code)
+            } finally {
+                $('btnLogin').innerText = 'Entrar'
+            }
         };
 
         // REGISTRO
@@ -659,10 +1707,10 @@
                 $('btnRegister').innerText = 'Criando conta...';
                 await createUserWithEmailAndPassword(auth, email, senha);
                 $('authOk').innerText = '✅ Conta criada com sucesso!'
-            } catch (e) { 
-                $('authError').innerText = traduzErro(e.code) 
-            } finally { 
-                $('btnRegister').innerText = 'Criar conta' 
+            } catch (e) {
+                $('authError').innerText = traduzErro(e.code)
+            } finally {
+                $('btnRegister').innerText = 'Criar conta'
             }
         };
 
@@ -692,54 +1740,54 @@
         function montarMarketplaces() { $('mpGrid1').innerHTML = montarCard('ml1', '🛒 Mercado Livre', '#ffe600', '#333', '0') + montarCard('mag1', '🛍️ Magalu', '#0086ff', '#fff', '5'); $('mpGrid2').innerHTML = montarCard('ml2', '🛒 Mercado Livre', '#ffe600', '#333', '0') + montarCard('mag2', '🛍️ Magalu', '#0086ff', '#fff', '5') }
 
         async function getProdutos() { if (!currentUser) return []; const snap = await getDocs(query(collection(db, 'produtos'), where('uid', '==', currentUser.uid))); const arr = []; snap.forEach(d => arr.push({ id: d.id, ...d.data() })); produtosCache = arr; return arr }
-        async function renderProdutos() { 
-            const produtos = await getProdutos(); 
+        async function renderProdutos() {
+            const produtos = await getProdutos();
             // ORDENA A-Z
-            produtos.sort((a,b) => a.nome.localeCompare(b.nome));
-            
+            produtos.sort((a, b) => a.nome.localeCompare(b.nome));
+
             $('listaProdutos').innerHTML = !produtos.length ? '<div class="empty">Nenhum produto cadastrado</div>' : produtos.map(p => `<div class="simple-item ${p.status === 'inativo' ? 'inativo' : ''}"><div><div class="simple-title">${p.nome}</div><div class="simple-sub">Custo: ${p.custo ? moeda(p.custo) : '—'} · Câmbio: ×${p.cambio || 1}</div></div><div class="simple-actions"><button class="btn btn-secondary" onclick="window.usarProduto('${p.id}')">Ir p/ Simulador</button><button class="btn btn-secondary" onclick="window.editarProduto('${p.id}')">Editar</button><button class="btn btn-secondary" onclick="window.inativarProduto('${p.id}')">${p.status === 'inativo' ? 'Ativar' : 'Inativar'}</button></div></div>`).join('');
         }
 
-        window.abrirModalProduto = (id = null) => { editProdutoId = id; $('modalProdutoWrap').style.display = 'flex'; if (id) { const p = produtosCache.find(x => x.id === id); $('produtoNomeCadastro').value = p?.nome || ''; $('produtoCustoCadastro').value = p?.custo || ''; $('produtoCambioCadastro').value = p?.cambio || 1; $('produtoStatusCadastro').value = p?.status || 'ativo' } else { $('produtoNomeCadastro').value = ''; $('produtoCustoCadastro').value = ''; $('produtoCambioCadastro').value = '1'; $('produtoStatusCadastro').value = 'ativo' } }; 
-        window.fecharModalProduto = () => $('modalProdutoWrap').style.display = 'none'; 
-        
-        window.salvarProdutoModal = async () => { 
-            const nome = $('produtoNomeCadastro').value.trim(); 
-            if (!nome) return toast('Informe o nome do produto'); 
-            const payload = { uid: currentUser.uid, nome, custo: v('produtoCustoCadastro'), cambio: v('produtoCambioCadastro') || 1, status: $('produtoStatusCadastro').value, updatedAt: new Date().toLocaleString('pt-BR') }; 
-            if (editProdutoId) await updateDoc(doc(db, 'produtos', editProdutoId), payload); 
-            else { payload.createdAt = serverTimestamp(); await addDoc(collection(db, 'produtos'), payload) } 
-            window.fecharModalProduto(); await renderProdutos(); window.preencherDropdownProdutos(); toast('Produto salvo com sucesso') 
-        }; 
-        
-        window.editarProduto = id => window.abrirModalProduto(id); 
-        window.inativarProduto = async id => { const p = produtosCache.find(x => x.id === id); await updateDoc(doc(db, 'produtos', id), { status: p.status === 'inativo' ? 'ativo' : 'inativo' }); await renderProdutos(); window.preencherDropdownProdutos(); toast('Status atualizado') }; 
-        
-        window.usarProduto = id => { 
-            const p = produtosCache.find(x => x.id === id); 
-            if (!p) return; 
-            $('nomeProduto').value = p.nome; $('custo').value = p.custo || ''; $('cambio').value = p.cambio || 1; 
+        window.abrirModalProduto = (id = null) => { editProdutoId = id; $('modalProdutoWrap').style.display = 'flex'; if (id) { const p = produtosCache.find(x => x.id === id); $('produtoNomeCadastro').value = p?.nome || ''; $('produtoCustoCadastro').value = p?.custo || ''; $('produtoCambioCadastro').value = p?.cambio || 1; $('produtoStatusCadastro').value = p?.status || 'ativo' } else { $('produtoNomeCadastro').value = ''; $('produtoCustoCadastro').value = ''; $('produtoCambioCadastro').value = '1'; $('produtoStatusCadastro').value = 'ativo' } };
+        window.fecharModalProduto = () => $('modalProdutoWrap').style.display = 'none';
+
+        window.salvarProdutoModal = async () => {
+            const nome = $('produtoNomeCadastro').value.trim();
+            if (!nome) return toast('Informe o nome do produto');
+            const payload = { uid: currentUser.uid, nome, custo: v('produtoCustoCadastro'), cambio: v('produtoCambioCadastro') || 1, status: $('produtoStatusCadastro').value, updatedAt: new Date().toLocaleString('pt-BR') };
+            if (editProdutoId) await updateDoc(doc(db, 'produtos', editProdutoId), payload);
+            else { payload.createdAt = serverTimestamp(); await addDoc(collection(db, 'produtos'), payload) }
+            window.fecharModalProduto(); await renderProdutos(); window.preencherDropdownProdutos(); toast('Produto salvo com sucesso')
+        };
+
+        window.editarProduto = id => window.abrirModalProduto(id);
+        window.inativarProduto = async id => { const p = produtosCache.find(x => x.id === id); await updateDoc(doc(db, 'produtos', id), { status: p.status === 'inativo' ? 'ativo' : 'inativo' }); await renderProdutos(); window.preencherDropdownProdutos(); toast('Status atualizado') };
+
+        window.usarProduto = id => {
+            const p = produtosCache.find(x => x.id === id);
+            if (!p) return;
+            $('nomeProduto').value = p.nome; $('custo').value = p.custo || ''; $('cambio').value = p.cambio || 1;
             mercadoMediaAtual = 0; mercadoIdealAtual = 0; // reseta inteligencia de mkt ao mudar produto
             window.fecharDropdownProdutos(); atualizarHeaderProduto(); window.calcularAll(); window.mudarAba('simulador'); toast('Produto carregado para simulação');
         };
 
         // DROPDOWN DE PRODUTOS ORDEM A-Z
-        window.preencherDropdownProdutos = (f = '') => { 
+        window.preencherDropdownProdutos = (f = '') => {
             const list = produtosCache
                 .filter(p => p.status !== 'inativo' && p.nome.toLowerCase().includes(f.toLowerCase()))
-                .sort((a,b) => a.nome.localeCompare(b.nome));
+                .sort((a, b) => a.nome.localeCompare(b.nome));
 
-            $('dropdownProdutos').innerHTML = '<div class="dropdown-item" onclick="window.abrirModalProduto();window.fecharDropdownProdutos()">➕ Cadastrar novo produto aqui</div>' + (list.length ? list.map(p => `<div class="dropdown-item" onclick="window.usarProduto('${p.id}')">${p.nome}</div>`).join('') : '<div class="dropdown-item">Nenhum produto encontrado. Digite para buscar ou cadastre.</div>') 
-        }; 
-        window.abrirDropdownProdutos = () => { $('dropdownProdutos').classList.add('show'); window.preencherDropdownProdutos($('nomeProduto').value) }; 
-        window.fecharDropdownProdutos = () => $('dropdownProdutos').classList.remove('show'); 
-        window.filtrarDropdownProdutos = () => { window.preencherDropdownProdutos($('nomeProduto').value); $('dropdownProdutos').classList.add('show'); atualizarHeaderProduto(); window.calcularAll() }; 
-        
+            $('dropdownProdutos').innerHTML = '<div class="dropdown-item" onclick="window.abrirModalProduto();window.fecharDropdownProdutos()">➕ Cadastrar novo produto aqui</div>' + (list.length ? list.map(p => `<div class="dropdown-item" onclick="window.usarProduto('${p.id}')">${p.nome}</div>`).join('') : '<div class="dropdown-item">Nenhum produto encontrado. Digite para buscar ou cadastre.</div>')
+        };
+        window.abrirDropdownProdutos = () => { $('dropdownProdutos').classList.add('show'); window.preencherDropdownProdutos($('nomeProduto').value) };
+        window.fecharDropdownProdutos = () => $('dropdownProdutos').classList.remove('show');
+        window.filtrarDropdownProdutos = () => { window.preencherDropdownProdutos($('nomeProduto').value); $('dropdownProdutos').classList.add('show'); atualizarHeaderProduto(); window.calcularAll() };
+
         // GESTÃO DE CLIQUE FORA DA TELA PARA OS 2 DROPDOWNS
-        document.addEventListener('click', e => { 
-            const w = document.querySelector('.dropdown-wrap'); 
-            if (w && !w.contains(e.target)) window.fecharDropdownProdutos(); 
-            
+        document.addEventListener('click', e => {
+            const w = document.querySelector('.dropdown-wrap');
+            if (w && !w.contains(e.target)) window.fecharDropdownProdutos();
+
             const boxLojas = document.getElementById('boxDropdownLojas');
             if (boxLojas && !boxLojas.contains(e.target)) {
                 const elMenu = $('dropdownLojas');
@@ -747,91 +1795,91 @@
             }
         });
 
-        function syncMargensMarketplaces() { ['ml1', 'mag1', 'ml2', 'mag2'].forEach(id => { const el = $('mktMargem_' + id); if (el) el.value = v('margem') }) } 
-        function syncComissoesMarketplaces() { ['ml1', 'mag1', 'ml2', 'mag2'].forEach(id => { const el = $('mktCom_' + id); if (el) el.value = v('comissao') }) } 
+        function syncMargensMarketplaces() { ['ml1', 'mag1', 'ml2', 'mag2'].forEach(id => { const el = $('mktMargem_' + id); if (el) el.value = v('margem') }) }
+        function syncComissoesMarketplaces() { ['ml1', 'mag1', 'ml2', 'mag2'].forEach(id => { const el = $('mktCom_' + id); if (el) el.value = v('comissao') }) }
         window.calcularAll = () => { syncMargensMarketplaces(); syncComissoesMarketplaces(); calcular(); window.calcularMarketplaces(); atualizarHeaderProduto() };
-        
-                // CALCULO DO SIMULADOR PRINCIPAL + ALERTA COMPETITIVIDADE
+
+        // CALCULO DO SIMULADOR PRINCIPAL + ALERTA COMPETITIVIDADE
         function calcular() {
-    const custo = v('custo');
-    const cambio = v('cambio') || 1;
-    const freteCPct = v('freteCompra');
-    const outrasRS = v('outrasReais');
-    const outrasPct = v('outrasPct');
-    const margem = v('margem');
-    const impostos = v('impostos');
-    const freteV = v('freteVenda');
-    const comissao = v('comissao');
-    const precoManual = v('precoManual');
+            const custo = v('custo');
+            const cambio = v('cambio') || 1;
+            const freteCPct = v('freteCompra');
+            const outrasRS = v('outrasReais');
+            const outrasPct = v('outrasPct');
+            const margem = v('margem');
+            const impostos = v('impostos');
+            const freteV = v('freteVenda');
+            const comissao = v('comissao');
+            const precoManual = v('precoManual');
 
-    if (custo === 0 && freteV === 0 && outrasRS === 0 && precoManual === 0) {
-        resetUI();
-        return;
-    }
+            if (custo === 0 && freteV === 0 && outrasRS === 0 && precoManual === 0) {
+                resetUI();
+                return;
+            }
 
-    const custoBRL = custo * cambio;
-    const freteCompraVal = custoBRL * (freteCPct / 100);
-    const base = custoBRL + freteCompraVal + outrasRS;
-    const outrasVal = base * (outrasPct / 100);
-    const custoProduto = base + outrasVal;
-    const custoTotal = custoProduto + freteV;
-    const taxa = (margem + impostos + comissao) / 100;
+            const custoBRL = custo * cambio;
+            const freteCompraVal = custoBRL * (freteCPct / 100);
+            const base = custoBRL + freteCompraVal + outrasRS;
+            const outrasVal = base * (outrasPct / 100);
+            const custoProduto = base + outrasVal;
+            const custoTotal = custoProduto + freteV;
+            const taxa = (margem + impostos + comissao) / 100;
 
-    const precoCalc = taxa < 1 ? (custoProduto + freteV) / (1 - taxa) : 0;
-    const preco = precoManual > 0 ? precoManual : precoCalc;
-    const valImp = preco * (impostos / 100);
-    const valCom = preco * (comissao / 100);
-    const lucro = preco - custoTotal - valImp - valCom;
-    const valMargem = preco * (margem / 100);
-    const margemReal = preco > 0 ? (lucro / preco) * 100 : 0;
+            const precoCalc = taxa < 1 ? (custoProduto + freteV) / (1 - taxa) : 0;
+            const preco = precoManual > 0 ? precoManual : precoCalc;
+            const valImp = preco * (impostos / 100);
+            const valCom = preco * (comissao / 100);
+            const lucro = preco - custoTotal - valImp - valCom;
+            const valMargem = preco * (margem / 100);
+            const margemReal = preco > 0 ? (lucro / preco) * 100 : 0;
 
-    lastCalc = {
-        custoBRL,
-        freteCompraVal,
-        outrasRS,
-        outrasVal,
-        custoProduto,
-        custoTotal,
-        freteV,
-        valImp,
-        valCom,
-        valMargem,
-        preco,
-        precoManual,
-        lucro,
-        margemReal
-    };
+            lastCalc = {
+                custoBRL,
+                freteCompraVal,
+                outrasRS,
+                outrasVal,
+                custoProduto,
+                custoTotal,
+                freteV,
+                valImp,
+                valCom,
+                valMargem,
+                preco,
+                precoManual,
+                lucro,
+                margemReal
+            };
 
-    $('precoVenda').textContent = moeda(preco);
-    $('heroSub').textContent = 'Custo final: ' + moeda(custoTotal) + ' · Margem alvo: ' + pct(margem);
-    $('manualBadge').style.display = precoManual > 0 ? 'inline-block' : 'none';
+            $('precoVenda').textContent = moeda(preco);
+            $('heroSub').textContent = 'Custo final: ' + moeda(custoTotal) + ' · Margem alvo: ' + pct(margem);
+            $('manualBadge').style.display = precoManual > 0 ? 'inline-block' : 'none';
 
-    const aBadge = $('badgeMercado');
-    if (mercadoMediaAtual > 0) {
-        if (preco <= mercadoIdealAtual) {
-            aBadge.innerText = `🔥 PREÇO IMBATÍVEL (Abaixo do Ideal de ${moeda(mercadoIdealAtual)})`;
-            aBadge.className = 'market-alert-badge good';
-            aBadge.style.display = 'block';
-        } else if (preco <= mercadoMediaAtual) {
-            aBadge.innerText = `✅ COMPETITIVO (Abaixo da média de ${moeda(mercadoMediaAtual)})`;
-            aBadge.className = 'market-alert-badge good';
-            aBadge.style.display = 'block';
-        } else {
-            aBadge.innerText = `🚨 CUIDADO: preço acima da média de mercado`;
-            aBadge.className = 'market-alert-badge bad';
-            aBadge.style.display = 'block';
-        }
-    } else {
-        aBadge.style.display = 'none';
-    }
+            const aBadge = $('badgeMercado');
+            if (mercadoMediaAtual > 0) {
+                if (preco <= mercadoIdealAtual) {
+                    aBadge.innerText = `🔥 PREÇO IMBATÍVEL (Abaixo do Ideal de ${moeda(mercadoIdealAtual)})`;
+                    aBadge.className = 'market-alert-badge good';
+                    aBadge.style.display = 'block';
+                } else if (preco <= mercadoMediaAtual) {
+                    aBadge.innerText = `✅ COMPETITIVO (Abaixo da média de ${moeda(mercadoMediaAtual)})`;
+                    aBadge.className = 'market-alert-badge good';
+                    aBadge.style.display = 'block';
+                } else {
+                    aBadge.innerText = `🚨 CUIDADO: preço acima da média de mercado`;
+                    aBadge.className = 'market-alert-badge bad';
+                    aBadge.style.display = 'block';
+                }
+            } else {
+                aBadge.style.display = 'none';
+            }
 
-    $('sCusto').textContent = moeda(custoTotal);
-    $('sMargem').textContent = moeda(valMargem);
-    $('sLucro').textContent = moeda(lucro);
-    $('sLucro').className = 'svalue ' + (lucro >= 0 ? 'green' : 'red');
-    $('sMargemReal').textContent = pct(margemReal);
+            $('sCusto').textContent = moeda(custoTotal);
+            $('sMargem').textContent = moeda(valMargem);
+            $('sLucro').textContent = moeda(lucro);
+            $('sLucro').className = 'svalue ' + (lucro >= 0 ? 'green' : 'red');
+            $('sMargemReal').textContent = pct(margemReal);
 
-    $('bkContent').innerHTML = `
+            $('bkContent').innerHTML = `
         <div class="bk-row"><span>Custo Produto (Cheio)</span><span class="rv">${moeda(custoProduto)}</span></div>
         <div class="bk-row"><span>Frete Expedição</span><span class="rv">${moeda(freteV)}</span></div>
         <div class="bk-row"><span>Impostos Totais</span><span class="rv">${moeda(valImp)}</span></div>
@@ -840,56 +1888,56 @@
         <div class="bk-row bk-total"><span>Preço Final para Venda</span><span class="rv">${moeda(preco)}</span></div>
     `;
 
-    $('chartArea').innerHTML = '<canvas id="grafico"></canvas>';
+            $('chartArea').innerHTML = '<canvas id="grafico"></canvas>';
 
-    if (chartInstance) {
-        chartInstance.destroy();
-    }
-
-    chartInstance = new Chart($('grafico'), {
-        type: 'doughnut',
-        data: {
-            labels: ['Custo', 'Frete', 'Impostos', 'Comissão', 'Lucro'],
-            datasets: [{
-                data: [custoProduto, freteV, valImp, valCom, Math.max(lucro, 0)],
-                backgroundColor: ['#0ea5e9', '#6366f1', '#ef4444', '#f97316', '#10b981'],
-                borderWidth: 2,
-                borderColor: '#fff'
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { position: 'bottom' }
+            if (chartInstance) {
+                chartInstance.destroy();
             }
-        }
-    });
 
-    $('custoGrid').innerHTML = `
+            chartInstance = new Chart($('grafico'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Custo', 'Frete', 'Impostos', 'Comissão', 'Lucro'],
+                    datasets: [{
+                        data: [custoProduto, freteV, valImp, valCom, Math.max(lucro, 0)],
+                        backgroundColor: ['#0ea5e9', '#6366f1', '#ef4444', '#f97316', '#10b981'],
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+
+            $('custoGrid').innerHTML = `
         <div class="custo-item" style="background:#eff8ff">Custo Convertido<br><b>${moeda(custoBRL)}</b></div>
         <div class="custo-item" style="background:#eef2ff">Imposto/Frete Compra<br><b>${moeda(freteCompraVal)}</b></div>
         <div class="custo-item" style="background:#f5f3ff">Despesas Extras R$<br><b>${moeda(outrasRS)}</b></div>
         <div class="custo-item" style="background:#fffbeb">Despesas Extras %<br><b>${moeda(outrasVal)}</b></div>
         <div class="custo-item custo-item-total">CUSTO FINAL DO PRODUTO<br><b>${moeda(custoProduto)}</b></div>
     `;
-}
+        }
 
         function atualizarHeaderProduto() { const n = $('nomeProduto').value.trim(); $('mpProductHeader').textContent = n ? '📦 ' + n.toUpperCase() : '📦 Digite o nome do produto no Simulador'; $('mpProductHeader').className = n ? 'mp-product-header' : 'mp-product-header empty-header' }
-        
-        window.calcularMarketplaces = () => { 
-            if (!lastCalc) return; 
-            const ids = ['ml1', 'mag1', 'ml2', 'mag2'], nomes = { ml1: 'ML Principal', mag1: 'Magalu Principal', ml2: 'ML Alternativo', mag2: 'Magalu Alternativa' }; 
-            const res = []; 
-            ids.forEach(id => { 
-                const margem = v('mktMargem_' + id), extra = v('mktExtra_' + id), comissao = v('mktCom_' + id), fixa = v('mktFixa_' + id), desc = v('mktDesc_' + id), impostos = v('impostos'), taxa = (margem + extra + impostos + comissao) / 100; 
-                if (taxa >= 1) return; 
-                const custoBase = lastCalc.custoProduto + lastCalc.freteV + fixa, precoOriginal = custoBase / (1 - taxa), precoFinal = precoOriginal * (1 - desc / 100), valImp = precoFinal * (impostos / 100), valCom = precoFinal * (comissao / 100), lucro = precoFinal - custoBase - valImp - valCom, mReal = precoFinal > 0 ? (lucro / precoFinal) * 100 : 0, lucroOrig = precoOriginal - custoBase - precoOriginal * (impostos / 100) - precoOriginal * (comissao / 100), mRealOrig = precoOriginal > 0 ? (lucroOrig / precoOriginal) * 100 : 0, perda = mRealOrig - mReal; 
-                $('mktOriginal_' + id).textContent = moeda(precoOriginal); $('mktPreco_' + id).textContent = moeda(precoFinal); $('mktPerda_' + id).textContent = desc > 0 ? '▼ ' + pct(perda) : 'Sem desconto'; $('mktLucro_' + id).textContent = moeda(lucro); $('mktMargemReal_' + id).textContent = pct(mReal); 
-                const badge = $('mktBadge_' + id); badge.textContent = lucro >= 0 ? '✅ Saudável' : '❌ NEGATIVO'; badge.className = 'badge-lucro ' + (lucro >= 0 ? 'badge-ok' : 'badge-bad'); badge.style.display = 'inline-block'; 
-                const al = $('mktAlerta_' + id); if (lucro < 0) { al.textContent = '🚨 FUGINDO DO PREJUÍZO (REVISE)'; al.className = 'mp-alerta alerta-prejuizo' } else if (mReal < 5) { al.textContent = '⚠️ MARGEM QUASE ZERO'; al.className = 'mp-alerta alerta-atencao' } else { al.textContent = '✅ LUCRATIVO NA CAMPANHA'; al.className = 'mp-alerta alerta-ok' } 
-                res.push({ id, nome: nomes[id], preco: precoFinal, lucro, mReal }) 
-            }); 
-            $('rankingList').innerHTML = res.length ? [...res].sort((a, b) => b.lucro - a.lucro).map((r, i) => `<div class="ranking-row"><div class="pos ${i == 0 ? 'pos-1' : i == 1 ? 'pos-2' : i == 2 ? 'pos-3' : 'pos-rest'}">${i + 1}</div><div style="flex:1"><b>${r.nome}</b></div><div>${moeda(r.preco)}</div><div style="color:${r.lucro >= 0 ? 'var(--success)' : 'var(--danger)'}"><b>LUCRO: ${moeda(r.lucro)}</b></div><div>Margem: ${pct(r.mReal)}</div></div>`).join('') : '<div class="empty">Calcule para ver o ranking</div>' 
+
+        window.calcularMarketplaces = () => {
+            if (!lastCalc) return;
+            const ids = ['ml1', 'mag1', 'ml2', 'mag2'], nomes = { ml1: 'ML Principal', mag1: 'Magalu Principal', ml2: 'ML Alternativo', mag2: 'Magalu Alternativa' };
+            const res = [];
+            ids.forEach(id => {
+                const margem = v('mktMargem_' + id), extra = v('mktExtra_' + id), comissao = v('mktCom_' + id), fixa = v('mktFixa_' + id), desc = v('mktDesc_' + id), impostos = v('impostos'), taxa = (margem + extra + impostos + comissao) / 100;
+                if (taxa >= 1) return;
+                const custoBase = lastCalc.custoProduto + lastCalc.freteV + fixa, precoOriginal = custoBase / (1 - taxa), precoFinal = precoOriginal * (1 - desc / 100), valImp = precoFinal * (impostos / 100), valCom = precoFinal * (comissao / 100), lucro = precoFinal - custoBase - valImp - valCom, mReal = precoFinal > 0 ? (lucro / precoFinal) * 100 : 0, lucroOrig = precoOriginal - custoBase - precoOriginal * (impostos / 100) - precoOriginal * (comissao / 100), mRealOrig = precoOriginal > 0 ? (lucroOrig / precoOriginal) * 100 : 0, perda = mRealOrig - mReal;
+                $('mktOriginal_' + id).textContent = moeda(precoOriginal); $('mktPreco_' + id).textContent = moeda(precoFinal); $('mktPerda_' + id).textContent = desc > 0 ? '▼ ' + pct(perda) : 'Sem desconto'; $('mktLucro_' + id).textContent = moeda(lucro); $('mktMargemReal_' + id).textContent = pct(mReal);
+                const badge = $('mktBadge_' + id); badge.textContent = lucro >= 0 ? '✅ Saudável' : '❌ NEGATIVO'; badge.className = 'badge-lucro ' + (lucro >= 0 ? 'badge-ok' : 'badge-bad'); badge.style.display = 'inline-block';
+                const al = $('mktAlerta_' + id); if (lucro < 0) { al.textContent = '🚨 FUGINDO DO PREJUÍZO (REVISE)'; al.className = 'mp-alerta alerta-prejuizo' } else if (mReal < 5) { al.textContent = '⚠️ MARGEM QUASE ZERO'; al.className = 'mp-alerta alerta-atencao' } else { al.textContent = '✅ LUCRATIVO NA CAMPANHA'; al.className = 'mp-alerta alerta-ok' }
+                res.push({ id, nome: nomes[id], preco: precoFinal, lucro, mReal })
+            });
+            $('rankingList').innerHTML = res.length ? [...res].sort((a, b) => b.lucro - a.lucro).map((r, i) => `<div class="ranking-row"><div class="pos ${i == 0 ? 'pos-1' : i == 1 ? 'pos-2' : i == 2 ? 'pos-3' : 'pos-rest'}">${i + 1}</div><div style="flex:1"><b>${r.nome}</b></div><div>${moeda(r.preco)}</div><div style="color:${r.lucro >= 0 ? 'var(--success)' : 'var(--danger)'}"><b>LUCRO: ${moeda(r.lucro)}</b></div><div>Margem: ${pct(r.mReal)}</div></div>`).join('') : '<div class="empty">Calcule para ver o ranking</div>'
         }
 
         // ==========================================
@@ -955,15 +2003,15 @@
             $('maxPreco').innerText = moeda(max);
             $('medPreco').innerText = moeda(mercadoMediaAtual);
             $('idealPreco').innerText = moeda(mercadoIdealAtual);
-            
+
             $('mercadoStats').style.display = "block";
 
             // GERAR GRÁFICO DO MERCADO
             if (chartMercadoInstance) chartMercadoInstance.destroy();
-            
+
             // Pega top 10 do menor ao maior p/ analise
-            let chartData = [...mercadoCache].sort((a,b)=>a.preco-b.preco).slice(0, 10);
-            
+            let chartData = [...mercadoCache].sort((a, b) => a.preco - b.preco).slice(0, 10);
+
             chartMercadoInstance = new Chart($('graficoMercado'), {
                 type: 'bar',
                 data: {
@@ -997,7 +2045,7 @@
             lojasSelecionadas = []; // default vazio
             const container = $('listaLojasCheckbox');
             const lojas = [...new Set(mercadoCache.map(i => i.loja))].sort();
-            
+
             container.innerHTML = '';
             lojas.forEach(loja => {
                 container.innerHTML += `
@@ -1080,10 +2128,10 @@
                 toast('✅ Preço fixado no Painel do Simulador!');
             }
         }
-        
-        window.usarPrecoNoSimulador = function(tipo) {
+
+        window.usarPrecoNoSimulador = function (tipo) {
             let val = tipo === 'ideal' ? mercadoIdealAtual : mercadoMediaAtual;
-            if(val > 0) window.usarPrecoConcorrente(val);
+            if (val > 0) window.usarPrecoConcorrente(val);
         }
 
         // ==========================================
@@ -1093,29 +2141,29 @@
             if (!lastCalc) return toast('Precisa calcular a operação antes de salvar.');
 
             await addDoc(collection(db, 'historico'), {
-    uid: currentUser.uid,
-    usuarioEmail: currentUser.email,
-    produtoNome: $('nomeProduto').value.trim() || 'Desconhecido',
-    data: new Date().toLocaleString('pt-BR'),
-    observacao: $('observacao').value || '',
+                uid: currentUser.uid,
+                usuarioEmail: currentUser.email,
+                produtoNome: $('nomeProduto').value.trim() || 'Desconhecido',
+                data: new Date().toLocaleString('pt-BR'),
+                observacao: $('observacao').value || '',
 
-    custoCompra: v('custo'),
-    cambio: v('cambio'),
-    freteCompra: v('freteCompra'),
+                custoCompra: v('custo'),
+                cambio: v('cambio'),
+                freteCompra: v('freteCompra'),
 
-    // ✅ NOVOS CAMPOS
-    custoProduto: lastCalc.custoProduto,
-    freteCompraPct: v('freteCompra'),
+                // ✅ NOVOS CAMPOS
+                custoProduto: lastCalc.custoProduto,
+                freteCompraPct: v('freteCompra'),
 
-    custoTotal: lastCalc.custoTotal,
-    preco: lastCalc.preco,
-    lucro: lastCalc.lucro,
-    margemReal: lastCalc.margemReal,
+                custoTotal: lastCalc.custoTotal,
+                preco: lastCalc.preco,
+                lucro: lastCalc.lucro,
+                margemReal: lastCalc.margemReal,
 
-    precoManualUsado: lastCalc.precoManual > 0, // ✅ IMPORTANTE
+                precoManualUsado: lastCalc.precoManual > 0, // ✅ IMPORTANTE
 
-    createdAt: serverTimestamp()
-});
+                createdAt: serverTimestamp()
+            });
 
 
             await renderHistorico();
@@ -1147,9 +2195,9 @@
                     <td>
     Preço: <b>${moeda(h.preco)}</b><br>
 
-    ${h.precoManualUsado ? 
-        `<span style="background:#f59e0b;color:#fff;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:700">Digitado Manual</span><br>` 
-        : ''}
+    ${h.precoManualUsado ?
+                        `<span style="background:#f59e0b;color:#fff;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:700">Digitado Manual</span><br>`
+                        : ''}
 
     <small style="color:var(--muted)">
         ${h.infoMercadoSalva ? `Média de mercado na época: ${moeda(h.mercadoMediaHist)}` : `(Pesquisa n/ realizada)`}
@@ -1187,37 +2235,37 @@
             toast('🚮 Registro eliminado com sucesso.');
         };
 
-        window.limparHistoricoUsuario = async () => { 
+        window.limparHistoricoUsuario = async () => {
             if (!confirm('Vai deletar todo o histórico da sua conta. Confirmar?')) return;
-            const snap = await getDocs(query(collection(db, 'historico'), where('uid', '==', currentUser.uid))); 
-            for (const d of snap.docs) await deleteDoc(doc(db, 'historico', d.id)); 
-            await renderHistorico(); toast('Todo seu histórico foi pra lixeira.') 
+            const snap = await getDocs(query(collection(db, 'historico'), where('uid', '==', currentUser.uid)));
+            for (const d of snap.docs) await deleteDoc(doc(db, 'historico', d.id));
+            await renderHistorico(); toast('Todo seu histórico foi pra lixeira.')
         };
 
         window.copiarResultado = () => { if (!lastCalc) return toast('Sem cálculos para extrair'); const txt = `Resumo da Precificação | ${$('nomeProduto').value || 'Projeto'}\nPreço de Venda: ${moeda(lastCalc.preco)}\nCusto Embutido: ${moeda(lastCalc.custoTotal)}\nLucro Limpo: ${moeda(lastCalc.lucro)}\nMargem: ${pct(lastCalc.margemReal)}`; navigator.clipboard.writeText(txt).then(() => toast('✨ Copiado pro Clipboard!')) };
         window.exportarPDF = () => { if (!lastCalc) return toast('Precisa simular antes do PDF'); html2pdf().set({ margin: 10, filename: 'relatorio_precificacao_pro.pdf', image: { type: 'jpeg', quality: .98 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } }).from($('pdf-area')).save(); toast('📑 Emitindo seu documento Oficial...') };
 
         function resetUI() {
-    $('precoVenda').textContent = 'R$ —';
-    $('heroSub').textContent = 'Preencha os campos ao lado';
-    $('manualBadge').style.display = 'none';
-    $('badgeMercado').style.display = 'none';
-    $('sCusto').textContent = 'R$ —';
-    $('sMargem').textContent = 'R$ —';
-    $('sLucro').textContent = 'R$ —';
-    $('sMargemReal').textContent = '— %';
-    $('bkContent').innerHTML = '<div class="empty">Aguardando dados</div>';
-    $('chartArea').innerHTML = '<div class="empty">O gráfico surgirá após simular</div>';
-    $('custoGrid').innerHTML = '<div class="empty" style="grid-column:1/-1">Nenhum custo listado</div>';
-    $('rankingList').innerHTML = '<div class="empty">Aguardando cálculo</div>';
+            $('precoVenda').textContent = 'R$ —';
+            $('heroSub').textContent = 'Preencha os campos ao lado';
+            $('manualBadge').style.display = 'none';
+            $('badgeMercado').style.display = 'none';
+            $('sCusto').textContent = 'R$ —';
+            $('sMargem').textContent = 'R$ —';
+            $('sLucro').textContent = 'R$ —';
+            $('sMargemReal').textContent = '— %';
+            $('bkContent').innerHTML = '<div class="empty">Aguardando dados</div>';
+            $('chartArea').innerHTML = '<div class="empty">O gráfico surgirá após simular</div>';
+            $('custoGrid').innerHTML = '<div class="empty" style="grid-column:1/-1">Nenhum custo listado</div>';
+            $('rankingList').innerHTML = '<div class="empty">Aguardando cálculo</div>';
 
-    if (chartInstance) {
-        chartInstance.destroy();
-        chartInstance = null;
-    }
+            if (chartInstance) {
+                chartInstance.destroy();
+                chartInstance = null;
+            }
 
-    lastCalc = null;
-}
+            lastCalc = null;
+        }
 
 
         window.limpar = () => { ['custo', 'freteVenda', 'outrasReais', 'outrasPct', 'precoManual', 'observacao'].forEach(id => $(id).value = ''); $('nomeProduto').value = ''; $('cambio').value = '1'; $('freteCompra').value = '28'; $('margem').value = '20'; $('impostos').value = '2'; $('comissao').value = '18'; syncMargensMarketplaces(); syncComissoesMarketplaces(); resetUI(); mercadoMediaAtual = 0; atualizarHeaderProduto(); lojasSelecionadas = []; window.atualizarLabelFiltro(); toast('Tudo Limpo 👌') };
@@ -1258,16 +2306,28 @@
             toast('Removido com Sucesso.');
             window.renderAutorizados();
         };
+        
+        window.filtrarHistorico = function () {
+            const termo = $('buscaHistorico').value.toLowerCase();
+            const linhas = document.querySelectorAll('#histContent tbody tr');
+
+            linhas.forEach(linha => {
+                const produto = linha.children[1].innerText.toLowerCase();
+                linha.style.display = produto.includes(termo) ? '' : 'none';
+            });
+        };
+
     </script>
 </body>
-    <footer>
-        <center>
-            <br>
-            <hr><br>
-             © 2026 Adailton J. Silva - Simulador de Marketplaces SaaS<br>
-            dev.adailton@gmail.com<br>
-            45 99956-0137<br>
-            São Paulo/SP
-        </center>
-    </footer>
+<footer>
+    <center>
+        <br>
+        <hr><br>
+        © 2026 Adailton J. Silva - Simulador de Marketplaces SaaS<br>
+        dev.adailton@gmail.com<br>
+        45 99956-0137<br>
+        São Paulo/SP
+    </center>
+</footer>
+
 </html>
