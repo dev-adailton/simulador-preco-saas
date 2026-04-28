@@ -2317,13 +2317,12 @@
             });
         };
 
-        catch (error) {
-  if (error.code === "permission-denied") {
-    statusEl.textContent = "Sem permissão para acessar.";
-  } else {
-    statusEl.textContent = "Erro ao carregar dados.";
-  }
+        try {
+   // código
+} catch (error) {
+   // tratamento
 }
+
 
     </script>
 </body>
