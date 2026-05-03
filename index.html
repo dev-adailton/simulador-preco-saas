@@ -1037,6 +1037,7 @@
             color: var(--text);
             display: -webkit-box;
             -webkit-line-clamp: 2;
+            line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
             line-height: 1.4;
@@ -2135,39 +2136,48 @@
         }
 
         // ==========================================
-        //  HISTORICO MELHORADO
+        //  FUNÇÃO DE GRAVAR CORRIGIDA 100% BLINDADA
         // ==========================================
         window.salvarHistorico = async () => {
             if (!lastCalc) return toast('Precisa calcular a operação antes de salvar.');
+            if (!currentUser) return toast('Você precisa estar logado para salvar.');
 
-            await addDoc(collection(db, 'historico'), {
-                uid: currentUser.uid,
-                usuarioEmail: currentUser.email,
-                produtoNome: $('nomeProduto').value.trim() || 'Desconhecido',
-                data: new Date().toLocaleString('pt-BR'),
-                observacao: $('observacao').value || '',
+            try {
+                // Utilizando a função v() para proteção contra campos nulos (que quebram o banco silenciosamente)
+                const payload = {
+                    uid: currentUser.uid,
+                    usuarioEmail: currentUser.email,
+                    produtoNome: $('nomeProduto').value.trim() || 'Desconhecido',
+                    data: new Date().toLocaleString('pt-BR'),
+                    observacao: $('observacao').value || '',
+                    custoCompra: v('custo'),
+                    cambio: v('cambio') || 1,
+                    freteCompra: v('freteCompra'),
+                    freteCompraPct: v('freteCompra'),
+                    custoProduto: lastCalc.custoProduto || 0,
+                    custoTotal: lastCalc.custoTotal || 0,
+                    preco: lastCalc.preco || 0,
+                    lucro: lastCalc.lucro || 0,
+                    margemReal: lastCalc.margemReal || 0,
+                    precoManualUsado: Boolean(lastCalc.precoManual > 0),
+                    
+                    // CORREÇÃO ESSENCIAL: Campos que estavam sendo lidos no Histórico
+                    // sem estarem sendo Salvos no banco, fazendo o histórico dar falso negativo:
+                    infoMercadoSalva: (mercadoMediaAtual > 0),
+                    mercadoMediaHist: mercadoMediaAtual || 0,
+                    mercadoIdealHist: mercadoIdealAtual || 0,
+                    
+                    createdAt: serverTimestamp()
+                };
 
-                custoCompra: v('custo'),
-                cambio: v('cambio'),
-                freteCompra: v('freteCompra'),
+                await addDoc(collection(db, 'historico'), payload);
+                await renderHistorico();
+                toast('💾 Simulação gravada no Histórico!');
 
-                // ✅ NOVOS CAMPOS
-                custoProduto: lastCalc.custoProduto,
-                freteCompraPct: v('freteCompra'),
-
-                custoTotal: lastCalc.custoTotal,
-                preco: lastCalc.preco,
-                lucro: lastCalc.lucro,
-                margemReal: lastCalc.margemReal,
-
-                precoManualUsado: lastCalc.precoManual > 0, // ✅ IMPORTANTE
-
-                createdAt: serverTimestamp()
-            });
-
-
-            await renderHistorico();
-            toast('💾 Simulação gravada no Histórico!');
+            } catch (error) {
+                console.error('Erro ao salvar no Firestore:', error);
+                toast('❌ Erro ao salvar: ' + (error.code || error.message));
+            }
         };
 
         async function renderHistorico() {
@@ -2267,7 +2277,6 @@
             lastCalc = null;
         }
 
-
         window.limpar = () => { ['custo', 'freteVenda', 'outrasReais', 'outrasPct', 'precoManual', 'observacao'].forEach(id => $(id).value = ''); $('nomeProduto').value = ''; $('cambio').value = '1'; $('freteCompra').value = '28'; $('margem').value = '20'; $('impostos').value = '2'; $('comissao').value = '18'; syncMargensMarketplaces(); syncComissoesMarketplaces(); resetUI(); mercadoMediaAtual = 0; atualizarHeaderProduto(); lojasSelecionadas = []; window.atualizarLabelFiltro(); toast('Tudo Limpo 👌') };
 
         window.salvarConfigApi = () => { localStorage.setItem('serp_api_key', $('serpApiKey').value); localStorage.setItem('modo_busca', $('modoBusca').value); toast('✅ Sistema Sincronizado com SerpApi') };
@@ -2316,13 +2325,6 @@
                 linha.style.display = produto.includes(termo) ? '' : 'none';
             });
         };
-
-        try {
-   // código
-} catch (error) {
-   // tratamento
-}
-
 
     </script>
 </body>
