@@ -2139,6 +2139,21 @@
         //  FUNÇÃO DE GRAVAR CORRIGIDA 100% BLINDADA
         // ==========================================
        window.salvarHistorico = async () => {
+console.log("🔥 ENTROU NA FUNÇÃO SALVAR");
+
+    if (!lastCalc) {
+        console.log("❌ BLOQUEADO: sem cálculo");
+        return toast('Precisa calcular a operação antes de salvar.');
+    }
+
+    if (!currentUser) {
+        console.log("❌ BLOQUEADO: sem usuário");
+        return toast('Você precisa estar logado para salvar.');
+    }
+
+    console.log("✅ PASSOU NAS VALIDAÇÕES");
+
+           
     // 1️⃣ Se não aparecer nem isso, seu botão HTML está quebrado ou desconectado
     
            console.log("🔥 Cliquei em salvar");
@@ -2181,6 +2196,15 @@
     } catch (error) {
 
         try {
+
+          try {
+   console.log("📦 PAYLOAD:", payload);
+   await addDoc(...)
+   console.log("✅ SALVOU!");
+} catch (e) {
+   console.error("💥 ERRO REAL:", e);
+}
+  
   console.log("🚀 Tentando salvar...");
   
   // seu código de salvar aqui
@@ -2197,9 +2221,7 @@
 
        async function renderHistorico() {
     console.log('🔄 Carregando histórico...');
-    
     if (!currentUser) {
-        console.log('❌ Sem usuário logado');
         $('histContent').innerHTML = '<div class="empty">Logue para ver.</div>';
         return;
     }
@@ -2208,29 +2230,71 @@
 
     try {
         const snap = await getDocs(
-            query(collection(db, 'historico'), 
-            where('uid', '==', currentUser.uid))
+            query(collection(db, 'historico'), where('uid', '==', currentUser.uid))
         );
 
         console.log('📦 Documentos encontrados:', snap.size);
-        
-        snap.forEach(d => console.log('📄 Doc:', d.id, d.data()));
 
         const hist = [];
         snap.forEach(d => hist.push({ id: d.id, ...d.data() }));
 
+        // Ordena do mais recente para o mais antigo
+        hist.sort((a, b) => {
+            const da = a.createdAt?.seconds || 0;
+            const db2 = b.createdAt?.seconds || 0;
+            return db2 - da;
+        });
+
         if (!hist.length) {
-            console.log('⚠️ Nenhum histórico encontrado para este UID');
             $('histContent').innerHTML = '<div class="empty">Nenhuma simulação salva ainda.</div>';
             return;
         }
 
-        // ... resto do render
-        
+        // ✅ MONTA A TABELA COMPLETA
+        $('histContent').innerHTML = `
+            <div style="overflow-x:auto">
+                <table class="hist-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Produto</th>
+                            <th>Preço de Venda</th>
+                            <th>Lucro Líquido</th>
+                            <th>Margem Real</th>
+                            <th>Data</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${hist.map((h, i) => `
+                            <tr>
+                                <td>${i + 1}</td>
+                                <td><b>${h.produtoNome || '—'}</b></td>
+                                <td><b style="color:var(--primary)">${moeda(h.preco)}</b></td>
+                                <td style="color:${(h.lucro || 0) >= 0 ? 'var(--success)' : 'var(--danger)'}">
+                                    <b>${moeda(h.lucro)}</b>
+                                </td>
+                                <td>${Number(h.margemReal || 0).toFixed(2).replace('.', ',')}%</td>
+                                <td style="font-size:12px;color:var(--muted)">${h.data || '—'}</td>
+                                <td>
+                                    <div style="display:flex;gap:6px">
+                                        <button class="btn btn-secondary" style="min-width:auto;padding:6px 10px;font-size:11px"
+                                            onclick="window.excluirHistorico('${h.id}')">🗑️ Excluir</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+
     } catch (error) {
         console.error('❌ Erro ao buscar histórico:', error);
         $('histContent').innerHTML = `<div class="empty">Erro: ${error.message}</div>`;
     }
+}
+
 }
 
         window.editarHistorico = async (id) => {
