@@ -2151,24 +2151,30 @@
                 cambio: v('cambio'),
                 freteCompra: v('freteCompra'),
 
-                // ✅ NOVOS CAMPOS
+                // ✅ CAMPOS ADICIONADOS
+                margem: v('margem'),
+                impostos: v('impostos'),
+                comissao: v('comissao'),
+                freteVenda: v('freteVenda'),
+                outrasReais: v('outrasReais'),
+                outrasPct: v('outrasPct'),
+                precoManualInput: v('precoManual'),
+
                 custoProduto: lastCalc.custoProduto,
                 freteCompraPct: v('freteCompra'),
-
                 custoTotal: lastCalc.custoTotal,
                 preco: lastCalc.preco,
                 lucro: lastCalc.lucro,
                 margemReal: lastCalc.margemReal,
-
-                precoManualUsado: lastCalc.precoManual > 0, // ✅ IMPORTANTE
+                precoManualUsado: lastCalc.precoManual > 0,
 
                 createdAt: serverTimestamp()
             });
 
-
             await renderHistorico();
             toast('💾 Simulação gravada no Histórico!');
         };
+
 
         async function renderHistorico() {
             if (!currentUser) { $('histContent').innerHTML = '<div class="empty">Logue para ver.</div>'; return; }
@@ -2213,20 +2219,40 @@
         }
 
         window.editarHistorico = async (id) => {
-            const snap = await getDocs(query(collection(db, 'historico')));
+            const snap = await getDocs(
+                query(collection(db, 'historico'), where('uid', '==', currentUser.uid))
+            );
+
             let item = null;
-            snap.forEach(d => { if (d.id === id) item = { id: d.id, ...d.data() }; });
+            snap.forEach(d => {
+                if (d.id === id) item = { id: d.id, ...d.data() };
+            });
 
             if (!item) return;
+
             $('nomeProduto').value = item.produtoNome;
             $('custo').value = item.custoCompra;
             $('cambio').value = item.cambio;
             $('freteCompra').value = item.freteCompra;
-            $('observacao').value = item.observacao;
-            $('precoManual').value = item.preco;
+            $('observacao').value = item.observacao || '';
 
-            window.calcularAll(); window.mudarAba('simulador'); toast('♻️ Histórico restaurado no simulador.');
+            if (item.margem !== undefined) $('margem').value = item.margem;
+            if (item.impostos !== undefined) $('impostos').value = item.impostos;
+            if (item.comissao !== undefined) $('comissao').value = item.comissao;
+            if (item.freteVenda !== undefined) $('freteVenda').value = item.freteVenda;
+            if (item.outrasReais !== undefined) $('outrasReais').value = item.outrasReais;
+            if (item.outrasPct !== undefined) $('outrasPct').value = item.outrasPct;
+
+            $('precoManual').value = item.precoManualUsado
+                ? (item.precoManualInput || item.preco)
+                : '';
+
+            window.calcularAll();
+            window.mudarAba('simulador');
+            toast('♻️ Histórico restaurado no simulador.');
         };
+
+
 
         window.excluirHistorico = async (id) => {
             if (!confirm('⚠️ Remoção Permanente. Tem certeza que quer apagar do banco?')) return;
@@ -2306,7 +2332,7 @@
             toast('Removido com Sucesso.');
             window.renderAutorizados();
         };
-        
+
         window.filtrarHistorico = function () {
             const termo = $('buscaHistorico').value.toLowerCase();
             const linhas = document.querySelectorAll('#histContent tbody tr');
@@ -2318,10 +2344,10 @@
         };
 
         try {
-   // código
-} catch (error) {
-   // tratamento
-}
+            // código
+        } catch (error) {
+            // tratamento
+        }
 
 
     </script>
