@@ -2140,7 +2140,10 @@
         // ==========================================
        window.salvarHistorico = async () => {
     // 1️⃣ Se não aparecer nem isso, seu botão HTML está quebrado ou desconectado
-    console.log("🚨 [PASSO 1] Botão SALVAR foi clicado!"); 
+    
+           console.log("🔥 Cliquei em salvar");
+
+           console.log("🚨 [PASSO 1] Botão SALVAR foi clicado!"); 
 
     console.log("🚨 [PASSO 2] Verificando Usuário:", currentUser);
     if (!currentUser) {
@@ -2176,6 +2179,17 @@
         await renderHistorico();
 
     } catch (error) {
+
+        try {
+  console.log("🚀 Tentando salvar...");
+  
+  // seu código de salvar aqui
+
+  console.log("✅ Salvou com sucesso");
+} catch (e) {
+  console.error("❌ Erro ao salvar:", e);
+}
+
         console.error('❌ [ERRO FIRESTORE]:', error);
         toast('Erro ao salvar: ' + error.message);
     }
