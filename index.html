@@ -840,71 +840,131 @@
 
         // SALVAR HISTÓRICO MELHORADO E À PROVA DE ERROS
         window.salvarHistorico = async () => {
-            if (!lastCalc) return toast('Precisa calcular a operação antes de salvar.');
-            if (!currentUser) return toast('Precisa estar logado.');
+    console.log("🔥 ENTROU NA FUNÇÃO SALVAR");
 
-            try {
-                await addDoc(collection(db, 'historico'), {
-                    uid: currentUser.uid,
-                    usuarioEmail: currentUser.email,
-                    produtoNome: $('nomeProduto').value.trim() || 'Desconhecido',
-                    data: new Date().toLocaleString('pt-BR'),
-                    observacao: $('observacao').value || '',
-                    custoCompra: v('custo'),
-                    cambio: v('cambio'),
-                    freteCompra: v('freteCompra'),
-                    custoProduto: lastCalc.custoProduto,
-                    freteCompraPct: v('freteCompra'),
-                    custoTotal: lastCalc.custoTotal,
-                    preco: lastCalc.preco,
-                    lucro: lastCalc.lucro,
-                    margemReal: lastCalc.margemReal,
-                    precoManualUsado: lastCalc.precoManual > 0,
-                    createdAt: serverTimestamp()
-                });
+    if (!lastCalc) {
+        console.log("❌ BLOQUEADO: sem cálculo");
+        return toast('Precisa calcular a operação antes de salvar.');
+    }
 
-                await renderHistorico();
-                toast('💾 Simulação gravada no Histórico!');
-            } catch (error) {
-                console.error("Erro salvando historico:", error);
-                toast('❌ Bloqueado pelas Permissões. Configure as regras no Firestore.');
-            }
+    if (!currentUser) {
+        console.log("❌ BLOQUEADO: sem usuário");
+        return toast('Você precisa estar logado para salvar.');
+    }
+
+    console.log("🚨 [PASSO 1] Botão SALVAR foi clicado!");
+    console.log("🚨 [PASSO 2] Verificando Usuário:", currentUser);
+    console.log("🚨 [PASSO 3] Verificando Cálculo:", lastCalc);
+    console.log("🚨 [PASSO 4] Passou em tudo! Enviando dados para o Firestore...");
+
+    try {
+        const payload = {
+            uid: currentUser.uid,
+            usuarioEmail: currentUser.email,
+            produtoNome: $('nomeProduto')?.value.trim() || 'Desconhecido',
+            custoCompra: v('custo'),
+            cambio: v('cambio'),
+            freteCompra: v('freteCompra'),
+            observacao: $('observacao')?.value.trim() || '',
+            preco: lastCalc.preco || 0,
+            lucro: lastCalc.lucro || 0,
+            margemReal: lastCalc.margemReal || 0,
+            data: new Date().toLocaleString('pt-BR'),
+            createdAt: serverTimestamp()
         };
 
-        async function renderHistorico() {
-            if (!currentUser) return;
-            const snap = await getDocs(query(collection(db, 'historico'), where('uid', '==', currentUser.uid)));
-            const hist = []; snap.forEach(d => hist.push({ id: d.id, ...d.data() }));
-            hist.sort((a, b) => String(b.data || '').localeCompare(String(a.data || '')));
-            $('histContent').innerHTML = !hist.length ? '<div class="empty">Nenhuma operação salva.</div>' : '<div style="overflow-x:auto"><table class="hist-table"><thead><tr><th>#</th><th>Produto/Projeto</th><th>Dia</th><th>Dados Compra</th><th>Visão Comercial</th><th>Resultado Caixa</th><th>Ações Rapidas</th></tr></thead><tbody>' + hist.map((h, i) => `<tr><td>${i + 1}</td><td><b>${h.produtoNome}</b><br><small style="color:var(--muted)">Obs: ${h.observacao || 'Nenhuma'}</small></td><td>${h.data}</td><td>$ ${h.custoCompra} (Câmbio ${h.cambio})<br><small style="color:var(--muted)">Frete Compra: ${h.freteCompraPct || 0}%<br>Custo Final Produto: ${moeda(h.custoProduto || 0)}</small></td><td>Preço: <b>${moeda(h.preco)}</b><br>${h.precoManualUsado ? `<span style="background:#f59e0b;color:#fff;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:700">Digitado Manual</span><br>` : ''}</td><td style="color:${h.lucro >= 0 ? 'var(--success)' : 'var(--danger)'}"><b>Lucro: ${moeda(h.lucro)}</b><br><small>M. Real: ${pct(h.margemReal)}</small></td><td style="white-space:nowrap"><button onclick="window.editarHistorico('${h.id}')" class="btn btn-secondary" style="padding:6px 12px; font-size:12px" title="Traz p/ tela">♻️ Re-simular</button><button onclick="window.excluirHistorico('${h.id}')" class="btn btn-secondary" style="padding:6px 12px; font-size:12px; color:var(--danger)" title="Apagar">❌</button></td></tr>`).join('') + '</tbody></table></div>';
+        const docRef = await addDoc(collection(db, 'historico'), payload);
+
+        console.log('✅ [PASSO 5] SUCESSO! SALVO COM ID:', docRef.id);
+        toast('Salvo com sucesso!');
+
+        await renderHistorico();
+    } catch (error) {
+        console.error('❌ [ERRO FIRESTORE]:', error);
+        toast('Erro ao salvar: ' + error.message);
+    }
+};
+
+
+       async function renderHistorico() {
+    console.log('🔄 Carregando histórico...');
+
+    if (!currentUser) {
+        console.log('❌ Sem usuário logado');
+        $('histContent').innerHTML = '<div class="empty">Logue para ver.</div>';
+        return;
+    }
+
+    console.log('👤 UID buscado:', currentUser.uid);
+
+    try {
+        const snap = await getDocs(
+            query(
+                collection(db, 'historico'),
+                where('uid', '==', currentUser.uid)
+            )
+        );
+
+        console.log('📦 Documentos encontrados:', snap.size);
+
+        const hist = [];
+        snap.forEach(d => {
+            const item = { id: d.id, ...d.data() };
+            console.log('📄 Doc:', d.id, item);
+            hist.push(item);
+        });
+
+        if (!hist.length) {
+            console.log('⚠️ Nenhum histórico encontrado para este UID');
+            $('histContent').innerHTML = '<div class="empty">Nenhuma simulação salva ainda.</div>';
+            return;
         }
 
-        window.editarHistorico = async (id) => { const snap = await getDocs(query(collection(db, 'historico'))); let item = null; snap.forEach(d => { if (d.id === id) item = { id: d.id, ...d.data() }; }); if (!item) return; $('nomeProduto').value = item.produtoNome; $('custo').value = item.custoCompra; $('cambio').value = item.cambio; $('freteCompra').value = item.freteCompra; $('observacao').value = item.observacao; $('precoManual').value = item.preco; window.calcularAll(); window.mudarAba('simulador'); toast('♻️ Histórico restaurado no simulador.'); };
-        window.excluirHistorico = async (id) => { if (!confirm('⚠️ Remoção Permanente. Tem certeza?')) return; await deleteDoc(doc(db, 'historico', id)); await renderHistorico(); toast('🚮 Registro eliminado com sucesso.'); };
-        window.limparHistoricoUsuario = async () => { if (!confirm('Vai deletar todo o histórico da sua conta. Confirmar?')) return; const snap = await getDocs(query(collection(db, 'historico'), where('uid', '==', currentUser.uid))); for (const d of snap.docs) await deleteDoc(doc(db, 'historico', d.id)); await renderHistorico(); toast('Todo seu histórico foi pra lixeira.') };
+        hist.sort((a, b) => {
+            const da = a.createdAt?.seconds || 0;
+            const dbb = b.createdAt?.seconds || 0;
+            return dbb - da;
+        });
 
-        window.copiarResultado = () => { if (!lastCalc) return toast('Sem cálculos para extrair'); const txt = `Resumo | ${$('nomeProduto').value || 'Projeto'}\nPreço de Venda: ${moeda(lastCalc.preco)}\nCustos: ${moeda(lastCalc.custoTotal)}\nLucro: ${moeda(lastCalc.lucro)}\nMargem: ${pct(lastCalc.margemReal)}`; navigator.clipboard.writeText(txt).then(() => toast('✨ Copiado!')) };
-        window.exportarPDF = () => { if (!lastCalc) return toast('Precisa simular antes'); html2pdf().set({ margin: 10, filename: 'relatorio.pdf', image: { type: 'jpeg', quality: .98 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } }).from($('pdf-area')).save(); toast('📑 Emitindo PDF...') };
+        $('histContent').innerHTML = `
+            <table class="hist-table">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Produto</th>
+                        <th>Preço</th>
+                        <th>Lucro</th>
+                        <th>Margem</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${hist.map(item => `
+                        <tr>
+                            <td>${item.data || '-'}</td>
+                            <td>${item.produtoNome || 'Sem nome'}</td>
+                            <td>${moeda(item.preco || 0)}</td>
+                            <td style="color:${(item.lucro || 0) >= 0 ? 'green' : 'red'};font-weight:700;">
+                                ${moeda(item.lucro || 0)}
+                            </td>
+                            <td>${pct(item.margemReal || 0)}</td>
+                            <td>
+                                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                                    <button class="btn btn-secondary" style="min-width:auto; padding:8px 10px;" onclick="window.editarHistorico('${item.id}')">Editar</button>
+                                    <button class="btn btn-secondary" style="min-width:auto; padding:8px 10px;" onclick="window.excluirHistorico('${item.id}')">Excluir</button>
+                                </div>
+                            </td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
+    } catch (error) {
+        console.error('❌ Erro ao buscar histórico:', error);
+        $('histContent').innerHTML = `<div class="empty">Erro: ${error.message}</div>`;
+    }
+}
 
-        function resetUI() { $('precoVenda').textContent = 'R$ —'; $('heroSub').textContent = 'Preencha os campos ao lado'; $('manualBadge').style.display = 'none'; $('badgeMercado').style.display = 'none'; $('sCusto').textContent = 'R$ —'; $('sMargem').textContent = 'R$ —'; $('sLucro').textContent = 'R$ —'; $('sMargemReal').textContent = '— %'; $('bkContent').innerHTML = '<div class="empty">Aguardando dados</div>'; $('chartArea').innerHTML = '<div class="empty">O gráfico surgirá após simular</div>'; $('custoGrid').innerHTML = '<div class="empty" style="grid-column:1/-1">Nenhum custo listado</div>'; $('rankingList').innerHTML = '<div class="empty">Aguardando cálculo</div>'; if (chartInstance) { chartInstance.destroy(); chartInstance = null; } lastCalc = null; }
-        window.limpar = () => { ['custo', 'freteVenda', 'outrasReais', 'outrasPct', 'precoManual', 'observacao'].forEach(id => $(id).value = ''); $('nomeProduto').value = ''; $('cambio').value = '1'; $('freteCompra').value = '28'; $('margem').value = '20'; $('impostos').value = '2'; $('comissao').value = '18'; syncMargensMarketplaces(); syncComissoesMarketplaces(); resetUI(); mercadoMediaAtual = 0; atualizarHeaderProduto(); lojasSelecionadas = []; window.atualizarLabelFiltro(); toast('Tudo Limpo 👌') };
-
-        window.salvarConfigApi = () => { localStorage.setItem('serp_api_key', $('serpApiKey').value); localStorage.setItem('modo_busca', $('modoBusca').value); toast('✅ API Atualizada') };
-        function carregarConfigApi() { $('serpApiKey').value = localStorage.getItem('serp_api_key') || ''; $('modoBusca').value = localStorage.getItem('modo_busca') || 'proxy' }
-
-        // ADMIN (WHITELIST)
-        window.addEmailAutorizado = async () => {
-            if (currentUser?.email !== ADMIN_EMAIL) return toast('🛑 Bloqueado: Exclusivo Dev');
-            const email = $('emailAutorizado').value.trim().toLowerCase();
-            if (!email) return toast('Forneça um endereço correto de E-mail');
-            try {
-                const q = query(collection(db, 'autorizados'), where('email', '==', email));
-                const snap = await getDocs(q);
-                if (!snap.empty) return toast('O usuário já possui passagem livre!');
-                await addDoc(collection(db, 'autorizados'), { email: email, dataHora: new Date().toLocaleString('pt-BR') });
-                $('emailAutorizado').value = ''; toast('🔑 E-mail VIP cadastrado!'); window.renderAutorizados();
-            } catch(e) { toast('Erro. Verifique as Regras.') }
-        };
 
         window.renderAutorizados = async () => {
             if (currentUser?.email !== ADMIN_EMAIL) return;
