@@ -2138,37 +2138,32 @@
         //  HISTORICO MELHORADO
         // ==========================================
         window.salvarHistorico = async () => {
-    if (!lastCalc) return toast('Precisa calcular a operação antes de salvar.');
-    if (!currentUser) return toast('Você precisa estar logado para salvar.');
+            if (!lastCalc) return toast('Precisa calcular a operação antes de salvar.');
 
-    try {
-        await addDoc(collection(db, 'historico'), {
-            uid: currentUser.uid,
-            usuarioEmail: currentUser.email,
-            produtoNome: document.getElementById('nomeProduto').value.trim() || 'Desconhecido',
-            data: new Date().toLocaleString('pt-BR'),
-            observacao: document.getElementById('observacao').value || '',
-            custoCompra: parseFloat(document.getElementById('custo').value) || 0,
-            cambio: parseFloat(document.getElementById('cambio').value) || 1,
-            freteCompra: parseFloat(document.getElementById('freteCompra').value) || 0,
-            freteCompraPct: parseFloat(document.getElementById('freteCompra').value) || 0,
-            custoProduto: lastCalc.custoProduto,
-            custoTotal: lastCalc.custoTotal,
-            preco: lastCalc.preco,
-            lucro: lastCalc.lucro,
-            margemReal: lastCalc.margemReal,
-            precoManualUsado: lastCalc.precoManual > 0,
-            createdAt: serverTimestamp()
-        });
+            await addDoc(collection(db, 'historico'), {
+                uid: currentUser.uid,
+                usuarioEmail: currentUser.email,
+                produtoNome: $('nomeProduto').value.trim() || 'Desconhecido',
+                data: new Date().toLocaleString('pt-BR'),
+                observacao: $('observacao').value || '',
 
-        await renderHistorico();
-        toast('💾 Simulação gravada no Histórico!');
+                custoCompra: v('custo'),
+                cambio: v('cambio'),
+                freteCompra: v('freteCompra'),
 
-    } catch (error) {
-        console.error('Erro ao salvar no Firestore:', error);
-        toast('❌ Erro ao salvar: ' + error.message);
-    }
-};
+                // ✅ NOVOS CAMPOS
+                custoProduto: lastCalc.custoProduto,
+                freteCompraPct: v('freteCompra'),
+
+                custoTotal: lastCalc.custoTotal,
+                preco: lastCalc.preco,
+                lucro: lastCalc.lucro,
+                margemReal: lastCalc.margemReal,
+
+                precoManualUsado: lastCalc.precoManual > 0, // ✅ IMPORTANTE
+
+                createdAt: serverTimestamp()
+            });
 
 
             await renderHistorico();
@@ -2321,6 +2316,13 @@
                 linha.style.display = produto.includes(termo) ? '' : 'none';
             });
         };
+
+        try {
+   // código
+} catch (error) {
+   // tratamento
+}
+
 
     </script>
 </body>
