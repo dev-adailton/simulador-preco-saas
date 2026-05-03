@@ -567,7 +567,10 @@
         window.auth = auth; window.db = db;
 
         const $ = id => document.getElementById(id), v = id => { const x = parseFloat($(id)?.value); return isNaN(x) ? 0 : x }, moeda = n => Number(n || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), pct = n => Number(n || 0).toFixed(2).replace('.', ',') + '%';
-
+        const v = id => parseFloat($(id)?.value || 0);
+        const moeda = n => n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        const pct = n => (n || 0).toFixed(2) + '%';
+        
         let chartInstance = null, chartMercadoInstance = null;
         let lastCalc = null, currentUser = null, editProdutoId = null, produtosCache = [];
         let mercadoCache = [], mercadoMediaAtual = 0, mercadoIdealAtual = 0;
