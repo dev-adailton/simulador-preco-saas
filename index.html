@@ -2181,47 +2181,43 @@
     }
 };
 
-        async function renderHistorico() {
-            if (!currentUser) { $('histContent').innerHTML = '<div class="empty">Logue para ver.</div>'; return; }
-            const snap = await getDocs(query(collection(db, 'historico'), where('uid', '==', currentUser.uid)));
-            const hist = [];
-            snap.forEach(d => hist.push({ id: d.id, ...d.data() }));
-            hist.sort((a, b) => String(b.data || '').localeCompare(String(a.data || '')));
+       async function renderHistorico() {
+    console.log('🔄 Carregando histórico...');
+    
+    if (!currentUser) {
+        console.log('❌ Sem usuário logado');
+        $('histContent').innerHTML = '<div class="empty">Logue para ver.</div>';
+        return;
+    }
 
-            $('histContent').innerHTML = !hist.length
-                ? '<div class="empty">Sua equipe ainda não salvou operações.</div>'
-                : '<div style="overflow-x:auto"><table class="hist-table"><thead><tr><th>#</th><th>Produto/Projeto</th><th>Dia</th><th>Dados Compra</th><th>Visão Comercial</th><th>Resultado Caixa</th><th>Ações Rapidas</th></tr></thead><tbody>' +
-                hist.map((h, i) => `<tr>
-                    <td>${i + 1}</td>
-                    <td><b>${h.produtoNome}</b><br><small style="color:var(--muted)">Obs: ${h.observacao || 'Nenhuma'}</small></td>
-                    <td>${h.data}</td>
-                    <td>
-    $ ${h.custoCompra} (Câmbio ${h.cambio})<br>
-    <small style="color:var(--muted)">
-        Frete Compra: ${h.freteCompraPct || 0}%<br>
-        Custo Final Produto: ${moeda(h.custoProduto || 0)}
-    </small>
-</td>
+    console.log('👤 UID buscado:', currentUser.uid);
 
-                    <td>
-    Preço: <b>${moeda(h.preco)}</b><br>
+    try {
+        const snap = await getDocs(
+            query(collection(db, 'historico'), 
+            where('uid', '==', currentUser.uid))
+        );
 
-    ${h.precoManualUsado ?
-                        `<span style="background:#f59e0b;color:#fff;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:700">Digitado Manual</span><br>`
-                        : ''}
+        console.log('📦 Documentos encontrados:', snap.size);
+        
+        snap.forEach(d => console.log('📄 Doc:', d.id, d.data()));
 
-    <small style="color:var(--muted)">
-        ${h.infoMercadoSalva ? `Média de mercado na época: ${moeda(h.mercadoMediaHist)}` : `(Pesquisa n/ realizada)`}
-    </small>
-</td>
+        const hist = [];
+        snap.forEach(d => hist.push({ id: d.id, ...d.data() }));
 
-                    <td style="color:${h.lucro >= 0 ? 'var(--success)' : 'var(--danger)'}"><b>Lucro: ${moeda(h.lucro)}</b><br><small>M. Real: ${pct(h.margemReal)}</small></td>
-                    <td style="white-space:nowrap">
-                        <button onclick="window.editarHistorico('${h.id}')" class="btn btn-secondary" style="padding:6px 12px; font-size:12px" title="Traz p/ tela">♻️ Re-simular</button>
-                        <button onclick="window.excluirHistorico('${h.id}')" class="btn btn-secondary" style="padding:6px 12px; font-size:12px; color:var(--danger)" title="Apagar">❌</button>
-                    </td>
-                </tr>`).join('') + '</tbody></table></div>';
+        if (!hist.length) {
+            console.log('⚠️ Nenhum histórico encontrado para este UID');
+            $('histContent').innerHTML = '<div class="empty">Nenhuma simulação salva ainda.</div>';
+            return;
         }
+
+        // ... resto do render
+        
+    } catch (error) {
+        console.error('❌ Erro ao buscar histórico:', error);
+        $('histContent').innerHTML = `<div class="empty">Erro: ${error.message}</div>`;
+    }
+}
 
         window.editarHistorico = async (id) => {
             const snap = await getDocs(query(collection(db, 'historico')));
