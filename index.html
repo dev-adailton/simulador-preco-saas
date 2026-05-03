@@ -2138,47 +2138,48 @@
         // ==========================================
         //  FUNÇÃO DE GRAVAR CORRIGIDA 100% BLINDADA
         // ==========================================
-        window.salvarHistorico = async () => {
-            if (!lastCalc) return toast('Precisa calcular a operação antes de salvar.');
-            if (!currentUser) return toast('Você precisa estar logado para salvar.');
+       window.salvarHistorico = async () => {
+    // 1️⃣ Se não aparecer nem isso, seu botão HTML está quebrado ou desconectado
+    console.log("🚨 [PASSO 1] Botão SALVAR foi clicado!"); 
 
-            try {
-                // Utilizando a função v() para proteção contra campos nulos (que quebram o banco silenciosamente)
-                const payload = {
-                    uid: currentUser.uid,
-                    usuarioEmail: currentUser.email,
-                    produtoNome: $('nomeProduto').value.trim() || 'Desconhecido',
-                    data: new Date().toLocaleString('pt-BR'),
-                    observacao: $('observacao').value || '',
-                    custoCompra: v('custo'),
-                    cambio: v('cambio') || 1,
-                    freteCompra: v('freteCompra'),
-                    freteCompraPct: v('freteCompra'),
-                    custoProduto: lastCalc.custoProduto || 0,
-                    custoTotal: lastCalc.custoTotal || 0,
-                    preco: lastCalc.preco || 0,
-                    lucro: lastCalc.lucro || 0,
-                    margemReal: lastCalc.margemReal || 0,
-                    precoManualUsado: Boolean(lastCalc.precoManual > 0),
-                    
-                    // CORREÇÃO ESSENCIAL: Campos que estavam sendo lidos no Histórico
-                    // sem estarem sendo Salvos no banco, fazendo o histórico dar falso negativo:
-                    infoMercadoSalva: (mercadoMediaAtual > 0),
-                    mercadoMediaHist: mercadoMediaAtual || 0,
-                    mercadoIdealHist: mercadoIdealAtual || 0,
-                    
-                    createdAt: serverTimestamp()
-                };
+    console.log("🚨 [PASSO 2] Verificando Usuário:", currentUser);
+    if (!currentUser) {
+        console.warn("🛑 PAROU AQUI: Usuário não está logado ou auth não carregou.");
+        toast('Usuário não autenticado');
+        return; // Sai da função sem fazer nada
+    }
 
-                await addDoc(collection(db, 'historico'), payload);
-                await renderHistorico();
-                toast('💾 Simulação gravada no Histórico!');
+    console.log("🚨 [PASSO 3] Verificando Cálculo (lastCalc):", typeof lastCalc !== 'undefined' ? lastCalc : 'NÃO EXISTE');
+    if (!lastCalc) {
+        console.warn("🛑 PAROU AQUI: O lastCalc está vazio ou null.");
+        toast('Precisa calcular antes de salvar');
+        return; // Sai da função sem fazer nada
+    }
 
-            } catch (error) {
-                console.error('Erro ao salvar no Firestore:', error);
-                toast('❌ Erro ao salvar: ' + (error.code || error.message));
-            }
-        };
+    console.log("🚨 [PASSO 4] Passou em tudo! Enviando dados para o Firestore...");
+
+    try {
+        const docRef = await addDoc(collection(db, 'historico'), {
+            uid: currentUser.uid,
+            usuarioEmail: currentUser.email,
+            produtoNome: document.getElementById('nomeProduto')?.value.trim() || 'Desconhecido',
+            data: new Date().toLocaleString('pt-BR'),
+            preco: lastCalc.preco || 0,
+            lucro: lastCalc.lucro || 0,
+            margemReal: lastCalc.margemReal || 0,
+            createdAt: serverTimestamp()
+        });
+
+        console.log('✅ [PASSO 5] SUCESSO! SALVO COM ID:', docRef.id);
+        toast('Salvo com sucesso!');
+
+        await renderHistorico();
+
+    } catch (error) {
+        console.error('❌ [ERRO FIRESTORE]:', error);
+        toast('Erro ao salvar: ' + error.message);
+    }
+};
 
         async function renderHistorico() {
             if (!currentUser) { $('histContent').innerHTML = '<div class="empty">Logue para ver.</div>'; return; }
