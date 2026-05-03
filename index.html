@@ -839,63 +839,65 @@
         window.usarPrecoNoSimulador = function (tipo) { let val = tipo === 'ideal' ? mercadoIdealAtual : mercadoMediaAtual; if (val > 0) window.usarPrecoConcorrente(val); }
 
         // SALVAR HISTÓRICO MELHORADO E À PROVA DE ERROS
-        window.salvarHistorico = async () => {
-    console.log("🔥 ENTROU NA FUNÇÃO SALVAR");
-
+        // ===============================
+// 🔥 SALVAR HISTÓRICO
+// ===============================
+window.salvarHistorico = async () => {
     if (!lastCalc) {
-        console.log("❌ BLOQUEADO: sem cálculo");
-        return toast('Precisa calcular a operação antes de salvar.');
+        return toast('Calcule antes de salvar.');
     }
 
     if (!currentUser) {
-        console.log("❌ BLOQUEADO: sem usuário");
-        return toast('Você precisa estar logado para salvar.');
+        return toast('Faça login para salvar.');
     }
-
-    console.log("🚨 [PASSO 1] Botão SALVAR foi clicado!");
-    console.log("🚨 [PASSO 2] Verificando Usuário:", currentUser);
-    console.log("🚨 [PASSO 3] Verificando Cálculo:", lastCalc);
-    console.log("🚨 [PASSO 4] Passou em tudo! Enviando dados para o Firestore...");
 
     try {
         const payload = {
             uid: currentUser.uid,
             usuarioEmail: currentUser.email,
-            produtoNome: $('nomeProduto')?.value.trim() || 'Desconhecido',
+
+            produtoNome: $('nomeProduto')?.value.trim() || 'Sem nome',
+
             custoCompra: v('custo'),
             cambio: v('cambio'),
             freteCompra: v('freteCompra'),
+            outrasDespesas: v('outrasDespesas'),
+            margemDesejada: v('margem'),
+            impostos: v('impostos'),
+            comissao: v('comissao'),
+            freteVenda: v('freteVenda'),
+
             observacao: $('observacao')?.value.trim() || '',
+
             preco: lastCalc.preco || 0,
             lucro: lastCalc.lucro || 0,
             margemReal: lastCalc.margemReal || 0,
+
             data: new Date().toLocaleString('pt-BR'),
             createdAt: serverTimestamp()
         };
 
-        const docRef = await addDoc(collection(db, 'historico'), payload);
+        await addDoc(collection(db, 'historico'), payload);
 
-        console.log('✅ [PASSO 5] SUCESSO! SALVO COM ID:', docRef.id);
-        toast('Salvo com sucesso!');
-
+        toast('✅ Salvo com sucesso!');
         await renderHistorico();
+
     } catch (error) {
-        console.error('❌ [ERRO FIRESTORE]:', error);
-        toast('Erro ao salvar: ' + error.message);
+        console.error(error);
+        toast('Erro ao salvar.');
     }
 };
 
 
-       async function renderHistorico() {
-    console.log('🔄 Carregando histórico...');
+// ===============================
+// 📊 RENDER HISTÓRICO
+// ===============================
+async function renderHistorico() {
 
     if (!currentUser) {
-        console.log('❌ Sem usuário logado');
-        $('histContent').innerHTML = '<div class="empty">Logue para ver.</div>';
+        $('histContent').innerHTML = '<div class="empty">Faça login.</div>';
         return;
     }
-
-    console.log('👤 UID buscado:', currentUser.uid);
 
     try {
         const snap = await getDocs(
@@ -905,21 +907,15 @@
             )
         );
 
-        console.log('📦 Documentos encontrados:', snap.size);
-
         const hist = [];
-        snap.forEach(d => {
-            const item = { id: d.id, ...d.data() };
-            console.log('📄 Doc:', d.id, item);
-            hist.push(item);
-        });
+        snap.forEach(d => hist.push({ id: d.id, ...d.data() }));
 
         if (!hist.length) {
-            console.log('⚠️ Nenhum histórico encontrado para este UID');
-            $('histContent').innerHTML = '<div class="empty">Nenhuma simulação salva ainda.</div>';
+            $('histContent').innerHTML = '<div class="empty">Nenhum histórico ainda.</div>';
             return;
         }
 
+        // ordenar mais recente primeiro
         hist.sort((a, b) => {
             const da = a.createdAt?.seconds || 0;
             const dbb = b.createdAt?.seconds || 0;
@@ -935,35 +931,91 @@
                         <th>Preço</th>
                         <th>Lucro</th>
                         <th>Margem</th>
-                        <th>Ações</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
                     ${hist.map(item => `
                         <tr>
                             <td>${item.data || '-'}</td>
-                            <td>${item.produtoNome || 'Sem nome'}</td>
+                            <td>${item.produtoNome || '-'}</td>
                             <td>${moeda(item.preco || 0)}</td>
-                            <td style="color:${(item.lucro || 0) >= 0 ? 'green' : 'red'};font-weight:700;">
+                            <td style="color:${item.lucro >= 0 ? 'green' : 'red'};font-weight:600;">
                                 ${moeda(item.lucro || 0)}
                             </td>
                             <td>${pct(item.margemReal || 0)}</td>
                             <td>
-                                <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                                    <button class="btn btn-secondary" style="min-width:auto; padding:8px 10px;" onclick="window.editarHistorico('${item.id}')">Editar</button>
-                                    <button class="btn btn-secondary" style="min-width:auto; padding:8px 10px;" onclick="window.excluirHistorico('${item.id}')">Excluir</button>
-                                </div>
+                                <button onclick="editarHistorico('${item.id}')">✏️</button>
+                                <button onclick="excluirHistorico('${item.id}')">🗑️</button>
                             </td>
                         </tr>
                     `).join('')}
                 </tbody>
             </table>
         `;
+
     } catch (error) {
-        console.error('❌ Erro ao buscar histórico:', error);
-        $('histContent').innerHTML = `<div class="empty">Erro: ${error.message}</div>`;
+        console.error(error);
+        $('histContent').innerHTML = '<div class="empty">Erro ao carregar.</div>';
     }
 }
+
+
+// ===============================
+// ✏️ EDITAR
+// ===============================
+window.editarHistorico = async (id) => {
+    try {
+        const docSnap = await getDoc(doc(db, 'historico', id));
+
+        if (!docSnap.exists()) {
+            return toast('Registro não encontrado.');
+        }
+
+        const item = docSnap.data();
+
+        // preencher formulário
+        $('nomeProduto').value = item.produtoNome || '';
+        $('custo').value = item.custoCompra || 0;
+        $('cambio').value = item.cambio || 1;
+        $('freteCompra').value = item.freteCompra || 0;
+        $('outrasDespesas').value = item.outrasDespesas || 0;
+        $('margem').value = item.margemDesejada || 0;
+        $('impostos').value = item.impostos || 0;
+        $('comissao').value = item.comissao || 0;
+        $('freteVenda').value = item.freteVenda || 0;
+        $('observacao').value = item.observacao || '';
+
+        toast('✅ Dados carregados');
+
+        // opcional: ir pra aba simulador
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    } catch (error) {
+        console.error(error);
+        toast('Erro ao carregar.');
+    }
+};
+
+
+// ===============================
+// 🗑️ EXCLUIR
+// ===============================
+window.excluirHistorico = async (id) => {
+
+    if (!confirm('Deseja excluir este registro?')) return;
+
+    try {
+        await deleteDoc(doc(db, 'historico', id));
+
+        toast('🗑️ Excluído');
+        renderHistorico();
+
+    } catch (error) {
+        console.error(error);
+        toast('Erro ao excluir.');
+    }
+};
 
 
         window.renderAutorizados = async () => {
