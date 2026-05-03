@@ -2175,7 +2175,7 @@
             const snap = await getDocs(query(collection(db, 'historico'), where('uid', '==', currentUser.uid)));
             const hist = [];
             snap.forEach(d => hist.push({ id: d.id, ...d.data() }));
-            hist.sort((a, b) => String(b.data || '').localeCompare(String(a.data || '')));
+            hist.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
 
             $('histContent').innerHTML = !hist.length
                 ? '<div class="empty">Sua equipe ainda não salvou operações.</div>'
