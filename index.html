@@ -2284,10 +2284,11 @@
                     <td><b>${h.produtoNome}</b><br><small style="color:var(--muted)">Obs: ${h.observacao || 'Nenhuma'}</small></td>
                     <td>${h.data}</td>
                     <td>
-    $ ${h.custoCompra}<br> (Câmbio ${h.cambio})<br>
     <small style="color:var(--muted)">
+        <span style="white-space:nowrap"><b>Custo: $${h.custoCompra}</b></span><br>
+        <span style="white-space:nowrap">Taxa: ${h.cambio}</span><br>
         <span style="white-space:nowrap">Frete Compra: ${h.freteCompraPct || 0}%</span><br>
-        <span style="white-space:nowrap">Custo Final: ${moeda(h.custoProduto || 0)}</span><br>
+        <span style="white-space:nowrap"><b>Custo Final: ${moeda(h.custoProduto || 0)}</b></span><br>
         <span style="white-space:nowrap">Comissão Venda: ${pct(h.comissaoPlataforma || 0)}</span>
     </small>
 </td>
@@ -2296,7 +2297,7 @@
     <b>${moeda(h.preco)}</b><br>
     ${h.precoManualUsado ?
                         `<span style="background:#f59e0b;color:#fff;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:700;white-space:nowrap">Digitado Manual</span><br>`
-                        : ''}
+                        : `<span style="background:var(--accent);color:#fff;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:700;white-space:nowrap">Preço Calculado</span><br>`}
     <small style="color:var(--muted);white-space:nowrap">Frete Venda: ${moeda(h.freteVenda || 0)}</small><br>
 
     <small style="color:var(--muted)">
