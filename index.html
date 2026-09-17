@@ -336,6 +336,14 @@
             color: #fff
         }
 
+        .btn-sm {
+            flex: 0 0 auto;
+            min-width: 0;
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: 8px;
+        }
+
         .results {
             display: flex;
             flex-direction: column;
@@ -720,6 +728,13 @@
         .hist-table td {
             padding: 10px 14px;
             border-bottom: 1px solid var(--border)
+        }
+
+        .hist-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            min-width: 130px;
         }
 
         .toast {
@@ -1189,6 +1204,16 @@
             .mercado-grid {
                 grid-template-columns: 1fr
             }
+
+            .hist-actions {
+                min-width: 0;
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .hist-actions .btn-sm {
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -1534,8 +1559,14 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <div class="toolbar"><button class="btn btn-secondary" style="max-width:220px"
-                            onclick="window.abrirModalProduto()">➕ Novo Produto</button></div>
+                    <div class="toolbar">
+                        <input type="text" id="buscaProdutos" placeholder="🔎 Pesquisar produto..."
+                            style="height:42px; padding:0 12px; border-radius:10px; border:1.5px solid var(--border); font-weight:700;"
+                            oninput="window.filtrarProdutos()">
+
+                        <button class="btn btn-secondary" style="max-width:220px"
+                            onclick="window.abrirModalProduto()">➕ Novo Produto</button>
+                    </div>
                     <div id="listaProdutos" class="simple-list"></div>
                 </div>
             </div>
@@ -1615,6 +1646,14 @@
                         <div class="iw wp"><span class="pre">×</span><input type="number" id="produtoCambioCadastro"
                                 step="0.0001" value="1"></div>
                     </div>
+                    <div class="field"><label>Frete de Venda (R$)</label>
+                        <div class="iw wp"><span class="pre">R$</span><input type="number" id="produtoFreteVendaCadastro"
+                                min="0" step="0.01"></div>
+                    </div>
+                    <div class="field"><label>Frete de Compra (%)</label>
+                        <div class="iw ws"><input type="number" id="produtoFreteCompraCadastro" min="0" step="0.01"
+                                value="28"><span class="suf">%</span></div>
+                    </div>
                     <div class="field"><label>Status</label>
                         <div class="iw">
                             <select id="produtoStatusCadastro">
@@ -1636,7 +1675,7 @@
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js';
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js';
-        import { getFirestore, collection, addDoc, getDocs, query, where, serverTimestamp, doc, updateDoc, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js';
+        import { getFirestore, collection, addDoc, getDocs, getDoc, query, where, serverTimestamp, doc, updateDoc, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js';
 
         const firebaseConfig = {
             apiKey: "AIzaSyALsqLomc6fbFYDlER2AIQOS8kLgxzHLY4",
@@ -1745,19 +1784,24 @@
             // ORDENA A-Z
             produtos.sort((a, b) => a.nome.localeCompare(b.nome));
 
-            $('listaProdutos').innerHTML = !produtos.length ? '<div class="empty">Nenhum produto cadastrado</div>' : produtos.map(p => `<div class="simple-item ${p.status === 'inativo' ? 'inativo' : ''}"><div><div class="simple-title">${p.nome}</div><div class="simple-sub">Custo: ${p.custo ? moeda(p.custo) : '—'} · Câmbio: ×${p.cambio || 1}</div></div><div class="simple-actions"><button class="btn btn-secondary" onclick="window.usarProduto('${p.id}')">Ir p/ Simulador</button><button class="btn btn-secondary" onclick="window.editarProduto('${p.id}')">Editar</button><button class="btn btn-secondary" onclick="window.inativarProduto('${p.id}')">${p.status === 'inativo' ? 'Ativar' : 'Inativar'}</button></div></div>`).join('');
+            $('listaProdutos').innerHTML = !produtos.length ? '<div class="empty">Nenhum produto cadastrado</div>' : produtos.map(p => `<div class="simple-item ${p.status === 'inativo' ? 'inativo' : ''}"><div><div class="simple-title">${p.nome}</div><div class="simple-sub">Custo: ${p.custo ? moeda(p.custo) : '—'} · Câmbio: ×${p.cambio || 1} · Frete Venda: ${p.freteVenda ? moeda(p.freteVenda) : '—'} · Frete Compra: ${p.freteCompra ?? 28}%</div></div><div class="simple-actions"><button class="btn btn-secondary" onclick="window.usarProduto('${p.id}')">Ir p/ Simulador</button><button class="btn btn-secondary" onclick="window.editarProduto('${p.id}')">Editar</button><button class="btn btn-secondary" onclick="window.inativarProduto('${p.id}')">${p.status === 'inativo' ? 'Ativar' : 'Inativar'}</button></div></div>`).join('');
         }
 
-        window.abrirModalProduto = (id = null) => { editProdutoId = id; $('modalProdutoWrap').style.display = 'flex'; if (id) { const p = produtosCache.find(x => x.id === id); $('produtoNomeCadastro').value = p?.nome || ''; $('produtoCustoCadastro').value = p?.custo || ''; $('produtoCambioCadastro').value = p?.cambio || 1; $('produtoStatusCadastro').value = p?.status || 'ativo' } else { $('produtoNomeCadastro').value = ''; $('produtoCustoCadastro').value = ''; $('produtoCambioCadastro').value = '1'; $('produtoStatusCadastro').value = 'ativo' } };
+        window.abrirModalProduto = (id = null) => { editProdutoId = id; $('modalProdutoWrap').style.display = 'flex'; if (id) { const p = produtosCache.find(x => x.id === id); $('produtoNomeCadastro').value = p?.nome || ''; $('produtoCustoCadastro').value = p?.custo || ''; $('produtoCambioCadastro').value = p?.cambio || 1; $('produtoFreteVendaCadastro').value = p?.freteVenda ?? ''; $('produtoFreteCompraCadastro').value = p?.freteCompra ?? 28; $('produtoStatusCadastro').value = p?.status || 'ativo' } else { $('produtoNomeCadastro').value = ''; $('produtoCustoCadastro').value = ''; $('produtoCambioCadastro').value = '1'; $('produtoFreteVendaCadastro').value = ''; $('produtoFreteCompraCadastro').value = '28'; $('produtoStatusCadastro').value = 'ativo' } };
         window.fecharModalProduto = () => $('modalProdutoWrap').style.display = 'none';
 
         window.salvarProdutoModal = async () => {
             const nome = $('produtoNomeCadastro').value.trim();
             if (!nome) return toast('Informe o nome do produto');
-            const payload = { uid: currentUser.uid, nome, custo: v('produtoCustoCadastro'), cambio: v('produtoCambioCadastro') || 1, status: $('produtoStatusCadastro').value, updatedAt: new Date().toLocaleString('pt-BR') };
+            const payload = { uid: currentUser.uid, nome, custo: v('produtoCustoCadastro'), cambio: v('produtoCambioCadastro') || 1, freteVenda: v('produtoFreteVendaCadastro'), freteCompra: v('produtoFreteCompraCadastro'), status: $('produtoStatusCadastro').value, updatedAt: new Date().toLocaleString('pt-BR') };
+            let idSalvo = editProdutoId;
             if (editProdutoId) await updateDoc(doc(db, 'produtos', editProdutoId), payload);
-            else { payload.createdAt = serverTimestamp(); await addDoc(collection(db, 'produtos'), payload) }
-            window.fecharModalProduto(); await renderProdutos(); window.preencherDropdownProdutos(); toast('Produto salvo com sucesso')
+            else { payload.createdAt = serverTimestamp(); const ref = await addDoc(collection(db, 'produtos'), payload); idSalvo = ref.id }
+            window.fecharModalProduto(); await renderProdutos(); window.preencherDropdownProdutos(); toast('Produto salvo com sucesso');
+
+            if (confirm('✅ Produto salvo! Deseja ir para o Simulador com esses dados?')) {
+                window.usarProduto(idSalvo);
+            }
         };
 
         window.editarProduto = id => window.abrirModalProduto(id);
@@ -1767,6 +1811,7 @@
             const p = produtosCache.find(x => x.id === id);
             if (!p) return;
             $('nomeProduto').value = p.nome; $('custo').value = p.custo || ''; $('cambio').value = p.cambio || 1;
+            $('freteVenda').value = p.freteVenda ?? ''; $('freteCompra').value = p.freteCompra ?? 28;
             mercadoMediaAtual = 0; mercadoIdealAtual = 0; // reseta inteligencia de mkt ao mudar produto
             window.fecharDropdownProdutos(); atualizarHeaderProduto(); window.calcularAll(); window.mudarAba('simulador'); toast('Produto carregado para simulação');
         };
@@ -1832,6 +1877,7 @@
             const lucro = preco - custoTotal - valImp - valCom;
             const valMargem = preco * (margem / 100);
             const margemReal = preco > 0 ? (lucro / preco) * 100 : 0;
+            const valorRepasse = preco - valCom - freteV;
 
             lastCalc = {
                 custoBRL,
@@ -1847,7 +1893,8 @@
                 preco,
                 precoManual,
                 lucro,
-                margemReal
+                margemReal,
+                valorRepasse
             };
 
             $('precoVenda').textContent = moeda(preco);
@@ -1886,6 +1933,7 @@
         <div class="bk-row"><span>Comissão Plataforma</span><span class="rv">${moeda(valCom)}</span></div>
         <div class="bk-row"><span>Lucro Líquido Projetado</span><span class="rv">${moeda(lucro)}</span></div>
         <div class="bk-row bk-total"><span>Preço Final para Venda</span><span class="rv">${moeda(preco)}</span></div>
+        <div class="bk-row"><span class="green">Valor do Repasse</span><span class="rv green">${moeda(valorRepasse)}</span></div>
     `;
 
             $('chartArea').innerHTML = '<canvas id="grafico"></canvas>';
@@ -2150,6 +2198,7 @@
                 custoCompra: v('custo'),
                 cambio: v('cambio'),
                 freteCompra: v('freteCompra'),
+                freteVenda: v('freteVenda'),
 
                 // ✅ NOVOS CAMPOS
                 custoProduto: lastCalc.custoProduto,
@@ -2166,6 +2215,17 @@
                 createdAt: serverTimestamp()
             });
 
+            // 🔄 Sincroniza Frete de Venda/Compra no cadastro do produto (aba Produtos)
+            const nomeAtual = $('nomeProduto').value.trim().toLowerCase();
+            const produtoVinculado = produtosCache.find(p => (p.nome || '').trim().toLowerCase() === nomeAtual);
+            if (produtoVinculado) {
+                await updateDoc(doc(db, 'produtos', produtoVinculado.id), {
+                    freteVenda: v('freteVenda'),
+                    freteCompra: v('freteCompra'),
+                    updatedAt: new Date().toLocaleString('pt-BR')
+                });
+                await renderProdutos();
+            }
 
             await renderHistorico();
             toast('💾 Simulação gravada no Histórico!');
@@ -2180,7 +2240,7 @@
 
             $('histContent').innerHTML = !hist.length
                 ? '<div class="empty">Sua equipe ainda não salvou operações.</div>'
-                : '<div style="overflow-x:auto"><table class="hist-table"><thead><tr><th>#</th><th>Produto/Projeto</th><th>Dia</th><th>Dados Compra</th><th>Visão Comercial</th><th>Comissão Plataforma (%)</th><th>Resultado Caixa</th><th>Ações Rapidas</th></tr></thead><tbody>' +
+                : '<div style="overflow-x:auto"><table class="hist-table"><thead><tr><th>#</th><th>Produto/Projeto</th><th>Dia</th><th>Dados Compra</th><th>Visão Comercial</th><th>Resultado Caixa</th><th>Ações Rapidas</th></tr></thead><tbody>' +
                 hist.map((h, i) => `<tr>
                     <td>${i + 1}</td>
                     <td><b>${h.produtoNome}</b><br><small style="color:var(--muted)">Obs: ${h.observacao || 'Nenhuma'}</small></td>
@@ -2189,7 +2249,8 @@
     $ ${h.custoCompra} (Câmbio ${h.cambio})<br>
     <small style="color:var(--muted)">
         Frete Compra: ${h.freteCompraPct || 0}%<br>
-        Custo Final Produto: ${moeda(h.custoProduto || 0)}
+        Custo Final Produto: ${moeda(h.custoProduto || 0)}<br>
+        Comissão Plataforma: ${pct(h.comissaoPlataforma || 0)}
     </small>
 </td>
 
@@ -2205,29 +2266,39 @@
     </small>
 </td>
 
-                    <td><b>${pct(h.comissaoPlataforma || 0)}</b></td>
                     <td style="color:${h.lucro >= 0 ? 'var(--success)' : 'var(--danger)'}"><b>Lucro: ${moeda(h.lucro)}</b><br><small>M. Real: ${pct(h.margemReal)}</small></td>
-                    <td style="white-space:nowrap">
-                        <button onclick="window.editarHistorico('${h.id}')" class="btn btn-secondary" style="padding:6px 12px; font-size:12px" title="Traz p/ tela">♻️ Re-simular</button>
-                        <button onclick="window.excluirHistorico('${h.id}')" class="btn btn-secondary" style="padding:6px 12px; font-size:12px; color:var(--danger)" title="Apagar">❌</button>
+                    <td>
+                        <div class="hist-actions">
+                            <button onclick="window.editarHistorico('${h.id}')" class="btn btn-secondary btn-sm" title="Traz p/ tela">♻️ Re-simular</button>
+                            <button onclick="window.excluirHistorico('${h.id}')" class="btn btn-secondary btn-sm" style="color:var(--danger)" title="Apagar">❌ Apagar</button>
+                        </div>
                     </td>
                 </tr>`).join('') + '</tbody></table></div>';
         }
 
         window.editarHistorico = async (id) => {
-            const snap = await getDocs(query(collection(db, 'historico')));
             let item = null;
-            snap.forEach(d => { if (d.id === id) item = { id: d.id, ...d.data() }; });
+            try {
+                const snap = await getDoc(doc(db, 'historico', id));
+                if (snap.exists()) item = { id: snap.id, ...snap.data() };
+            } catch (e) {
+                console.error(e);
+                return toast('❌ Não foi possível carregar este registro.');
+            }
 
-            if (!item) return;
-            $('nomeProduto').value = item.produtoNome;
-            $('custo').value = item.custoCompra;
-            $('cambio').value = item.cambio;
-            $('freteCompra').value = item.freteCompra;
-            $('observacao').value = item.observacao;
-            $('precoManual').value = item.preco;
+            if (!item) return toast('❌ Registro não encontrado.');
+            $('nomeProduto').value = item.produtoNome || '';
+            $('custo').value = item.custoCompra ?? '';
+            $('cambio').value = item.cambio ?? 1;
+            $('freteCompra').value = item.freteCompra ?? 28;
+            $('freteVenda').value = item.freteVenda ?? '';
+            $('observacao').value = item.observacao || '';
+            $('precoManual').value = (item.preco === null || item.preco === undefined || item.preco === '' || !Number.isFinite(Number(item.preco)))
+                ? '' : Number(item.preco).toFixed(2);
             if (item.comissaoPlataforma !== undefined) $('comissao').value = item.comissaoPlataforma;
 
+            mercadoMediaAtual = 0; mercadoIdealAtual = 0;
+            atualizarHeaderProduto();
             window.calcularAll(); window.mudarAba('simulador'); toast('♻️ Histórico restaurado no simulador.');
         };
 
@@ -2317,6 +2388,16 @@
             linhas.forEach(linha => {
                 const produto = linha.children[1].innerText.toLowerCase();
                 linha.style.display = produto.includes(termo) ? '' : 'none';
+            });
+        };
+
+        window.filtrarProdutos = function () {
+            const termo = $('buscaProdutos').value.toLowerCase();
+            const itens = document.querySelectorAll('#listaProdutos .simple-item');
+
+            itens.forEach(item => {
+                const titulo = item.querySelector('.simple-title')?.innerText.toLowerCase() || '';
+                item.style.display = titulo.includes(termo) ? '' : 'none';
             });
         };
 
