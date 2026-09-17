@@ -727,7 +727,8 @@
             padding: 10px 14px;
             text-align: left;
             font-weight: 700;
-            font-size: 12px
+            font-size: 12px;
+            white-space: nowrap
         }
 
         .hist-table td {
@@ -2277,33 +2278,33 @@
 
             $('histContent').innerHTML = !hist.length
                 ? '<div class="empty">Sua equipe ainda não salvou operações.</div>'
-                : '<div style="overflow-x:auto"><table class="hist-table"><thead><tr><th>#</th><th>Produto/Projeto</th><th>Dia</th><th>Dados Compra</th><th>Visão Comercial</th><th>Resultado Caixa</th><th>Ações Rapidas</th></tr></thead><tbody>' +
+                : '<div style="overflow-x:auto"><table class="hist-table"><thead><tr><th>#</th><th>Produto</th><th>Data</th><th>Dados Compra</th><th>Preço de Venda</th><th>Margem</th><th>Ações Rápidas</th></tr></thead><tbody>' +
                 hist.map((h, i) => `<tr>
                     <td>${i + 1}</td>
                     <td><b>${h.produtoNome}</b><br><small style="color:var(--muted)">Obs: ${h.observacao || 'Nenhuma'}</small></td>
                     <td>${h.data}</td>
                     <td>
-    $ ${h.custoCompra} (Câmbio ${h.cambio})<br>
+    $ ${h.custoCompra}<br> (Câmbio ${h.cambio})<br>
     <small style="color:var(--muted)">
-        Frete Compra: ${h.freteCompraPct || 0}%<br>
-        Custo Final Produto: ${moeda(h.custoProduto || 0)}<br>
-        Comissão Plataforma: ${pct(h.comissaoPlataforma || 0)}
+        <span style="white-space:nowrap">Frete Compra: ${h.freteCompraPct || 0}%</span><br>
+        <span style="white-space:nowrap">Custo Final: ${moeda(h.custoProduto || 0)}</span><br>
+        <span style="white-space:nowrap">Comissão Venda: ${pct(h.comissaoPlataforma || 0)}</span>
     </small>
 </td>
 
                     <td>
-    Preço: <b>${moeda(h.preco)}</b><br>
-
+    <b>${moeda(h.preco)}</b><br>
     ${h.precoManualUsado ?
-                        `<span style="background:#f59e0b;color:#fff;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:700">Digitado Manual</span><br>`
+                        `<span style="background:#f59e0b;color:#fff;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:700;white-space:nowrap">Digitado Manual</span><br>`
                         : ''}
+    <small style="color:var(--muted);white-space:nowrap">Frete Venda: ${moeda(h.freteVenda || 0)}</small><br>
 
     <small style="color:var(--muted)">
-        ${h.infoMercadoSalva ? `Média de mercado na época: ${moeda(h.mercadoMediaHist)}` : `(Pesquisa n/ realizada)`}
+        ${h.infoMercadoSalva ? `Média de mercado na época: ${moeda(h.mercadoMediaHist)}` : `<span style="white-space:nowrap">(Pesquisa n/ realizada)</span>`}
     </small>
 </td>
 
-                    <td style="color:${h.lucro >= 0 ? 'var(--success)' : 'var(--danger)'}"><b>Lucro: ${moeda(h.lucro)}</b><br><small>M. Real: ${pct(h.margemReal)}</small></td>
+                    <td style="color:${h.lucro >= 0 ? 'var(--success)' : 'var(--danger)'}"><b>${moeda(h.lucro)}</b><br><small style="white-space:nowrap">Margem: ${pct(h.margemReal)}</small></td>
                     <td>
                         <div class="hist-actions">
                             <button onclick="window.editarHistorico('${h.id}')" class="btn btn-secondary btn-sm" title="Traz p/ tela">♻️ Atualizar</button>
