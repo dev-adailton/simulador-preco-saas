@@ -2154,6 +2154,7 @@
                 // ✅ NOVOS CAMPOS
                 custoProduto: lastCalc.custoProduto,
                 freteCompraPct: v('freteCompra'),
+                comissaoPlataforma: v('comissao'),
 
                 custoTotal: lastCalc.custoTotal,
                 preco: lastCalc.preco,
@@ -2179,7 +2180,7 @@
 
             $('histContent').innerHTML = !hist.length
                 ? '<div class="empty">Sua equipe ainda não salvou operações.</div>'
-                : '<div style="overflow-x:auto"><table class="hist-table"><thead><tr><th>#</th><th>Produto/Projeto</th><th>Dia</th><th>Dados Compra</th><th>Visão Comercial</th><th>Resultado Caixa</th><th>Ações Rapidas</th></tr></thead><tbody>' +
+                : '<div style="overflow-x:auto"><table class="hist-table"><thead><tr><th>#</th><th>Produto/Projeto</th><th>Dia</th><th>Dados Compra</th><th>Visão Comercial</th><th>Comissão Plataforma (%)</th><th>Resultado Caixa</th><th>Ações Rapidas</th></tr></thead><tbody>' +
                 hist.map((h, i) => `<tr>
                     <td>${i + 1}</td>
                     <td><b>${h.produtoNome}</b><br><small style="color:var(--muted)">Obs: ${h.observacao || 'Nenhuma'}</small></td>
@@ -2204,6 +2205,7 @@
     </small>
 </td>
 
+                    <td><b>${pct(h.comissaoPlataforma || 0)}</b></td>
                     <td style="color:${h.lucro >= 0 ? 'var(--success)' : 'var(--danger)'}"><b>Lucro: ${moeda(h.lucro)}</b><br><small>M. Real: ${pct(h.margemReal)}</small></td>
                     <td style="white-space:nowrap">
                         <button onclick="window.editarHistorico('${h.id}')" class="btn btn-secondary" style="padding:6px 12px; font-size:12px" title="Traz p/ tela">♻️ Re-simular</button>
@@ -2224,6 +2226,7 @@
             $('freteCompra').value = item.freteCompra;
             $('observacao').value = item.observacao;
             $('precoManual').value = item.preco;
+            if (item.comissaoPlataforma !== undefined) $('comissao').value = item.comissaoPlataforma;
 
             window.calcularAll(); window.mudarAba('simulador'); toast('♻️ Histórico restaurado no simulador.');
         };
