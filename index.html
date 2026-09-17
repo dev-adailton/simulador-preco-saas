@@ -336,6 +336,11 @@
             color: #fff
         }
 
+        .btn-warning {
+            background: var(--warning);
+            color: #fff
+        }
+
         .btn-sm {
             flex: 0 0 auto;
             min-width: 0;
@@ -1334,6 +1339,8 @@
                         <div class="actions">
                             <button class="btn btn-primary" onclick="window.calcularAll()">⚡ Calcular Tudo</button>
                             <button class="btn btn-success" onclick="window.salvarHistorico()">💾 Salvar</button>
+                            <button class="btn btn-warning" id="btnAtualizar" style="display:none"
+                                onclick="window.atualizarHistorico()">🔄 Atualizar</button>
                             <button class="btn btn-accent" onclick="window.copiarResultado()">📋 Copiar</button>
                             <button class="btn btn-secondary" onclick="window.exportarPDF()">📄 PDF</button>
                             <button class="btn btn-secondary" onclick="window.limpar()">🗑️ Limpar</button>
@@ -1692,7 +1699,9 @@
         const $ = id => document.getElementById(id), v = id => { const x = parseFloat($(id)?.value); return isNaN(x) ? 0 : x }, moeda = n => Number(n || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), pct = n => Number(n || 0).toFixed(2).replace('.', ',') + '%';
 
         let chartInstance = null, chartMercadoInstance = null;
-        let lastCalc = null, currentUser = null, editProdutoId = null, produtosCache = [];
+        let lastCalc = null, currentUser = null, editProdutoId = null, produtosCache = [], editHistoricoId = null;
+
+        function ativarModoAtualizar(id) { editHistoricoId = id; $('btnAtualizar').style.display = id ? 'flex' : 'none' }
         let mercadoCache = [], mercadoMediaAtual = 0, mercadoIdealAtual = 0;
         let lojasSelecionadas = []; // NOVO ESTADO DE LOJAS PARA O FILTRO PRO
 
@@ -1813,6 +1822,7 @@
             $('nomeProduto').value = p.nome; $('custo').value = p.custo || ''; $('cambio').value = p.cambio || 1;
             $('freteVenda').value = p.freteVenda ?? ''; $('freteCompra').value = p.freteCompra ?? 28;
             mercadoMediaAtual = 0; mercadoIdealAtual = 0; // reseta inteligencia de mkt ao mudar produto
+            ativarModoAtualizar(null); // nova simulação: Salvar cria registro novo, não atualiza o anterior
             window.fecharDropdownProdutos(); atualizarHeaderProduto(); window.calcularAll(); window.mudarAba('simulador'); toast('Produto carregado para simulação');
         };
 
@@ -2185,14 +2195,9 @@
         // ==========================================
         //  HISTORICO MELHORADO
         // ==========================================
-        window.salvarHistorico = async () => {
-            if (!lastCalc) return toast('Precisa calcular a operação antes de salvar.');
-
-            await addDoc(collection(db, 'historico'), {
-                uid: currentUser.uid,
-                usuarioEmail: currentUser.email,
+        function montarPayloadHistorico() {
+            return {
                 produtoNome: $('nomeProduto').value.trim() || 'Desconhecido',
-                data: new Date().toLocaleString('pt-BR'),
                 observacao: $('observacao').value || '',
 
                 custoCompra: v('custo'),
@@ -2210,12 +2215,12 @@
                 lucro: lastCalc.lucro,
                 margemReal: lastCalc.margemReal,
 
-                precoManualUsado: lastCalc.precoManual > 0, // ✅ IMPORTANTE
+                precoManualUsado: lastCalc.precoManual > 0 // ✅ IMPORTANTE
+            };
+        }
 
-                createdAt: serverTimestamp()
-            });
-
-            // 🔄 Sincroniza Frete de Venda/Compra no cadastro do produto (aba Produtos)
+        // 🔄 Sincroniza Frete de Venda/Compra no cadastro do produto (aba Produtos)
+        async function sincronizarProdutoVinculado() {
             const nomeAtual = $('nomeProduto').value.trim().toLowerCase();
             const produtoVinculado = produtosCache.find(p => (p.nome || '').trim().toLowerCase() === nomeAtual);
             if (produtoVinculado) {
@@ -2226,9 +2231,36 @@
                 });
                 await renderProdutos();
             }
+        }
 
+        window.salvarHistorico = async () => {
+            if (!lastCalc) return toast('Precisa calcular a operação antes de salvar.');
+
+            await addDoc(collection(db, 'historico'), {
+                uid: currentUser.uid,
+                usuarioEmail: currentUser.email,
+                data: new Date().toLocaleString('pt-BR'),
+                ...montarPayloadHistorico(),
+                createdAt: serverTimestamp()
+            });
+
+            await sincronizarProdutoVinculado();
             await renderHistorico();
             toast('💾 Simulação gravada no Histórico!');
+        };
+
+        window.atualizarHistorico = async () => {
+            if (!editHistoricoId) return toast('Nenhum registro carregado para atualizar. Use o Re-simular no Histórico.');
+            if (!lastCalc) return toast('Precisa calcular a operação antes de atualizar.');
+
+            await updateDoc(doc(db, 'historico', editHistoricoId), {
+                ...montarPayloadHistorico(),
+                updatedAt: new Date().toLocaleString('pt-BR')
+            });
+
+            await sincronizarProdutoVinculado();
+            await renderHistorico();
+            toast('🔄 Registro atualizado com sucesso!');
         };
 
         async function renderHistorico() {
@@ -2298,6 +2330,7 @@
             if (item.comissaoPlataforma !== undefined) $('comissao').value = item.comissaoPlataforma;
 
             mercadoMediaAtual = 0; mercadoIdealAtual = 0;
+            ativarModoAtualizar(id);
             atualizarHeaderProduto();
             window.calcularAll(); window.mudarAba('simulador'); toast('♻️ Histórico restaurado no simulador.');
         };
@@ -2342,7 +2375,7 @@
         }
 
 
-        window.limpar = () => { ['custo', 'freteVenda', 'outrasReais', 'outrasPct', 'precoManual', 'observacao'].forEach(id => $(id).value = ''); $('nomeProduto').value = ''; $('cambio').value = '1'; $('freteCompra').value = '28'; $('margem').value = '20'; $('impostos').value = '2'; $('comissao').value = '18'; syncMargensMarketplaces(); syncComissoesMarketplaces(); resetUI(); mercadoMediaAtual = 0; atualizarHeaderProduto(); lojasSelecionadas = []; window.atualizarLabelFiltro(); toast('Tudo Limpo 👌') };
+        window.limpar = () => { ['custo', 'freteVenda', 'outrasReais', 'outrasPct', 'precoManual', 'observacao'].forEach(id => $(id).value = ''); $('nomeProduto').value = ''; $('cambio').value = '1'; $('freteCompra').value = '28'; $('margem').value = '20'; $('impostos').value = '2'; $('comissao').value = '18'; syncMargensMarketplaces(); syncComissoesMarketplaces(); resetUI(); mercadoMediaAtual = 0; ativarModoAtualizar(null); atualizarHeaderProduto(); lojasSelecionadas = []; window.atualizarLabelFiltro(); toast('Tudo Limpo 👌') };
 
         window.salvarConfigApi = () => { localStorage.setItem('serp_api_key', $('serpApiKey').value); localStorage.setItem('modo_busca', $('modoBusca').value); toast('✅ Sistema Sincronizado com SerpApi') };
         function carregarConfigApi() { $('serpApiKey').value = localStorage.getItem('serp_api_key') || ''; $('modoBusca').value = localStorage.getItem('modo_busca') || 'proxy' }
