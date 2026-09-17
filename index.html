@@ -1673,6 +1673,8 @@
             <div class="modal-head">📦 Produto <button class="modal-close"
                     onclick="window.fecharModalProduto()">×</button></div>
             <div class="modal-body">
+                <div id="produtoUltimaAtualizacao" class="simple-sub" style="margin-bottom:14px; display:none">🕒
+                    Última atualização: <b id="produtoUltimaAtualizacaoValor">—</b></div>
                 <div class="modal-grid">
                     <div class="field"><label>Nome do Produto</label>
                         <div class="iw"><input type="text" id="produtoNomeCadastro"></div>
@@ -1825,10 +1827,21 @@
             // ORDENA A-Z
             produtos.sort((a, b) => a.nome.localeCompare(b.nome));
 
-            $('listaProdutos').innerHTML = !produtos.length ? '<div class="empty">Nenhum produto cadastrado</div>' : produtos.map(p => `<div class="simple-item ${p.status === 'inativo' ? 'inativo' : ''}"><div><div class="simple-title">${p.nome}</div><div class="simple-sub">Custo: ${p.custo ? moeda(p.custo) : '—'} · Câmbio: ×${p.cambio || 1} · Frete Venda: ${p.freteVenda ? moeda(p.freteVenda) : '—'} · Frete Compra: ${p.freteCompra ?? 28}%</div></div><div class="simple-actions"><button class="btn btn-secondary" onclick="window.usarProduto('${p.id}')">Ir p/ Simulador</button><button class="btn btn-secondary" onclick="window.editarProduto('${p.id}')">Editar</button><button class="btn btn-secondary" onclick="window.inativarProduto('${p.id}')">${p.status === 'inativo' ? 'Ativar' : 'Inativar'}</button></div></div>`).join('');
+            $('listaProdutos').innerHTML = !produtos.length ? '<div class="empty">Nenhum produto cadastrado</div>' : produtos.map(p => `<div class="simple-item ${p.status === 'inativo' ? 'inativo' : ''}"><div><div class="simple-title">${p.nome}</div><div class="simple-sub">Custo: ${p.custo ? moeda(p.custo) : '—'} · Câmbio: ×${p.cambio || 1} · Frete Venda: ${p.freteVenda ? moeda(p.freteVenda) : '—'} · Frete Compra: ${p.freteCompra ?? 28}% · 🕒 Atualizado em: ${p.updatedAt || 'nunca'}</div></div><div class="simple-actions"><button class="btn btn-secondary" onclick="window.usarProduto('${p.id}')">Ir p/ Simulador</button><button class="btn btn-secondary" onclick="window.editarProduto('${p.id}')">Editar</button><button class="btn btn-secondary" onclick="window.inativarProduto('${p.id}')">${p.status === 'inativo' ? 'Ativar' : 'Inativar'}</button></div></div>`).join('');
         }
 
-        window.abrirModalProduto = (id = null) => { editProdutoId = id; $('modalProdutoWrap').style.display = 'flex'; if (id) { const p = produtosCache.find(x => x.id === id); $('produtoNomeCadastro').value = p?.nome || ''; $('produtoCustoCadastro').value = p?.custo || ''; $('produtoCambioCadastro').value = p?.cambio || 1; $('produtoFreteVendaCadastro').value = p?.freteVenda ?? ''; $('produtoFreteCompraCadastro').value = p?.freteCompra ?? 28; $('produtoStatusCadastro').value = p?.status || 'ativo' } else { $('produtoNomeCadastro').value = ''; $('produtoCustoCadastro').value = ''; $('produtoCambioCadastro').value = '1'; $('produtoFreteVendaCadastro').value = ''; $('produtoFreteCompraCadastro').value = '28'; $('produtoStatusCadastro').value = 'ativo' } };
+        window.abrirModalProduto = (id = null) => {
+            editProdutoId = id; $('modalProdutoWrap').style.display = 'flex';
+            if (id) {
+                const p = produtosCache.find(x => x.id === id);
+                $('produtoNomeCadastro').value = p?.nome || ''; $('produtoCustoCadastro').value = p?.custo || ''; $('produtoCambioCadastro').value = p?.cambio || 1; $('produtoFreteVendaCadastro').value = p?.freteVenda ?? ''; $('produtoFreteCompraCadastro').value = p?.freteCompra ?? 28; $('produtoStatusCadastro').value = p?.status || 'ativo';
+                $('produtoUltimaAtualizacao').style.display = p?.updatedAt ? 'block' : 'none';
+                $('produtoUltimaAtualizacaoValor').textContent = p?.updatedAt || '—';
+            } else {
+                $('produtoNomeCadastro').value = ''; $('produtoCustoCadastro').value = ''; $('produtoCambioCadastro').value = '1'; $('produtoFreteVendaCadastro').value = ''; $('produtoFreteCompraCadastro').value = '28'; $('produtoStatusCadastro').value = 'ativo';
+                $('produtoUltimaAtualizacao').style.display = 'none';
+            }
+        };
         window.fecharModalProduto = () => $('modalProdutoWrap').style.display = 'none';
 
         window.salvarProdutoModal = async () => {
@@ -2251,14 +2264,16 @@
             };
         }
 
-        // 🔄 Sincroniza Frete de Venda/Compra no cadastro do produto (aba Produtos)
+        // 🔄 Sincroniza Custo/Câmbio/Frete Compra/Frete Venda no cadastro do produto (aba Produtos)
         async function sincronizarProdutoVinculado() {
             const nomeAtual = $('nomeProduto').value.trim().toLowerCase();
             const produtoVinculado = produtosCache.find(p => (p.nome || '').trim().toLowerCase() === nomeAtual);
             if (produtoVinculado) {
                 await updateDoc(doc(db, 'produtos', produtoVinculado.id), {
-                    freteVenda: v('freteVenda'),
+                    custo: v('custo'),
+                    cambio: v('cambio') || 1,
                     freteCompra: v('freteCompra'),
+                    freteVenda: v('freteVenda'),
                     updatedAt: new Date().toLocaleString('pt-BR')
                 });
                 await renderProdutos();
