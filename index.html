@@ -1352,6 +1352,22 @@
                                     <div class="iw wp"><span class="pre">R$</span><input type="number" id="freteVenda"
                                             min="0" step="0.01" oninput="window.calcularAll()"></div>
                                 </div>
+                                <div class="field"><label>Plataforma</label>
+                                    <div class="iw">
+                                        <select id="plataforma" onchange="window.onPlataformaChange()">
+                                            <option value="">— Nenhuma / Manual —</option>
+                                            <option value="magalu">Magalu</option>
+                                            <option value="ml">Mercado Livre</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="field"><label>Tipo de Comissão</label>
+                                    <div class="iw">
+                                        <select id="tipoComissao" onchange="window.onTipoComissaoChange()" disabled>
+                                            <option value="">—</option>
+                                        </select>
+                                    </div>
+                                </div>
                                 <div class="field"><label>Comissão Plataforma (%)</label>
                                     <div class="iw ws"><input type="number" id="comissao" value="18" min="0"
                                             step="0.01" oninput="window.calcularAll()"><span class="suf">%</span></div>
@@ -1704,6 +1720,27 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="stitle" style="margin-top:18px">📊 Tabela de Comissões por Plataforma (%)</div>
+                <div class="grid2">
+                    <div class="field"><label>Magalu · Padrão (%)</label>
+                        <div class="iw ws"><input type="number" id="produtoComMagaluPadrao" min="0" step="0.01"
+                                value="18"><span class="suf">%</span></div>
+                    </div>
+                    <div class="field"><label>Magalu · Promocional (%)</label>
+                        <div class="iw ws"><input type="number" id="produtoComMagaluPromocional" min="0" step="0.01"
+                                value="14"><span class="suf">%</span></div>
+                    </div>
+                    <div class="field"><label>Mercado Livre · Clássico (%)</label>
+                        <div class="iw ws"><input type="number" id="produtoComMlClassico" min="0" step="0.01"
+                                value="0"><span class="suf">%</span></div>
+                    </div>
+                    <div class="field"><label>Mercado Livre · Premium (%)</label>
+                        <div class="iw ws"><input type="number" id="produtoComMlPremium" min="0" step="0.01"
+                                value="0"><span class="suf">%</span></div>
+                    </div>
+                </div>
+
                 <div class="actions">
                     <button class="btn btn-success" onclick="window.salvarProdutoModal()">💾 Salvar</button>
                     <button class="btn btn-secondary" onclick="window.fecharModalProduto()">Cancelar</button>
@@ -1740,6 +1777,50 @@
         let lojasSelecionadas = []; // NOVO ESTADO DE LOJAS PARA O FILTRO PRO
 
         const ADMIN_EMAIL = 'dev.adailton@gmail.com'.toLowerCase();
+
+        // 📊 TABELA DE COMISSÕES POR PLATAFORMA
+        const COMISSAO_DEFAULT = { magalu: { padrao: 18, promocional: 14 }, ml: { classico: 0, premium: 0 } };
+        const TIPOS_COMISSAO = {
+            magalu: [{ value: 'padrao', label: 'Padrão' }, { value: 'promocional', label: 'Promocional' }],
+            ml: [{ value: 'classico', label: 'Clássico' }, { value: 'premium', label: 'Premium' }]
+        };
+        const CAMPO_PRODUTO_COMISSAO = {
+            'magalu:padrao': 'comMagaluPadrao',
+            'magalu:promocional': 'comMagaluPromocional',
+            'ml:classico': 'comMlClassico',
+            'ml:premium': 'comMlPremium'
+        };
+        const NOME_PLATAFORMA = { magalu: 'Magalu', ml: 'Mercado Livre' };
+        function labelPlataforma(p) { return NOME_PLATAFORMA[p] || 'Manual' }
+        function labelTipoComissao(plataforma, tipo) { return TIPOS_COMISSAO[plataforma]?.find(t => t.value === tipo)?.label || '—' }
+
+        window.onPlataformaChange = () => {
+            const plataforma = $('plataforma').value;
+            const tipoSel = $('tipoComissao');
+            if (!plataforma) {
+                tipoSel.innerHTML = '<option value="">—</option>';
+                tipoSel.disabled = true;
+                tipoSel.value = '';
+                return;
+            }
+            tipoSel.disabled = false;
+            tipoSel.innerHTML = TIPOS_COMISSAO[plataforma].map(t => `<option value="${t.value}">${t.label}</option>`).join('');
+            tipoSel.value = TIPOS_COMISSAO[plataforma][0].value;
+            window.onTipoComissaoChange();
+        };
+
+        window.onTipoComissaoChange = () => {
+            const plataforma = $('plataforma').value;
+            const tipo = $('tipoComissao').value;
+            if (!plataforma || !tipo) return;
+            const campo = CAMPO_PRODUTO_COMISSAO[`${plataforma}:${tipo}`];
+            const nomeAtual = $('nomeProduto').value.trim().toLowerCase();
+            const produtoAtual = produtosCache.find(p => (p.nome || '').trim().toLowerCase() === nomeAtual);
+            const valor = (produtoAtual && produtoAtual[campo] !== undefined && produtoAtual[campo] !== null && produtoAtual[campo] !== '')
+                ? produtoAtual[campo] : COMISSAO_DEFAULT[plataforma][tipo];
+            $('comissao').value = valor;
+            window.calcularAll();
+        };
 
         function toast(m) { const t = $('toast'); t.textContent = m; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2600) };
 
@@ -1835,10 +1916,18 @@
             if (id) {
                 const p = produtosCache.find(x => x.id === id);
                 $('produtoNomeCadastro').value = p?.nome || ''; $('produtoCustoCadastro').value = p?.custo || ''; $('produtoCambioCadastro').value = p?.cambio || 1; $('produtoFreteVendaCadastro').value = p?.freteVenda ?? ''; $('produtoFreteCompraCadastro').value = p?.freteCompra ?? 28; $('produtoStatusCadastro').value = p?.status || 'ativo';
+                $('produtoComMagaluPadrao').value = p?.comMagaluPadrao ?? COMISSAO_DEFAULT.magalu.padrao;
+                $('produtoComMagaluPromocional').value = p?.comMagaluPromocional ?? COMISSAO_DEFAULT.magalu.promocional;
+                $('produtoComMlClassico').value = p?.comMlClassico ?? COMISSAO_DEFAULT.ml.classico;
+                $('produtoComMlPremium').value = p?.comMlPremium ?? COMISSAO_DEFAULT.ml.premium;
                 $('produtoUltimaAtualizacao').style.display = p?.updatedAt ? 'block' : 'none';
                 $('produtoUltimaAtualizacaoValor').textContent = p?.updatedAt || '—';
             } else {
                 $('produtoNomeCadastro').value = ''; $('produtoCustoCadastro').value = ''; $('produtoCambioCadastro').value = '1'; $('produtoFreteVendaCadastro').value = ''; $('produtoFreteCompraCadastro').value = '28'; $('produtoStatusCadastro').value = 'ativo';
+                $('produtoComMagaluPadrao').value = COMISSAO_DEFAULT.magalu.padrao;
+                $('produtoComMagaluPromocional').value = COMISSAO_DEFAULT.magalu.promocional;
+                $('produtoComMlClassico').value = COMISSAO_DEFAULT.ml.classico;
+                $('produtoComMlPremium').value = COMISSAO_DEFAULT.ml.premium;
                 $('produtoUltimaAtualizacao').style.display = 'none';
             }
         };
@@ -1847,7 +1936,11 @@
         window.salvarProdutoModal = async () => {
             const nome = $('produtoNomeCadastro').value.trim();
             if (!nome) return toast('Informe o nome do produto');
-            const payload = { uid: currentUser.uid, nome, custo: v('produtoCustoCadastro'), cambio: v('produtoCambioCadastro') || 1, freteVenda: v('produtoFreteVendaCadastro'), freteCompra: v('produtoFreteCompraCadastro'), status: $('produtoStatusCadastro').value, updatedAt: new Date().toLocaleString('pt-BR') };
+            const payload = {
+                uid: currentUser.uid, nome, custo: v('produtoCustoCadastro'), cambio: v('produtoCambioCadastro') || 1, freteVenda: v('produtoFreteVendaCadastro'), freteCompra: v('produtoFreteCompraCadastro'), status: $('produtoStatusCadastro').value,
+                comMagaluPadrao: v('produtoComMagaluPadrao'), comMagaluPromocional: v('produtoComMagaluPromocional'), comMlClassico: v('produtoComMlClassico'), comMlPremium: v('produtoComMlPremium'),
+                updatedAt: new Date().toLocaleString('pt-BR')
+            };
             let idSalvo = editProdutoId;
             if (editProdutoId) await updateDoc(doc(db, 'produtos', editProdutoId), payload);
             else { payload.createdAt = serverTimestamp(); const ref = await addDoc(collection(db, 'produtos'), payload); idSalvo = ref.id }
@@ -1866,6 +1959,7 @@
             if (!p) return;
             $('nomeProduto').value = p.nome; $('custo').value = p.custo || ''; $('cambio').value = p.cambio || 1;
             $('freteVenda').value = p.freteVenda ?? ''; $('freteCompra').value = p.freteCompra ?? 28;
+            $('plataforma').value = ''; window.onPlataformaChange(); // reseta seleção de plataforma/comissão ao trocar de produto
             mercadoMediaAtual = 0; mercadoIdealAtual = 0; // reseta inteligencia de mkt ao mudar produto
             ativarModoAtualizar(null); // nova simulação: Salvar cria registro novo, não atualiza o anterior
             window.fecharDropdownProdutos(); atualizarHeaderProduto(); window.calcularAll(); window.mudarAba('simulador'); toast('Produto carregado para simulação');
@@ -2254,6 +2348,8 @@
                 custoProduto: lastCalc.custoProduto,
                 freteCompraPct: v('freteCompra'),
                 comissaoPlataforma: v('comissao'),
+                plataforma: $('plataforma').value,
+                tipoComissao: $('tipoComissao').value,
 
                 custoTotal: lastCalc.custoTotal,
                 preco: lastCalc.preco,
@@ -2264,18 +2360,24 @@
             };
         }
 
-        // 🔄 Sincroniza Custo/Câmbio/Frete Compra/Frete Venda no cadastro do produto (aba Produtos)
+        // 🔄 Sincroniza Custo/Câmbio/Frete Compra/Frete Venda/Comissão no cadastro do produto (aba Produtos)
         async function sincronizarProdutoVinculado() {
             const nomeAtual = $('nomeProduto').value.trim().toLowerCase();
             const produtoVinculado = produtosCache.find(p => (p.nome || '').trim().toLowerCase() === nomeAtual);
             if (produtoVinculado) {
-                await updateDoc(doc(db, 'produtos', produtoVinculado.id), {
+                const updateData = {
                     custo: v('custo'),
                     cambio: v('cambio') || 1,
                     freteCompra: v('freteCompra'),
                     freteVenda: v('freteVenda'),
                     updatedAt: new Date().toLocaleString('pt-BR')
-                });
+                };
+
+                const plataforma = $('plataforma').value, tipo = $('tipoComissao').value;
+                const campoComissao = CAMPO_PRODUTO_COMISSAO[`${plataforma}:${tipo}`];
+                if (campoComissao) updateData[campoComissao] = v('comissao');
+
+                await updateDoc(doc(db, 'produtos', produtoVinculado.id), updateData);
                 await renderProdutos();
             }
         }
@@ -2319,7 +2421,7 @@
 
             $('histContent').innerHTML = !hist.length
                 ? '<div class="empty">Sua equipe ainda não salvou operações.</div>'
-                : '<div style="overflow-x:auto"><table class="hist-table"><thead><tr><th>#</th><th>Produto</th><th>Data</th><th>Dados Compra</th><th>Preço de Venda</th><th>Margem</th><th>Ações Rápidas</th></tr></thead><tbody>' +
+                : '<div style="overflow-x:auto"><table class="hist-table"><thead><tr><th>#</th><th>Produto</th><th>Data</th><th>Dados Compra</th><th>Preço de Venda</th><th>Plataforma</th><th>Margem</th><th>Ações Rápidas</th></tr></thead><tbody>' +
                 hist.map((h, i) => `<tr>
                     <td>${i + 1}</td>
                     <td><b>${h.produtoNome}</b><br><small style="color:var(--muted)">Obs: ${h.observacao || 'Nenhuma'}</small></td>
@@ -2329,8 +2431,7 @@
         <span style="white-space:nowrap"><b>Custo: $${h.custoCompra}</b></span><br>
         <span style="white-space:nowrap">Taxa: ${h.cambio}</span><br>
         <span style="white-space:nowrap">Frete Compra: ${h.freteCompraPct || 0}%</span><br>
-        <span style="white-space:nowrap"><b>Custo Final: ${moeda(h.custoProduto || 0)}</b></span><br>
-        <span style="white-space:nowrap">Comissão Venda: ${pct(h.comissaoPlataforma || 0)}</span>
+        <span style="white-space:nowrap"><b>Custo Final: ${moeda(h.custoProduto || 0)}</b></span>
     </small>
 </td>
 
@@ -2343,6 +2444,14 @@
 
     <small style="color:var(--muted)">
         ${h.infoMercadoSalva ? `Média de mercado na época: ${moeda(h.mercadoMediaHist)}` : `<span style="white-space:nowrap">(Pesquisa n/ realizada)</span>`}
+    </small>
+</td>
+
+                    <td>
+    <small style="color:var(--muted)">
+        <span style="white-space:nowrap"><b>${labelPlataforma(h.plataforma)}</b></span><br>
+        ${h.plataforma ? `<span style="white-space:nowrap">Tipo: ${labelTipoComissao(h.plataforma, h.tipoComissao)}</span><br>` : ''}
+        <span style="white-space:nowrap">Comissão: ${pct(h.comissaoPlataforma || 0)}</span>
     </small>
 </td>
 
@@ -2375,6 +2484,12 @@
             $('observacao').value = item.observacao || '';
             $('precoManual').value = (item.preco === null || item.preco === undefined || item.preco === '' || !Number.isFinite(Number(item.preco)))
                 ? '' : Number(item.preco).toFixed(2);
+
+            $('plataforma').value = item.plataforma || '';
+            window.onPlataformaChange();
+            if (item.plataforma && item.tipoComissao) { $('tipoComissao').value = item.tipoComissao; window.onTipoComissaoChange() }
+
+            // ✅ Restaura o % exato gravado na época (pode diferir do valor atual da tabela de comissões)
             if (item.comissaoPlataforma !== undefined) $('comissao').value = item.comissaoPlataforma;
 
             mercadoMediaAtual = 0; mercadoIdealAtual = 0;
@@ -2423,7 +2538,7 @@
         }
 
 
-        window.limpar = () => { ['custo', 'freteVenda', 'outrasReais', 'outrasPct', 'precoManual', 'observacao'].forEach(id => $(id).value = ''); $('nomeProduto').value = ''; $('cambio').value = '1'; $('freteCompra').value = '28'; $('margem').value = '20'; $('impostos').value = '2'; $('comissao').value = '18'; syncMargensMarketplaces(); syncComissoesMarketplaces(); resetUI(); mercadoMediaAtual = 0; ativarModoAtualizar(null); atualizarHeaderProduto(); lojasSelecionadas = []; window.atualizarLabelFiltro(); toast('Tudo Limpo 👌') };
+        window.limpar = () => { ['custo', 'freteVenda', 'outrasReais', 'outrasPct', 'precoManual', 'observacao'].forEach(id => $(id).value = ''); $('nomeProduto').value = ''; $('cambio').value = '1'; $('freteCompra').value = '28'; $('margem').value = '20'; $('impostos').value = '2'; $('comissao').value = '18'; $('plataforma').value = ''; window.onPlataformaChange(); syncMargensMarketplaces(); syncComissoesMarketplaces(); resetUI(); mercadoMediaAtual = 0; ativarModoAtualizar(null); atualizarHeaderProduto(); lojasSelecionadas = []; window.atualizarLabelFiltro(); toast('Tudo Limpo 👌') };
 
         window.salvarConfigApi = () => { localStorage.setItem('serp_api_key', $('serpApiKey').value); localStorage.setItem('modo_busca', $('modoBusca').value); toast('✅ Sistema Sincronizado com SerpApi') };
         function carregarConfigApi() { $('serpApiKey').value = localStorage.getItem('serp_api_key') || ''; $('modoBusca').value = localStorage.getItem('modo_busca') || 'proxy' }
