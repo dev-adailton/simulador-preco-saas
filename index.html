@@ -196,6 +196,24 @@
             align-items: start
         }
 
+        .sim-left {
+            display: flex;
+            flex-direction: column;
+            gap: 20px
+        }
+
+        .sim-left .card {
+            margin-bottom: 0
+        }
+
+        .sim-left .card-ident {
+            overflow: visible
+        }
+
+        .sim-left .card-ident .card-header {
+            border-radius: var(--radius) var(--radius) 0 0
+        }
+
         .stitle {
             font-size: 11px;
             color: var(--muted);
@@ -1198,7 +1216,7 @@
             opacity: 0.8;
         }
 
-        @media(max-width:1100px) {
+        @media(max-width:900px) {
             .sim-layout {
                 grid-template-columns: 1fr
             }
@@ -1246,7 +1264,6 @@
     <!-- APP PRINCIPAL -->
     <div class="container" id="app-screen" style="display:none">
         <div class="topbar">
-            <div class="vtag">🚀 Versão 4.0 PRO SaaS</div>
             <h1>Simulador de Preço de Venda PRO</h1>
             <p>✅ Simulador · Marketplaces · Inteligência de Mercado</p>
             <div class="user-info" id="userInfo"></div>
@@ -1267,89 +1284,97 @@
         <!-- SIMULADOR -->
         <div class="panel active" id="panel-simulador">
             <div class="sim-layout">
-                <div class="card">
-                    <div class="card-header">
-                        <div class="icon">📦</div>
-                        <div>
-                            <h2>Parâmetros de Precificação</h2>
-                            <p>⚡ Produto pesquisável e cadastro rápido</p>
+                <div class="sim-left">
+                    <div class="card card-ident">
+                        <div class="card-header">
+                            <div class="icon">📦</div>
+                            <div>
+                                <h2>Parâmetros de Precificação</h2>
+                                <p>⚡ Produto pesquisável e cadastro rápido</p>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="stitle" style="margin-top:0">📝 Identificação</div>
+                            <div class="field"><label>Nome do Produto</label>
+                                <div class="product-picker">
+                                    <div class="dropdown-wrap">
+                                        <div class="iw">
+                                            <input type="text" id="nomeProduto"
+                                                placeholder="Pesquisar e selecionar produto..." autocomplete="off"
+                                                oninput="window.filtrarDropdownProdutos()"
+                                                onfocus="window.abrirDropdownProdutos()">
+                                        </div>
+                                        <div class="dropdown-box" id="dropdownProdutos"></div>
+                                    </div>
+                                    <button class="btn btn-secondary" style="min-width:140px"
+                                        onclick="window.abrirModalProduto()">➕ Cadastrar</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="card-body">
-                        <div class="stitle">📝 Identificação</div>
-                        <div class="field"><label>Nome do Produto</label>
-                            <div class="product-picker">
-                                <div class="dropdown-wrap">
-                                    <div class="iw">
-                                        <input type="text" id="nomeProduto"
-                                            placeholder="Pesquisar e selecionar produto..." autocomplete="off"
-                                            oninput="window.filtrarDropdownProdutos()"
-                                            onfocus="window.abrirDropdownProdutos()">
-                                    </div>
-                                    <div class="dropdown-box" id="dropdownProdutos"></div>
+
+                    <div class="card card-custos">
+                        <div class="card-body">
+                            <div class="stitle" style="margin-top:0">🛒 Custos de Compra</div>
+                            <div class="grid2">
+                                <div class="field"><label>Custo de Compra</label>
+                                    <div class="iw wp"><span class="pre">$</span><input type="number" id="custo"
+                                            min="0" step="0.01" oninput="window.calcularAll()"></div>
                                 </div>
-                                <button class="btn btn-secondary" style="min-width:140px"
-                                    onclick="window.abrirModalProduto()">➕ Cadastrar</button>
+                                <div class="field"><label>Taxa de Câmbio</label>
+                                    <div class="iw wp"><span class="pre">×</span><input type="number" id="cambio"
+                                            value="1" min="0" step="0.0001" oninput="window.calcularAll()"></div>
+                                </div>
+                                <div class="field"><label>Frete de Compra (%)</label>
+                                    <div class="iw ws"><input type="number" id="freteCompra" value="28" min="0"
+                                            step="0.01" oninput="window.calcularAll()"><span class="suf">%</span></div>
+                                </div>
+                                <div class="field"><label>Outras Despesas (R$)</label>
+                                    <div class="iw wp"><span class="pre">R$</span><input type="number"
+                                            id="outrasReais" min="0" step="0.01" oninput="window.calcularAll()"></div>
+                                </div>
+                                <div class="field"><label>Outras Despesas (%)</label>
+                                    <div class="iw ws"><input type="number" id="outrasPct" min="0" step="0.01"
+                                            oninput="window.calcularAll()"><span class="suf">%</span></div>
+                                </div>
                             </div>
-                        </div>
-                        <div class="stitle">🛒 Custos de Compra</div>
-                        <div class="grid2">
-                            <div class="field"><label>Custo de Compra</label>
-                                <div class="iw wp"><span class="pre">$</span><input type="number" id="custo" min="0"
-                                        step="0.01" oninput="window.calcularAll()"></div>
+                            <div class="stitle">💰 Venda & Tributação</div>
+                            <div class="grid2">
+                                <div class="field"><label>Margem de Venda (%)</label>
+                                    <div class="iw ws"><input type="number" id="margem" value="20" min="0" max="99"
+                                            step="0.01" oninput="window.calcularAll()"><span class="suf">%</span></div>
+                                </div>
+                                <div class="field"><label>Impostos (%)</label>
+                                    <div class="iw ws"><input type="number" id="impostos" value="2" min="0"
+                                            step="0.01" oninput="window.calcularAll()"><span class="suf">%</span></div>
+                                </div>
+                                <div class="field"><label>Frete de Venda (R$)</label>
+                                    <div class="iw wp"><span class="pre">R$</span><input type="number" id="freteVenda"
+                                            min="0" step="0.01" oninput="window.calcularAll()"></div>
+                                </div>
+                                <div class="field"><label>Comissão Plataforma (%)</label>
+                                    <div class="iw ws"><input type="number" id="comissao" value="18" min="0"
+                                            step="0.01" oninput="window.calcularAll()"><span class="suf">%</span></div>
+                                </div>
+                                <div class="field"><label>Preço de Venda (Manual)</label>
+                                    <div class="iw wp"><span class="pre">R$</span><input type="number"
+                                            id="precoManual" min="0" step="0.01" oninput="window.calcularAll()"></div>
+                                </div>
+                                <div class="field"><label>Observação Interna</label>
+                                    <div class="iw"><input type="text" id="observacao"
+                                            placeholder="Ex: promocional, fornecedor X..."></div>
+                                </div>
                             </div>
-                            <div class="field"><label>Taxa de Câmbio</label>
-                                <div class="iw wp"><span class="pre">×</span><input type="number" id="cambio" value="1"
-                                        min="0" step="0.0001" oninput="window.calcularAll()"></div>
+                            <div class="actions">
+                                <button class="btn btn-primary" onclick="window.calcularAll()">⚡ Calcular
+                                    Tudo</button>
+                                <button class="btn btn-success" onclick="window.salvarHistorico()">💾 Salvar</button>
+                                <button class="btn btn-warning" id="btnAtualizar" style="display:none"
+                                    onclick="window.atualizarHistorico()">🔄 Atualizar</button>
+                                <button class="btn btn-accent" onclick="window.copiarResultado()">📋 Copiar</button>
+                                <button class="btn btn-secondary" onclick="window.exportarPDF()">📄 PDF</button>
+                                <button class="btn btn-secondary" onclick="window.limpar()">🗑️ Limpar</button>
                             </div>
-                            <div class="field"><label>Frete de Compra (%)</label>
-                                <div class="iw ws"><input type="number" id="freteCompra" value="28" min="0" step="0.01"
-                                        oninput="window.calcularAll()"><span class="suf">%</span></div>
-                            </div>
-                            <div class="field"><label>Outras Despesas (R$)</label>
-                                <div class="iw wp"><span class="pre">R$</span><input type="number" id="outrasReais"
-                                        min="0" step="0.01" oninput="window.calcularAll()"></div>
-                            </div>
-                            <div class="field"><label>Outras Despesas (%)</label>
-                                <div class="iw ws"><input type="number" id="outrasPct" min="0" step="0.01"
-                                        oninput="window.calcularAll()"><span class="suf">%</span></div>
-                            </div>
-                        </div>
-                        <div class="stitle">💰 Venda & Tributação</div>
-                        <div class="grid2">
-                            <div class="field"><label>Margem de Venda (%)</label>
-                                <div class="iw ws"><input type="number" id="margem" value="20" min="0" max="99"
-                                        step="0.01" oninput="window.calcularAll()"><span class="suf">%</span></div>
-                            </div>
-                            <div class="field"><label>Impostos (%)</label>
-                                <div class="iw ws"><input type="number" id="impostos" value="2" min="0" step="0.01"
-                                        oninput="window.calcularAll()"><span class="suf">%</span></div>
-                            </div>
-                            <div class="field"><label>Frete de Venda (R$)</label>
-                                <div class="iw wp"><span class="pre">R$</span><input type="number" id="freteVenda"
-                                        min="0" step="0.01" oninput="window.calcularAll()"></div>
-                            </div>
-                            <div class="field"><label>Comissão Plataforma (%)</label>
-                                <div class="iw ws"><input type="number" id="comissao" value="18" min="0" step="0.01"
-                                        oninput="window.calcularAll()"><span class="suf">%</span></div>
-                            </div>
-                            <div class="field"><label>Preço de Venda (Manual)</label>
-                                <div class="iw wp"><span class="pre">R$</span><input type="number" id="precoManual"
-                                        min="0" step="0.01" oninput="window.calcularAll()"></div>
-                            </div>
-                            <div class="field"><label>Observação Interna</label>
-                                <div class="iw"><input type="text" id="observacao"
-                                        placeholder="Ex: promocional, fornecedor X..."></div>
-                            </div>
-                        </div>
-                        <div class="actions">
-                            <button class="btn btn-primary" onclick="window.calcularAll()">⚡ Calcular Tudo</button>
-                            <button class="btn btn-success" onclick="window.salvarHistorico()">💾 Salvar</button>
-                            <button class="btn btn-warning" id="btnAtualizar" style="display:none"
-                                onclick="window.atualizarHistorico()">🔄 Atualizar</button>
-                            <button class="btn btn-accent" onclick="window.copiarResultado()">📋 Copiar</button>
-                            <button class="btn btn-secondary" onclick="window.exportarPDF()">📄 PDF</button>
-                            <button class="btn btn-secondary" onclick="window.limpar()">🗑️ Limpar</button>
                         </div>
                     </div>
                 </div>
@@ -1363,6 +1388,13 @@
                         <div class="manual-badge" id="manualBadge" style="display:none">✍️ PREÇO MANUAL ATIVO</div>
                         <!-- ALERTA DE COMPETITIVIDADE DE MERCADO -->
                         <div id="badgeMercado" class="market-alert-badge" style="display:none"></div>
+                    </div>
+
+                    <div class="breakdown">
+                        <div class="bk-header">📋 Detalhamento Completo</div>
+                        <div id="bkContent">
+                            <div class="empty">Preencha os campos para ver o detalhamento</div>
+                        </div>
                     </div>
 
                     <div class="stats">
@@ -1388,12 +1420,6 @@
                         <div class="ch">🥧 Composição do Preço</div>
                         <div class="cb" id="chartArea">
                             <canvas id="grafico"></canvas>
-                        </div>
-                    </div>
-                    <div class="breakdown">
-                        <div class="bk-header">📋 Detalhamento Completo</div>
-                        <div id="bkContent">
-                            <div class="empty">Preencha os campos para ver o detalhamento</div>
                         </div>
                     </div>
                 </div>
@@ -2308,7 +2334,7 @@
                     <td style="color:${h.lucro >= 0 ? 'var(--success)' : 'var(--danger)'}"><b>${moeda(h.lucro)}</b><br><small style="white-space:nowrap">Margem: ${pct(h.margemReal)}</small></td>
                     <td>
                         <div class="hist-actions">
-                            <button onclick="window.editarHistorico('${h.id}')" class="btn btn-secondary btn-sm" title="Traz p/ tela">♻️ Atualizar</button>
+                            <button onclick="window.editarHistorico('${h.id}')" class="btn btn-secondary btn-sm" title="Traz p/ tela">♻️ Visualizar</button>
                             <button onclick="window.excluirHistorico('${h.id}')" class="btn btn-secondary btn-sm" style="color:var(--danger)" title="Apagar">❌ Apagar</button>
                         </div>
                     </td>
